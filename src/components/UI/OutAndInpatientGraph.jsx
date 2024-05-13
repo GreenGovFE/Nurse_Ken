@@ -13,51 +13,52 @@ import {
   Cell,
 } from "recharts";
 
-const dist = [
-  { name: "Out-Patients", value: 400 },
-  { name: "In-Patients", value: 300 },
-];
-const COLORS = ["#3BFF43", "#109615"];
+function OutAndInpatientGraph({ InPatients, OutPatients }) {
+  const dist = [
+    { name: "Out-Patients", value: OutPatients },
+    { name: "In-Patients", value: InPatients },
+  ];
+  const COLORS = ["#3BFF43", "#109615"];
 
-const data = [
-  {
-    name: "Jul 23",
-    OutPatients: 4000,
-    InPatients: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Aug 23",
-    OutPatients: 3000,
-    InPatients: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Sep 23",
-    OutPatients: 2000,
-    InPatients: 9800,
-    amt: 2290,
-  },
-  {
-    name: "oct 23",
-    OutPatients: 2780,
-    InPatients: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Nov 23",
-    OutPatients: 1890,
-    InPatients: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Dec 23",
-    OutPatients: 2390,
-    InPatients: 3800,
-    amt: 2500,
-  },
-];
-function OutAndInpatientGraph() {
+  const data = [
+    {
+      name: "Jul 23",
+      OutPatients: 4000,
+      InPatients: 2400,
+      amt: 2400,
+    },
+    {
+      name: "Aug 23",
+      OutPatients: 3000,
+      InPatients: 1398,
+      amt: 2210,
+    },
+    {
+      name: "Sep 23",
+      OutPatients: 2000,
+      InPatients: 9800,
+      amt: 2290,
+    },
+    {
+      name: "Oct 23",
+      OutPatients: 2780,
+      InPatients: 3908,
+      amt: 2000,
+    },
+    {
+      name: "Nov 23",
+      OutPatients: 1890,
+      InPatients: 4800,
+      amt: 2181,
+    },
+    {
+      name: "Dec 23",
+      OutPatients: 2390,
+      InPatients: 3800,
+      amt: 2500,
+    },
+  ];
+
   return (
     <div className="w-100 container">
       <div className="w-100 flex flex-v-center space-between border-bottom p-b-20">
@@ -80,7 +81,6 @@ function OutAndInpatientGraph() {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-
           <Bar
             barSize={10}
             dataKey="OutPatients"
@@ -100,7 +100,10 @@ function OutAndInpatientGraph() {
             iconType="circle"
             layout="horizontal"
             verticalAlign="bottom"
+            align="center"
+            width={140}
           />
+          <Tooltip />
           <Pie
             data={dist}
             cx={120}

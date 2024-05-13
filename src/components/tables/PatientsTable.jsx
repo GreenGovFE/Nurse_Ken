@@ -6,8 +6,11 @@ function PatientsTable({ data }) {
 
   let navigate = useNavigate()
 
-  const continueUpdate =(id)=>{
+  const continueUpdate =(id, data)=>{
+    console.log(data)
     sessionStorage?.setItem("patientId", id);
+    sessionStorage?.setItem("patientName", `${data?.firstName}  ${data?.lastName}`);
+    sessionStorage.setItem("personalInfo", JSON.stringify(data));
     navigate("/patient-details")
   }
 
@@ -22,20 +25,18 @@ function PatientsTable({ data }) {
               <th>First Name</th>
               <th>Last Name</th>
               <th>User Name</th>
-              <th>Last Updated by</th>
-              <th>Date Created</th>
+              
             </tr>
           </thead>
 
           <tbody className="white-bg view-det-pane ">
             {data.map((row) => (
-              <tr className="hovers pointer" onClick={()=>continueUpdate(row?.patientId)} key={row.id}>
-                <td>{row.patientId}</td>
-                <td>{row.firstName}</td>
-                <td>{row.lastName}</td>
-                <td>{row.email}</td>
-                <td>{row.lastUpdatedby}</td>
-                <td>{row.dateCreated}</td>
+              <tr className="hovers pointer" onClick={()=>continueUpdate(row?.patientId || row?.id, row)} key={row?.id}>
+                <td>{row?.patientId || row?.id}</td>
+                <td>{row?.firstName}</td>
+                <td>{row?.lastName}</td>
+                <td>{row?.email}</td>
+                
               </tr>
             ))}
           </tbody>

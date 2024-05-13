@@ -49,6 +49,10 @@ function checkHttpStatus(response) {
     return response;
   }
 
+  if (response && response.StatusCode === 401) {
+    return response;
+  }
+
   const errorText = response && response.statusText ? response.statusText : 'Unknown Error';
   const error = new Error(errorText);
   error.response = response;

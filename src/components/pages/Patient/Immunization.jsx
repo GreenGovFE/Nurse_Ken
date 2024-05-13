@@ -24,11 +24,17 @@ function Immunization({setSelectedTab}) {
     setdocumentArray(newarr)
 }
 
-const getImmunization = async () =>{
-  let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${sessionStorage?.getItem("patientId")}`)
-  console.log(res)
-  setImmunizationData(res);
+const getImmunization = async () => {
+  try {
+    let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${sessionStorage?.getItem("patientId")}`);
+    console.log(res);
+    setImmunizationData(res);
+  } catch (error) {
+    console.error('Error fetching immunization data:', error);
+    // Handle the error here, such as displaying an error message to the user
+  }
 }
+
 
 
 const handleChange = (event) => {
@@ -56,6 +62,38 @@ const next = () => {
 }
 
 
+const temperatureOptions = [
+  { name: "select measurement", value: "" },
+  { name: "Temperature (°C)", value: "celsius" },
+  { name: "Temperature (°F)", value: "fahrenheit" },
+];
+
+const weightOptions = [
+  { name: "select measurement", value: "" },
+  { name: "Weight (kg)", value: "kg" },
+  { name: "Weight (lbs)", value: "lbs" },
+  { name: "Weight (g)", value: "g" },
+  { name: "Weight (oz)", value: "oz" },
+  { name: "Weight (mg)", value: "mg" },
+];
+
+const ageOptions = [
+  { name: "select measurement", value: "" },
+  { name: "Age (months)", value: "months" },
+  { name: "Age (years)", value: "years" },
+];
+
+const quantityOptions = [
+  { name: "select measurement", value: "" },
+  { name: "drops (drps)", value: "drops" },
+  { name: "Pieces (pcs)", value: "pieces" },
+  { name: "Milliliters (ml)", value: "milliliters" },
+  { name: "Liters (L)", value: "liters" },
+  { name: "Centiliters (cl)", value: "centiliters" },
+  { name: "Deciliters (dl)", value: "deciliters" },
+  // Add more units as needed
+];
+
 
 useEffect(()=>{
   getImmunization();
@@ -72,34 +110,35 @@ useEffect(()=>{
         <div><TagInputs onChange = {handleChange} name ="vaccineBrand" label="Vaccine Brand" /></div>
         <div><TagInputs onChange = {handleChange} name ="batchId" label="Batch #ID" /></div>
         <div className="flex">
-          <div className="w-60">
+          <div className="w-100">
             <TagInputs onChange = {handleChange} variation={true} name ="quantity" label="Quantity" />
           </div>
-          <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange} type="select" />
-          </div>
+          {/* <div className="w-40 m-l-20">
+            <TagInputs onChange = {handleChange}  options = {quantityOptions} type="select" />
+          </div> */}
         </div>
         <div className="flex">
-          <div className="w-60">
+          <div className="w-100">
             <TagInputs onChange = {handleChange} variation={true} name ="age" label="Select Age" />
           </div>
-          <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange} name ="relationship" type="select" />
-          </div>
-        </div><div className="flex">
-          <div className="w-60">
+          {/* <div className="w-40 m-l-20">
+            <TagInputs onChange = {handleChange}  options = {ageOptions} name ="relationship" type="select" />
+          </div> */}
+        </div>
+        <div className="flex">
+          <div className="w-100">
             <TagInputs onChange = {handleChange} variation={true} name ="weight" label="Select Weight" />
           </div>
-          <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange} name ="relationship" type="select" />
-          </div>
+          {/* <div className="w-40 m-l-20">
+            <TagInputs onChange = {handleChange}  options = {weightOptions} name ="relationship" type="select" />
+          </div> */}
         </div><div className="flex">
-          <div className="w-60">
+          <div className="w-100">
             <TagInputs onChange = {handleChange} variation={true} name ="temperature" label="Temperature" />
           </div>
-          <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange} name ="relationship" type="select" />
-          </div>
+          {/* <div className="w-40 m-l-20">
+            <TagInputs onChange = {handleChange}  options = {temperatureOptions} name ="relationship" type="select" />
+          </div> */}
         </div>
 
         <div><TagInputs onChange = {handleChange} name ="dateGiven" label="Date Given" type="date" /></div>
@@ -131,8 +170,8 @@ useEffect(()=>{
           ))}
         </div>
         <div className="w-100 "> 
-        <button onClick={submitPayload} className="btn w-100 m-t-20"> Add Record</button>
-        <button onClick={next} className="pointer w-100 m-t-20"> Continue</button>
+        <button onClick={submitPayload} className="submit-btn w-100 m-t-20"> Add Record</button>
+        <button onClick={next} className="save-drafts w-100 m-t-20"> Continue</button>
          </div>
 
       </div>

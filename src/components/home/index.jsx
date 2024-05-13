@@ -35,7 +35,7 @@ const makePostRequest = async () => {
       );
       if (data) {
         console.log(data)
-        sessionStorage.setItem('token',  data.jwt.token);
+        sessionStorage.setItem('token',  data?.jwt?.token);
         sessionStorage.setItem('clinicId',  data.clinicId);
         localStorage.setItem('USER_INFO', JSON.stringify(data));
        navigate('/dashboard');

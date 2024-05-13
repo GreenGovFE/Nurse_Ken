@@ -12,7 +12,7 @@ const AddPatients = () => {
     const navigate = useNavigate()
     return (
         <div className="m-t-80 flex  w-100 flex-direction-v flex-v-center">
-            <div className="w-40"><TagInputs label="New or Referred" type="select" options = {patientType} /></div>
+            <div className="w-40"><TagInputs className ={'m-b-10'} label="New or Referred" type="select" options = {patientType} /></div>
             {/* <TagInputs label="First Name" />
             <TagInputs label="Last Name" />
             <TagInputs label="Gender" type="select" options={gender} />

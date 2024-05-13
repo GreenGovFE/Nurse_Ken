@@ -1,4 +1,13 @@
 function AllergyTable({ data }) {
+  
+  const formatDate = (timestamp) => {
+    const dateObject = new Date(timestamp);
+    const formattedDate = dateObject.toISOString().split("T")[0];
+    return formattedDate;
+  };
+
+  console.log(data)
+
     return (
       <div className="w-100 ">
         <div className="w-100 none-flex-item m-t-40">
@@ -14,11 +23,11 @@ function AllergyTable({ data }) {
   
             <tbody className="white-bg view-det-pane">
               {data.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.date}</td>
-                  <td>{row.allergyType}</td>
-                  <td>{row.details}</td>
-                  <td>{row.prescribedMedication}</td>
+                <tr key={row?.id}>
+                  <td>{formatDate(row?.createdAt)}</td>
+                  <td>{row?.name}</td>
+                  <td>{row?.comment}</td>
+                  <td>{row?.prescribedMedication}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../../UI/InputField";
 import TextArea from "../../UI/TextArea";
 import { RiToggleFill } from "react-icons/ri";
 import AllergyTable from "../../tables/AlllergyTable";
 import { PatientData, allergyData, stats } from "../mockdata/PatientData";
+import { get, post } from "../../../utility/fetch";
+import notification from "../../../utility/notification";
+import TagInputs from "../../layouts/TagInputs";
 
 function MedicalRecord() {
-  const [selectedTab, setSelectedTab] = useState("allergies");
+  const [selectedTab, setSelectedTab] = useState(1);
   const [allergies, setAllergies] = useState([{ name: "", comment: "" }]);
   const [pastIllnesses, setPastIllnesses] = useState([
     { name: "", comment: "" },
@@ -20,30 +23,38 @@ function MedicalRecord() {
   const [familyHistory, setFamilyHistory] = useState([
     { name: "", comment: "" },
   ]);
+  const [payload, setPayload] = useState({})
+
+  const patientId = Number(sessionStorage.getItem("patientId"))
+  const [medTableData, setMedTableData] = useState([])
+
+  useEffect(() => {
+    getMedRecords();
+  }, []);
 
   const handleInputChange = (index, key, value) => {
     switch (selectedTab) {
-      case "allergies":
+      case 1:
         const updatedAllergies = [...allergies];
         updatedAllergies[index][key] = value;
         setAllergies(updatedAllergies);
         break;
-      case "pastIllnesses":
+      case 2:
         const updatedPastIllnesses = [...pastIllnesses];
         updatedPastIllnesses[index][key] = value;
         setPastIllnesses(updatedPastIllnesses);
         break;
-      case "chronicConditions":
+      case 3:
         const updatedChronicConditions = [...chronicConditions];
         updatedChronicConditions[index][key] = value;
         setChronicConditions(updatedChronicConditions);
         break;
-      case "surgicalHistory":
+      case 4:
         const updatedSurgicalHistory = [...surgicalHistory];
         updatedSurgicalHistory[index][key] = value;
         setSurgicalHistory(updatedSurgicalHistory);
         break;
-      case "familyHistory":
+      case 5:
         const updatedFamilyHistory = [...familyHistory];
         updatedFamilyHistory[index][key] = value;
         setFamilyHistory(updatedFamilyHistory);
@@ -75,14 +86,70 @@ function MedicalRecord() {
     }
   };
 
+  const submitPayload = async (payload) => {
+    try {
+      let res = await post("/patients/AddMedicalRecord", { ...payload, PatientId: Number(sessionStorage.getItem("patientId")) })
+      if (res.recordId) {
+        notification({ message: res?.messages, type: "success" })
+        // sessionStorage.setItem("patientId", res?.patientId)
+      }
+    } catch (error) {
+      notification({ message: error?.detail, type: "error" })
+    }
+
+  }
+
+  const getMedRecords = async () => {
+    try {
+      let res = await get(`/patients/${patientId}/medicalRecord`)
+      if (res) {
+        setMedTableData(res)
+        // sessionStorage.setItem("patientId", res?.patientId)
+      }
+    } catch (error) {
+      console.error('Error fetching payment history:', error);
+
+    }
+
+  }
+
+
   const handleContinue = () => {
-    // Handle the logic for continuing with the data
-    console.log("Allergies:", allergies);
+    let currentTabData = {};
+    switch (selectedTab) {
+      case 1:
+        currentTabData = allergies;
+        break;
+      case 2:
+        currentTabData = pastIllnesses;
+        break;
+      case 3:
+        currentTabData = chronicConditions;
+        break;
+      case 4:
+        currentTabData = surgicalHistory;
+        break;
+      case 5:
+        currentTabData = familyHistory;
+        break;
+      default:
+        break;
+    }
+
+    const payload = {
+      medicalRecordType: selectedTab,
+      name: currentTabData[0]?.name,
+      comment: currentTabData[0]?.comment,
+    };
+    console.log("Allergies:", allergies, payload, Number(sessionStorage.getItem("patientId")));
     console.log("Past Illnesses:", pastIllnesses);
     console.log("Chronic Conditions:", chronicConditions);
     console.log("Surgical History:", surgicalHistory);
     console.log("Family History:", familyHistory);
+    submitPayload(payload);
   };
+
+
 
   return (
     <div>
@@ -91,42 +158,37 @@ function MedicalRecord() {
       <div className="flex">
         <div className="m-r-80">
           <div
-            className={`pointer m-t-20  ${
-              selectedTab === "allergies" ? "pilled bold-text" : ""
-            }`}
-            onClick={() => setSelectedTab("allergies")}
+            className={`pointer m-t-20  ${selectedTab === 1 ? "pilled bold-text" : ""
+              }`}
+            onClick={() => setSelectedTab(1)}
           >
             1. Allergies
           </div>
           <div
-            className={`pointer m-t-20  ${
-              selectedTab === "pastIllnesses" ? "pilled bold-text" : ""
-            }`}
-            onClick={() => setSelectedTab("pastIllnesses")}
+            className={`pointer m-t-20  ${selectedTab === 2 ? "pilled bold-text" : ""
+              }`}
+            onClick={() => setSelectedTab(2)}
           >
             2. Past Illnesses
           </div>
           <div
-            className={`pointer m-t-20  ${
-              selectedTab === "chronicConditions" ? "pilled bold-text" : ""
-            }`}
-            onClick={() => setSelectedTab("chronicConditions")}
+            className={`pointer m-t-20  ${selectedTab === 3 ? "pilled bold-text" : ""
+              }`}
+            onClick={() => setSelectedTab(3)}
           >
             3. Chronic Conditions
           </div>
           <div
-            className={`pointer m-t-20  ${
-              selectedTab === "surgicalHistory" ? "pilled bold-text" : ""
-            }`}
-            onClick={() => setSelectedTab("surgicalHistory")}
+            className={`pointer m-t-20  ${selectedTab === 4 ? "pilled bold-text" : ""
+              }`}
+            onClick={() => setSelectedTab(4)}
           >
             4. Surgical History
           </div>
           <div
-            className={`pointer m-t-20 ${
-              selectedTab === "familyHistory" ? "pilled bold-text" : ""
-            }`}
-            onClick={() => setSelectedTab("familyHistory")}
+            className={`pointer m-t-20 ${selectedTab === 5 ? "pilled bold-text" : ""
+              }`}
+            onClick={() => setSelectedTab(5)}
           >
             5. Family History
           </div>
@@ -134,16 +196,14 @@ function MedicalRecord() {
         {/* Render content based on the selected tab */}
 
         <div>
-          {selectedTab === "allergies" && (
+          {selectedTab === 1 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
-                <div>Not Applicable</div>
-                <RiToggleFill color="green" size={32} />
               </div>
 
               {allergies.map((allergy, index) => (
                 <div key={index}>
-                  <InputField
+                  <TagInputs
                     label="Allergy Name"
                     type="text"
                     placeholder="Allergy Name"
@@ -152,9 +212,9 @@ function MedicalRecord() {
                       handleInputChange(index, "name", e.target.value)
                     }
                   />
-                  <TextArea
+                  <TagInputs
                     label="Comment"
-                    type="text"
+                    type="textArea"
                     placeholder="Comment"
                     value={allergy.comment}
                     onChange={(e) =>
@@ -170,15 +230,13 @@ function MedicalRecord() {
               </div>
             </div>
           )}
-          {selectedTab === "pastIllnesses" && (
+          {selectedTab === 2 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
-                <div>Not Applicable</div>
-                <RiToggleFill color="green" size={32} />
               </div>
               {pastIllnesses.map((Illness, index) => (
                 <div key={index}>
-                  <InputField
+                  <TagInputs
                     label="Illness Name"
                     type="text"
                     placeholder="Illness Name"
@@ -187,9 +245,9 @@ function MedicalRecord() {
                       handleInputChange(index, "name", e.target.value)
                     }
                   />
-                  <TextArea
+                  <TagInputs
                     label="Comment"
-                    type="text"
+                    type="textArea"
                     placeholder="Comment"
                     value={Illness.comment}
                     onChange={(e) =>
@@ -206,15 +264,13 @@ function MedicalRecord() {
             </div>
           )}
 
-          {selectedTab === "chronicConditions" && (
+          {selectedTab === 3 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
-                <div>Not Applicable</div>
-                <RiToggleFill color="green" size={32} />
               </div>
               {chronicConditions.map((condition, index) => (
                 <div key={index}>
-                  <InputField
+                  <TagInputs
                     label="Condition Name"
                     type="text"
                     placeholder="Condition Name"
@@ -223,9 +279,9 @@ function MedicalRecord() {
                       handleInputChange(index, "name", e.target.value)
                     }
                   />
-                  <TextArea
+                  <TagInputs
                     label="Comment"
-                    type="text"
+                    type="textArea"
                     placeholder="Comment"
                     value={condition.comment}
                     onChange={(e) =>
@@ -242,15 +298,13 @@ function MedicalRecord() {
             </div>
           )}
 
-          {selectedTab === "surgicalHistory" && (
+          {selectedTab === 4 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
-                <div>Not Applicable</div>
-                <RiToggleFill color="green" size={32} />
               </div>
               {surgicalHistory.map((surgery, index) => (
                 <div key={index}>
-                  <InputField
+                  <TagInputs
                     label="Surgery Name"
                     type="text"
                     placeholder="Surgery Name"
@@ -259,9 +313,9 @@ function MedicalRecord() {
                       handleInputChange(index, "name", e.target.value)
                     }
                   />
-                  <TextArea
+                  <TagInputs
                     label="Comment"
-                    type="text"
+                    type="textArea"
                     placeholder="Comment"
                     value={surgery.comment}
                     onChange={(e) =>
@@ -281,15 +335,13 @@ function MedicalRecord() {
             </div>
           )}
 
-          {selectedTab === "familyHistory" && (
+          {selectedTab === 5 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
-                <div>Not Applicable</div>
-                <RiToggleFill color="green" size={32} />
               </div>
               {familyHistory.map((familyMember, index) => (
                 <div key={index}>
-                  <InputField
+                  <TagInputs
                     label="Name"
                     type="text"
                     placeholder="Family Member Name"
@@ -298,9 +350,9 @@ function MedicalRecord() {
                       handleInputChange(index, "name", e.target.value)
                     }
                   />
-                  <TextArea
+                  <TagInputs
                     label="Comment"
-                    type="text"
+                    type="textArea"
                     placeholder="Comment"
                     value={familyMember.comment}
                     onChange={(e) =>
@@ -322,14 +374,14 @@ function MedicalRecord() {
 
           {/* Repeat the above structure for other tabs */}
           {/* ... */}
-          <div>
-            <button className="btn w-100 m-t-20" onClick={handleContinue}>
-              Continue
-            </button>
-            <AllergyTable data={allergyData} />
-
-          </div>
+          <button className="submit-btn w-100 m-t-20" onClick={handleContinue}>
+            Continue
+          </button>
         </div>
+      </div>
+      <div>
+        <AllergyTable data={medTableData} />
+
       </div>
     </div>
   );

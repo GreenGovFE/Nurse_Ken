@@ -11,6 +11,7 @@ import HeaderSearch from "../../Input/HeaderSearch";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { get } from "../../utility/fetch";
+import TagInputs from "../layouts/TagInputs";
 
 
 function Patients() {
@@ -21,6 +22,8 @@ function Patients() {
 
   const [allPatients, setAllPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [payload, setPayload] = useState('');
+
 
   // Function to handle date change
   const handleDateChange = (date) => {
@@ -57,11 +60,35 @@ let navigate = useNavigate()
     </button>
   );
 
-  const getAllPatients = async () =>{
-    let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30`)
-    console.log(res);
-    setAllPatients(res.data);
+  const getAllPatients = async () => {
+    try {
+      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30`);
+      console.log(res);
+      setAllPatients(res.data);
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+      // Handle the error here, such as displaying an error message to the user
+    }
+  };
+
+  const searchPatients = async (searchParam) => {
+    try {
+      let res = await get(`/patients/filter?firstName=${searchParam}&pageIndex=1&pageSize=100`);
+      console.log(res);
+      setAllPatients(res.data);
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+      // Handle the error here, such as displaying an error message to the user
+    }
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    console.log(value)
+    searchPatients(value)
+    setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
   }
+  
   return (
     <div className="w-100 m-t-80">
       <div className="flex space-between w-100" >
@@ -70,9 +97,8 @@ let navigate = useNavigate()
         <h3>Patients Management</h3>
         </div>
         <div className="flex">
-          <div className="m-l-10"><HeaderSearch /></div>
-          <div className="m-l-10"><SelectInput/></div>
-          <div className="m-l-10"><button onClick={()=> navigate("/patients/add")} className="btn"><div className="flex flex-v-center"><AiOutlinePlus size={25} color="white"/> <p className="m-l-10">Onboard a Patient</p></div></button></div>
+          {/* <div className="m-l-10"><HeaderSearch /></div> */}
+          <div className="m-l-10"><button onClick={()=> {navigate("/patient-details");sessionStorage.setItem("personalInfo", JSON.stringify({}));sessionStorage.setItem("patientId", '')}} className="submit-btn"><div className="flex flex-h-center flex-v-center"><AiOutlinePlus size={24} color="white"/> <p className="m-l-10 m-r-10">Onboard a Patient</p></div></button></div>
           <div></div>
         </div>
       </div>
@@ -100,11 +126,11 @@ let navigate = useNavigate()
         </div> */}
 
         <div className="flex flex-v-center  w-50 m-t-20 gap-10">
-          <div className="w-60 input">
-            <input type="text" />
+          <div className="w-80 ">
+          <TagInputs onChange={handleChange}  name="firstName" label="Find Patient" />
           </div>
 
-          <div className="dropdown-input w-25 ">
+          {/* <div className="dropdown-input w-25 ">
             {" "}
             <select>
               <option value="Ward A">Ward A</option>
@@ -112,7 +138,7 @@ let navigate = useNavigate()
               <option value="Ward C">Ward C</option>
               <option value="Ward D">Ward D</option>
             </select>
-          </div>
+          </div> */}
         </div>
       </div>
 

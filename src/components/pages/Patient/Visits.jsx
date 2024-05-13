@@ -13,10 +13,11 @@ function Visits({ setSelectedTab }) {
   const [docNames, setDocNames] = useState([])
   const [payload, setPayload] = useState({})
   const [nurses, setNurses] = useState([])
+  const [doctors, setDoctors] = useState([])
   const [visits, setVisits] = useState([])
 
   const handleChange = (event) => {
-    if(event.target.name === "age" || event.target.name === "temperature" || event.target.name === "heartPulse" || event.target.name === "height" || event.target.name === "nurseEmployeeId" || event.target.name === "weight"){
+    if(event.target.name === "age" || event.target.name === "temperature" || event.target.name === "heartPulse" || event.target.name === "height" || event.target.name === "nurseEmployeeId" || event.target.name === "doctorEmployeeId" || event.target.name === "careType" || event.target.name === "weight"){
       setPayload({ ...payload, [event.target.name]: parseFloat(event.target.value )})
 
     }
@@ -27,34 +28,95 @@ function Visits({ setSelectedTab }) {
   }
 
   const getNurses = async () => {
-    let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem("clinicId")}&pageIndex=1&pageSize=10`)
-    console.log(res);
-    let tempNurses = res?.data?.map((nurse, idx) => {
-      return {
+    try {
+      let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem("clinicId")}&pageIndex=1&pageSize=10`);
+      console.log(res);
+      let tempNurses = res?.data?.map((nurse, idx) => {
+        return {
           name: nurse?.username, value: parseFloat(nurse?.employeeId)
-        }
-      })
-
+        };
+      });
+  
       tempNurses?.unshift({
-        name:"Select Nurse", value:""
-      })
+        name: "Select Nurse", value: ""
+      });
+  
+      setNurses(tempNurses);
+    } catch (error) {
+      console.error('Error fetching nurses:', error);
+      // Handle the error here, such as displaying an error message to the user
+    }
+  };
+  
+  const getDoctors = async () => {
+    try {
+      let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem("clinicId")}&pageIndex=1&pageSize=30`);
+      console.log(res);
+      let tempDoc = res?.data?.map((doc, idx) => {
+        return {
+          name: doc?.username, value: parseFloat(doc?.employeeId)
+        };
+      });
+  
+      tempDoc?.unshift({
+        name: "Select Doctor", value: ""
+      });
+  
+      setDoctors(tempDoc);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      // Handle the error here, such as displaying an error message to the user
+    }
+  };
+  
+  const temperatureOptions = [
+    { name: "select measurement", value: "" },
+    { name: "Temperature (°C)", value: "celsius" },
+    { name: "Temperature (°F)", value: "fahrenheit" },
+  ];
 
-    setNurses(tempNurses)
+  const weightOptions = [
+    { name: "select measurement", value: "" },
+    { name: "Weight (kg)", value: "kg" },
+    { name: "Weight (lbs)", value: "lbs" },
+    { name: "Weight (g)", value: "g" },
+    { name: "Weight (oz)", value: "oz" },
+    { name: "Weight (mg)", value: "mg" },
+  ];
 
+  const heightOptions = [
+    { name: "select measurement", value: "" },
+    { name: "Height (cm)", value: "cm" },
+    { name: "Height (m)", value: "m" },
+    { name: "Height (ft)", value: "ft" },
+   
+  ];
+
+  const careTypes = [
+    { name: "Select Care Type", value: "" },
+    { name: "In patient", value: 1 },
+    { name: "Out patient", value: 2},
+    
+   
+  ];
+
+  const getVisitationDetails = async () => {
+    try {
+      let res = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${sessionStorage.getItem("patientId")}`);
+      console.log(res);
+      setVisits(res);
+    } catch (error) {
+      console.error('Error fetching visitation details:', error);
+      // Handle the error here, such as displaying an error message to the user
+    }
   }
-
-  const getVisitationDetails = async () =>{
-    let res = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${sessionStorage.getItem("patientId")}`)
-    console.log(res)
-    setVisits(res)
-
-  }
+  
 
 
   const submitPayload = async () => {
     try {
-      let res = await post("/patients/AddVisitationRecords", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), PatientId: 33 })
-      if (res.patientId) {
+      let res = await post("/patients/AddVisitationRecords", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), PatientId: parseFloat(sessionStorage.getItem("patientId")) })
+      if (res) {
         notification({ message: res?.messages, type: "success" });
         getVisitationDetails();
         // sessionStorage.setItem("patientId", res?.patientId)
@@ -80,6 +142,8 @@ function Visits({ setSelectedTab }) {
 
   useEffect(() => {
     getNurses()
+    getDoctors()
+    getVisitationDetails()
   }, [])
 
 
@@ -92,50 +156,52 @@ function Visits({ setSelectedTab }) {
         <div className="w-40">
           <div><TagInputs onChange={handleChange} name="dateOfVisit" label="Visit Date" type="date" /></div>
           <div className="flex">
-            <div className="w-60">
-              <TagInputs onChange={handleChange} name="temperature" label="Temperature" />
+            <div className="w-100">
+              <TagInputs onChange={handleChange}  name="temperature" label="Temperature" />
             </div>
-            <div className="w-40 m-l-20">
-              <TagInputs onChange={handleChange} name="firstName" type="select" />
-            </div>
+            {/* <div className="w-40 m-l-20">
+              <TagInputs onChange={handleChange} options = {temperatureOptions} name="firstName" type="select" />
+            </div> */}
           </div>
           <div className="flex">
-            <div className="w-60">
+            <div className="w-100">
               <TagInputs onChange={handleChange} name="bloodPressure" label="Blood Pressure" />
             </div>
-            <div className="w-40 m-l-20">
+            {/* <div className="w-40 m-l-20">
               <TagInputs onChange={handleChange} name="firstName" type="select" />
-            </div>
+            </div> */}
           </div><div className="flex">
-            <div className="w-60">
+            <div className="w-100">
               <TagInputs onChange={handleChange} name="heartPulse" label="Heart Pulse" />
             </div>
-            <div className="w-40 m-l-20">
+            {/* <div className="w-40 m-l-20">
               <TagInputs onChange={handleChange} name="firstName" type="select" />
-            </div>
+            </div> */}
           </div><div className="flex">
-            <div className="w-60">
+            <div className="w-100">
               <TagInputs onChange={handleChange} name="respiratory" label="Respiratory" />
             </div>
-            <div className="w-40 m-l-20">
+            {/* <div className="w-40 m-l-20">
               <TagInputs onChange={handleChange} name="firstName" type="select" />
+            </div> */}
+          </div>
+          <div className="flex">
+            <div className="w-100">
+              <TagInputs onChange={handleChange}  name="height" label="Height" />
             </div>
-          </div><div className="flex">
-            <div className="w-60">
-              <TagInputs onChange={handleChange} name="height" label="Height" />
-            </div>
-            <div className="w-40 m-l-20">
-              <TagInputs onChange={handleChange} name="firstName" type="select" />
-            </div></div><div className="flex">
-            <div className="w-60">
+            {/* <div className="w-40 m-l-20">
+              <TagInputs onChange={handleChange} options = {heightOptions} name="firstName" type="select" />
+            </div> */}
+          </div>
+            <div className="w-100">
               <TagInputs onChange={handleChange} name="weight" label="Weight" />
             </div>
-            <div className="w-40 m-l-20">
-              <TagInputs onChange={handleChange} name="firstName" type="select" />
-            </div>
-          </div>
+            {/* <div className="w-40 m-l-20">
+              <TagInputs onChange={handleChange} options = {weightOptions} name="firstName" type="select" />
+            </div> */}
 
-          <div><TagInputs onChange={handleChange} name="doctorEmployeeId" label="Assign Doctor" type="select" /></div>
+          <div><TagInputs onChange={handleChange} type = 'select' options = {careTypes} name="careType" label="Care Type"  /></div>
+          <div><TagInputs onChange={handleChange} options = {doctors} name="doctorEmployeeId" label="Assign Doctor" type="select" /></div>
           <div><TagInputs onChange={handleChange} name="nurseEmployeeId" label="Assign Nurse" options={nurses} type="select" /></div>
           <div><TextArea
             label="Notes"

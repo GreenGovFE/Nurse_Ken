@@ -12,8 +12,8 @@ import Finance_HMO from "./Patient/Finance_HMO";
 
 function PatientDetails() {
   const [selectedTab, setSelectedTab] = useState("personal");
-
- const renderTabContent = (selectedTab) => { 
+  
+  const renderTabContent = (selectedTab) => {
     switch (selectedTab) {
       case "personal":
         return <Personal renderTabContent={renderTabContent} />;
@@ -50,7 +50,7 @@ function PatientDetails() {
     <div className="w-100">
       <div className="m-t-80">PatientDetails</div>
 
-      <div className="tabs m-t-20 bold-text">
+      <div className=" tabs m-t-20 bold-text">
         <div
           className={`tab-item ${selectedTab === "personal" ? "active" : ""}`}
           onClick={() => setSelectedTab("personal")}
@@ -90,7 +90,7 @@ function PatientDetails() {
           Immunization
         </div>
         <div
-          className={`tab-item ${selectedTab === "vitals" ? "active" : ""}`}
+          className={`tab-item ${selectedTab === "visits" ? "active" : ""}`}
           onClick={() => setSelectedTab("visits")}
         >
           Visits
@@ -101,7 +101,7 @@ function PatientDetails() {
         >
           Treatment
         </div>
-        <div
+        {/* <div
           className={`tab-item ${selectedTab === "medication" ? "active" : ""}`}
           onClick={() => setSelectedTab("medication")}
         >
@@ -113,7 +113,7 @@ function PatientDetails() {
           onClick={() => setSelectedTab("appointment")}
         >
           Appointment
-        </div>
+        </div> */}
         <div
           className={`tab-item ${selectedTab === "labs" ? "active" : ""}`}
           onClick={() => setSelectedTab("labs")}
@@ -121,10 +121,10 @@ function PatientDetails() {
           Labs
         </div>
         <div
-          className={`tab-item ${selectedTab === "insurance" ? "active" : ""}`}
+          className={`tab-item ${selectedTab === "financeHmo" ? "active" : ""}`}
           onClick={() => setSelectedTab("financeHmo")}
         >
-          Insurance
+          Finance/Hmo
         </div>
       </div>
 
