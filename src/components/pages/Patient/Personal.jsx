@@ -7,20 +7,20 @@ import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 
 import UploadPic from "../../UI/UploadPic";
 function Personal({ setSelectedTab }) {
-  const personalInfo = JSON.parse(sessionStorage.getItem("personalInfo"));
+  const [personalInfo, setPersonalInfo] = useState(JSON.parse(sessionStorage.getItem("personalInfo")));
   const [payload, setPayload] = useState(personalInfo || {});
 
   const [pictureUrl, setPictureUrl] = useState(personalInfo?.pictureUrl || '')
   const [fileName, setFilename] = useState('')
-  
+
   const patientId = Number(sessionStorage.getItem("patientId"))
-  
-  
+
+
   let gender = [
     { value: "choose", name: "Choose Gender" },
     { value: "Male", name: "Male" },
     { value: "Female", name: "Female" },
-  
+
   ]
   let maritalStatus = [
     { value: "choose", name: "Choose Marital Status" },
@@ -47,8 +47,26 @@ function Personal({ setSelectedTab }) {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+  
+    if (name === "dateOfBirth") {
+      const selectedDate = new Date(value);
+      const currentDate = new Date();
+  
+      if (selectedDate >= currentDate) {
+        console.log("Invalid input");
+        notification({ message: 'Please select appropriate date', type: "error" })
+        return;
+      }
+    }else if(name === 'phoneNumber'){
+      if((value.length <= 11 && isNaN(value))|| value.length > 11){
+        notification({ message: 'Please enter a valid phone number', type: "error" })
+        return;
+      }
+    }
+  
     setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
   }
+  
 
   console.log(personalInfo)
 
@@ -67,13 +85,29 @@ function Personal({ setSelectedTab }) {
 
   }
 
+
+  const fetchPatientById = async (id) => {
+    try {
+      let res = await get(`/patients/AllPatientById?patientId=${id}`)
+      notification({ message: res?.messages, type: "success" })
+      setPayload(res)
+      sessionStorage.setItem("personalInfo", JSON.stringify(res))
+
+    } catch (error) {
+      notification({ message: error?.detail, type: "error" })
+    }
+
+  }
+
+
+
   const updatePatient = async () => {
     try {
-      let res = await put("/patients/UpdatePatient", { ...payload,  pictureUrl: pictureUrl })
+      let res = await put("/patients/UpdatePatient", { ...payload, pictureUrl: pictureUrl })
       if (res.patientId) {
         notification({ message: res?.messages, type: "success" })
-        setSelectedTab("contactDetails")
         sessionStorage.setItem("patientId", res?.patientId)
+        fetchPatientById(res?.patientId)
       }
     } catch (error) {
       notification({ message: error?.detail, type: "error" })
@@ -101,18 +135,18 @@ function Personal({ setSelectedTab }) {
       <div className="m-t-40 "></div>
       <div className="flex space-between">
         <div className="col-7">
-          <TagInputs onChange={handleChange}  name="referal" label="New or Referred" type="select" options={patientType} />
-          <TagInputs onChange={handleChange} value = {payload?.firstName || ''} name="firstName" label="First Name" />
-          <TagInputs onChange={handleChange} value = {payload?.lastName || ''}  name="lastName" label="Last Name" />
-          <TagInputs onChange={handleChange} value = {payload?.gender || ''}  name="gender" type="select" label="Gender" options={gender} />
-          <TagInputs onChange={handleChange} value = {formatDate(payload?.dateOfBirth) || ''}  name="dateOfBirth" type="date" label="Date Of Birth" />
-          <TagInputs onChange={handleChange} value = {payload?.email || ''} name="email" label="Email" />
-          <TagInputs onChange={handleChange} value = {payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number" />
-          <TagInputs onChange={handleChange} value = {payload?.nationality || ''} name="nationality" label="Nationality" />
-          <TagInputs onChange={handleChange} value = {payload?.stateOfOrigin || ''} name="stateOfOrigin" label="State Of Origin" />
-          <TagInputs onChange={handleChange} value = {payload?.lga || ''} name="lga" label="LGA" />
-          <TagInputs onChange={handleChange} value = {payload?.placeOfBirth || ''} name="placeOfBirth" label="Place Of Birth" />
-          <TagInputs onChange={handleChange} value = {payload?.maritalStatus || ''} name="maritalStatus" type="select" label="Marital Status" options={maritalStatus} />
+          <TagInputs onChange={handleChange} name="referal" label="New or Referred" type="select" options={patientType} />
+          <TagInputs onChange={handleChange} value={payload?.firstName || ''} name="firstName" label="First Name" />
+          <TagInputs onChange={handleChange} value={payload?.lastName || ''} name="lastName" label="Last Name" />
+          <TagInputs onChange={handleChange} value={payload?.gender || ''} name="gender" type="select" label="Gender" options={gender} />
+          <TagInputs onChange={handleChange} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth" type="date" label="Date Of Birth" />
+          <TagInputs onChange={handleChange} value={payload?.email || ''} name="email" label="Email" />
+          <TagInputs onChange={handleChange} value={payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number" />
+          <TagInputs onChange={handleChange} value={payload?.nationality || ''} name="nationality" label="Nationality" />
+          <TagInputs onChange={handleChange} value={payload?.stateOfOrigin || ''} name="stateOfOrigin" label="State Of Origin" />
+          <TagInputs onChange={handleChange} value={payload?.lga || ''} name="lga" label="LGA" />
+          <TagInputs onChange={handleChange} value={payload?.placeOfBirth || ''} name="placeOfBirth" label="Place Of Birth" />
+          <TagInputs onChange={handleChange} value={payload?.maritalStatus || ''} name="maritalStatus" type="select" label="Marital Status" options={maritalStatus} />
         </div>
         <div className="col-4">
           <p className="m-b-20">Profile Picture</p>

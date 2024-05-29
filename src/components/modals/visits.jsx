@@ -119,8 +119,8 @@ function ViewVisit({ closeModal, visit, next }) {
                     <div className="flex space-between flex-v-center m-t-20 col-3">
                         <p>Visit Record</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-3">
-                        <p>{formattedTime}</p>
+                    <div className="flex space-between flex-v-center m-t-20 col-4">
+                    <p>Time: {formattedTime}</p>
                     </div>
                 </div>
                 <div className="p-40">
@@ -159,11 +159,11 @@ function ViewVisit({ closeModal, visit, next }) {
                         </tbody>
                     </table>
 
-                    <TagInputs label="Assigned Nurse" name="assignedNurse" value={getNurseName(visit.nurseId)} disabled={true} />
-                    <TagInputs label="Assigned Doctor" name="assignedDoctor" value={getDoctorName(visit.doctorId)} disabled={true} />
-                    <TagInputs label="Additional Notes" name="additonalNoteOnTreatment" value={visit.DoctorName} onChange = {handleChange} disabled={true} type='textArea' />
+                    <TagInputs label="Assigned Nurse" name="assignedNurse" value={getNurseName(visit.nurseId)} readOnly={true} />
+                    <TagInputs label="Assigned Doctor" name="assignedDoctor" value={getDoctorName(visit.doctorId)} readOnly={true} />
+                    <TagInputs label="Additional Notes" name="additonalNoteOnTreatment" value={visit.DoctorName} onChange = {handleChange} readOnly={true} type='textArea' />
 
-                    {/* <button className="btn m-t-20 w-100" onClick={() => addNotes}>Add Notes</button> */}
+                    {/* <button className="submit-btn m-t-20 w-100" onClick={() => addNotes}>Add Notes</button> */}
                 </div>
             </div>
         </div>

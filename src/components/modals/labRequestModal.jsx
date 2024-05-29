@@ -76,9 +76,9 @@ const LabrequestModal = ({ closeModal, record }) => {
                         <h3 >{record?.patientFullName}</h3> |
                         <p>Lab Report</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-3">
+                    <div className="flex space-between flex-v-center m-t-20 col-4">
                         <h4>Date: {new Date(record?.createdOn).toLocaleDateString()}</h4> |
-                        <p>{formattedTime}</p>
+                        <p>Time: {formattedTime}</p>
                     </div>
                 </div>
                 <div className="m-t-10 ">
@@ -96,7 +96,7 @@ const LabrequestModal = ({ closeModal, record }) => {
                             {record?.patientLabDocuments.map((doc, index) => (
                                 <div className="flex flex-direction-v" key={index}>
                                     <a href={doc.docUrl} target="_blank" rel="noopener noreferrer">{doc.docName}</a>
-                                    <button className="btn col-2 m-t-10" onClick={() => downloadFile(doc.docName)}>Download</button>
+                                    <button className="submit-btn col-2 m-t-10" onClick={() => downloadFile(doc.docName)}>Download</button>
                                 </div>
                             ))}
                         </div>

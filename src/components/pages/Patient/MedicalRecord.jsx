@@ -88,15 +88,43 @@ function MedicalRecord() {
 
   const submitPayload = async (payload) => {
     try {
-      let res = await post("/patients/AddMedicalRecord", { ...payload, PatientId: Number(sessionStorage.getItem("patientId")) })
+      const patientId = Number(sessionStorage.getItem("patientId"));
+      if (!patientId) {
+        throw new Error("Patient ID not found in session storage");
+      }
+
+      const res = await post("/patients/AddMedicalRecord", { ...payload, PatientId: patientId });
+      console.log(res);
+
       if (res.recordId) {
-        notification({ message: res?.messages, type: "success" })
-        // sessionStorage.setItem("patientId", res?.patientId)
+        notification({ message: res?.messages, type: "success" });
+        // sessionStorage.setItem("patientId", res?.patientId);
+      }else if (res.StatusCode === 401) {
+        notification({ message: 'Unathorized Session', type: "error" });
+      }
+      else if (res.StatusCode === 500) {
+        notification({ message: 'Internal Server Error', type: "error" });
+      }
+       else {
+        console.log(res);
+
+        let errorMessage = "An error occurred";
+
+        if (res && res.errors) {
+          // Check if 'Name' or 'Comment' field has an error
+          if (res.errors.Name && res.errors.Comment) {
+            errorMessage = "Both Name and Comment are required";
+          } else if (res.errors.Comment) {
+            errorMessage = res.errors.Comment[0];
+          }else if (res.errors.Name) {
+            errorMessage = res.errors.Name[0];
+          }
+        }
+        notification({ message: errorMessage, type: "error" });
       }
     } catch (error) {
-      notification({ message: error?.detail, type: "error" })
-    }
-
+      console.log(error);
+    };
   }
 
   const getMedRecords = async () => {
@@ -223,11 +251,11 @@ function MedicalRecord() {
                   />
                 </div>
               ))}
-              <div className="w-100 flex flex-h-end">
+              {/* <div className="w-100 flex flex-h-end">
                 <button className="rounded-btn m-t-20" onClick={handleAddField}>
                   Add Allergy
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
           {selectedTab === 2 && (
@@ -256,11 +284,11 @@ function MedicalRecord() {
                   />
                 </div>
               ))}
-              <div className="w-100 flex flex-h-end">
+              {/* <div className="w-100 flex flex-h-end">
                 <button className="rounded-btn m-t-20" onClick={handleAddField}>
                   Add Illness
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -290,11 +318,11 @@ function MedicalRecord() {
                   />
                 </div>
               ))}
-              <div className="w-100 flex flex-h-end">
+              {/* <div className="w-100 flex flex-h-end">
                 <button className="rounded-btn m-t-20" onClick={handleAddField}>
                   Add Chronic Conditions
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -324,14 +352,14 @@ function MedicalRecord() {
                   />
                 </div>
               ))}
-              <div className="w-100 flex flex-h-end">
+              {/* <div className="w-100 flex flex-h-end">
                 <button
                   className="rounded-btn m-t-20"
                   onClick={() => handleAddField("surgicalHistory")}
                 >
                   Add Surgery
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -361,21 +389,21 @@ function MedicalRecord() {
                   />
                 </div>
               ))}
-              <div className="w-100 flex flex-h-end">
+              {/* <div className="w-100 flex flex-h-end">
                 <button
                   className="rounded-btn m-t-20"
                   onClick={() => handleAddField("familyHistory")}
                 >
                   Add Family History
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
 
           {/* Repeat the above structure for other tabs */}
           {/* ... */}
           <button className="submit-btn w-100 m-t-20" onClick={handleContinue}>
-            Continue
+            Add
           </button>
         </div>
       </div>

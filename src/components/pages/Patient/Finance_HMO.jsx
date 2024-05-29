@@ -16,13 +16,15 @@ function Finance_HMO() {
   const [pictureUrl, setPictureUrl] = useState('')
   const [paymentHistory, setPaymentHistory] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
+  const [hmo, setHmo] = useState([])
 
   useEffect(() => {
     getPaymentHistory()
+    getHmo()
   }, [])
   const getPaymentHistory = async () => {
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/32/${pageNumber}/10/patient-payment-history`);
+      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${personalInfo?.patientId}/${pageNumber}/10/patient-payment-history`);
       console.log(response)
 
       setPaymentHistory(response?.data?.resultList);
@@ -35,10 +37,10 @@ function Finance_HMO() {
 
   const getHmo = async () => {
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/32/${pageNumber}/10/patient-payment-history`);
+      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${personalInfo?.hmoId}`);
       console.log(response)
 
-      setPaymentHistory(response?.data?.resultList);
+      setHmo(response?.data);
     } catch (error) {
       console.error('Error fetching payment history:', error);
       // Handle the error here, such as displaying an error message to the user
@@ -74,8 +76,8 @@ function Finance_HMO() {
             </div>
           </div>
           <div className="col-4 float-right">
-            <div className="flex-50"><TagInputs className="no-wrap" label="HMO Class" /></div>
-            <div className="flex-50"><TagInputs className="no-wrap" label="Validity" /></div>
+            <div className="flex-50"><TagInputs className="no-wrap" value={hmo?.packages && hmo.packages.length > 0 ? hmo.packages[0].name : ''} disabled label="HMO Class" /></div>
+            <div className="flex-50"><TagInputs className="no-wrap" disabled label="Validity" /></div>
           </div>
         </div>
 
@@ -83,18 +85,23 @@ function Finance_HMO() {
         <div className="flex w-100">
 
           <div className="flex  w-100 space-between">
-            <div className="flex-50"><TagInputs className="no-wrap" label="HMO Service Provider" /></div>
+            <div className="flex-50"><TagInputs className="no-wrap" value = {`${hmo?.vendorName}  |  ${hmo?.taxIdentityNumber}`} disabled label="HMO Service Provider" /></div>
           </div>
 
         </div>
 
-        <h3 className="m-t-40">Payment Breakdown</h3>
+        <h3 className="m-t-40 m-b-40">Payment Breakdown</h3>
         <div className="">
-          <HMOTable data={PatientData} />
+          <HMOTable
+           data={PatientData}
+           hmoPackages={hmo?.packages && hmo?.packages[0]?.packageBenefits}
+           hmoId={hmo?.packages && hmo.packages.length > 0 ? hmo.packages[0].hmoId : ''}
+           hmoClass={hmo?.packages && hmo.packages.length > 0 ? hmo.packages[0].name : ''}
+           />
         </div>
 
-        <h3 className="m-t-40">Historical Payments</h3>
         <div className="">
+        <h3 className="m-t-40">Historical Payments</h3>
           <HMOTableHistory data={paymentHistory} />
         </div>
       </div>

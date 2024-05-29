@@ -45,13 +45,33 @@ export const put = (endpoint, body, auth = true) => fetchBackend(endpoint, 'PUT'
 export const del = (endpoint, body, auth = true) => fetchBackend(endpoint, 'DELETE', auth, body);
 
 function checkHttpStatus(response) {
+
+  console.log(response)
   if (response && response.ok) {
     return response;
   }
 
-  if (response && response.StatusCode === 401) {
+  if (response && response.status === 401) {
     return response;
   }
+
+  if (response && response.status === 204) {
+    return response;
+  }
+
+  if (response && response.status === 404) {
+    return response;
+  }
+
+  if (response && response.status === 400) {
+    return response;
+  }
+
+  if (response && response.status === 500) {
+    return response;
+  }
+
+ 
 
   const errorText = response && response.statusText ? response.statusText : 'Unknown Error';
   const error = new Error(errorText);

@@ -76,25 +76,26 @@ function VisitsTable({ data }) {
   };
 
   return (
-    <div className="w-100">
-      <div className="w-100 none-flex-item m-t-40">
+    <div className="w-100 m-t-10">
+      <div className="w-100 none-flex-item  ">
         <table className="bordered-table">
           <thead className="border-top-none">
             <tr className="border-top-none">
               <th>Date</th>
-              <th>Blood Pressure</th>
-              <th>Weight</th>
-              <th>Temp</th>
-              <th>Height</th>
-              <th>Heart</th>
-              <th>Resp</th>
+              <th>Blood Pressure (mmHg)</th>
+              <th>Weight (Kg)</th>
+              <th>Temperature  (°C)</th>
+              <th>Height (cm)</th>
+              <th>Heart (bpm)</th>
+              <th>Respiration (bpm)</th>
               <th>Admin Nurse</th>
               <th>Assigned Doctor</th>
+              <th></th>
             </tr>
           </thead>
 
           <tbody className="white-bg view-det-pane">
-            {data.map((row) => (
+            {Array.isArray(data) && data?.map((row) => (  
               <tr key={row.id}>
                 <td>{formatDate(row.dateOfVisit)}</td>
                 <td>{row.bloodPressure}</td>
@@ -105,7 +106,7 @@ function VisitsTable({ data }) {
                 <td>{row.respiratory}</td>
                 <td>{getNurseName(row.nurseId)}</td>
                 <td>{getDoctorName(row.doctorId)}</td>
-                {/* <td onClick={selectRecord(row)}><img className="hovers pointer" src="/details.png" /></td> */}
+                <td onClick={selectRecord(row)}><img className="hovers pointer" src="/details.png" /></td>
               </tr>
 
             ))}

@@ -30,7 +30,7 @@ function PatientsTable({ data }) {
           </thead>
 
           <tbody className="white-bg view-det-pane ">
-            {data.map((row) => (
+            {Array.isArray(data) && data?.map((row) => (
               <tr className="hovers pointer" onClick={()=>continueUpdate(row?.patientId || row?.id, row)} key={row?.id}>
                 <td>{row?.patientId || row?.id}</td>
                 <td>{row?.firstName}</td>

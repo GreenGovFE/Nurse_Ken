@@ -18,33 +18,42 @@ function Dashboard() {
   const [malePercentage, setMalePercentage] = useState(0)
   const [femalePercentage, setFemalePercentage] = useState(0)
   const [patientAdmission, setPatientAdmission] = useState([])
-  const [availableStaff, setAvailableStaff] = useState([])
+  const [availableStaff, setAvailableStaff] = useState(0)
   const [hmopatients, setHmoPatients] = useState(0);
+  const [totalpatients, setTotalPatients] = useState(0);
 
-  
+  const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
+
+
   const getAdmittedPatients = async () => {
-    let res = await get("/dashboard/doctor/admittedpatients")
-    console.log(res)
-    setAdmittedPatients(res)
+    try {
+      let res = await get("/dashboard/doctor/admittedpatients")
+      console.log(res)
+      setAdmittedPatients(res)
 
+    } catch (error) {
+      console.error('Error fetching in and out patients:', error);
 
+    }
   }
 
+
+  console.log(userInfo)
+
   const token = sessionStorage.getItem('token');
-  console.log('Token:', token);
 
   const getInAndOutPatients = async () => {
     try {
       let res = await get("/dashboard/AllOutPatientAndInPatientCount");
       console.log(res);
-      setInpatients(res?.inpatientCount);
-      setOutpatients(res?.outpatientCount);
+      setInpatients(res);
+      // setOutpatients(res?.outpatientCount);
     } catch (error) {
       console.error('Error fetching in and out patients:', error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const getPatientAdmission = async () => {
     try {
       let res = await get("/dashboard/admission");
@@ -55,7 +64,7 @@ function Dashboard() {
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const getAvailableStaff = async () => {
     try {
       let res = await get(`/dashboard/AvaliableStaff/${sessionStorage?.getItem("clinicId")}`);
@@ -66,7 +75,7 @@ function Dashboard() {
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const getGenderDistribution = async () => {
     try {
       let res = await get("/dashboard/gender");
@@ -78,7 +87,7 @@ function Dashboard() {
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const getHmoPatients = async () => {
     try {
       let res = await axios.get("https://edogoverp.com/healthfinanceapi/api/dashboard/patients-with-hmo");
@@ -89,20 +98,38 @@ function Dashboard() {
       // Handle the error here, such as displaying an error message to the user
     }
   };
-    useEffect(() => {
+  const getTotalPatients = async () => {
+    try {
+      let res = await axios.get("https://edogoverp.com/healthfinanceapi/api/dashboard/total-patients");
+      console.log(res);
+      setTotalPatients(res.data);
+    } catch (error) {
+      console.error('Error fetching HMO patients:', error);
+      // Handle the error here, such as displaying an error message to the user
+    }
+  };
+
+  console.log(inPatients)
+
+  useEffect(() => {
     getAdmittedPatients()
     getHmoPatients()
     getInAndOutPatients()
     getGenderDistribution()
     getPatientAdmission()
     getAvailableStaff()
+    getTotalPatients()
 
   }, []);
   return (
     <div className="w-100 m-t-80">
       <div className="m-t-20">
+        <div className="m-b-40">
+          <span>Good Day</span>
+          <h3>{userInfo?.firstName} {userInfo?.lastName}</h3>
+          <span>{userInfo?.role}</span>
+        </div>
         <div className="flex">
-          {" "}
 
           <div className="m-r-20">
             <StatCard data={{
@@ -122,6 +149,13 @@ function Dashboard() {
             <StatCard data={{
               number: hmopatients,
               title: "Patients with HMO",
+            }} icon={<RiGroup2Fill className="icon" size={32} />}
+            />
+          </div>
+          <div className="m-r-20">
+            <StatCard data={{
+              number: totalpatients,
+              title: "Total Patients",
             }} icon={<RiGroup2Fill className="icon" size={32} />}
             />
           </div>

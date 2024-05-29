@@ -1,6 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
+import { RiAddBoxFill, RiDeleteBin3Fill, RiEdit2Fill } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
+import ActionReferralModal from "../modals/ActionRefferalModal";
 
 function ReferralTable({ data }) {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [referralId, setRefferalId] = useState('');
+
+  const openModal = () => {
+    setIsModalOpen(true);
+    
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+    
+  };
+  
+
+  const continueUpdate = (id, data) => {
+    console.log(data)
+    sessionStorage?.setItem("patientId", id);
+    sessionStorage?.setItem("patientName", `${data?.firstName}  ${data?.lastName}`);
+    setRefferalId(data?.referralId)
+    openModal()
+  }
+
   return (
     <div className="w-100 ">
       <div className="w-100 none-flex-item m-t-40">
@@ -18,20 +44,31 @@ function ReferralTable({ data }) {
           </thead>
 
           <tbody className="white-bg view-det-pane">
-            {data.map((row) => (
-              <tr key={row.id}>
-                <td>{row.id}</td>
-                <td>{row.firstName}</td>
-                <td>{row.lastName}</td>
-                <td>{row.hospital}</td>
-                <td>{row.diagnosis}</td>
-                <td>{row.dateCreated}</td>
-                <td>{row.action}</td>
+            {Array.isArray(data) && data?.map((row) => (
+              <tr key={row?.id}>
+                <td>{row?.patientId}</td>
+                <td>{row?.firstName}</td>
+                <td>{row?.lastName}</td>
+                <td>{row?.hospitalName}</td>
+                <td>{row?.diagnosis}</td>
+                <td>{row?.dateCreated}</td>
+                <td>
+                  <div>
+                    <span className="flex flex-h-center">
+                    <RiAddBoxFill onClick={()=> continueUpdate(row?.patientId, row)} className="pointer" style={{ width: '24px', height: '24px' }} />
+                    </span>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {isModalOpen &&
+      <ActionReferralModal
+        closeModal={closeModal}
+        referralId={referralId}
+      />}
     </div>
   );
 }

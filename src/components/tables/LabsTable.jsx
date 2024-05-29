@@ -40,7 +40,7 @@ function LabsTable({ data }) {
             </thead>
   
             <tbody className="white-bg view-det-pane">
-              {data?.map((row) => (
+              {Array.isArray(data) && data?.map((row) => (
                 <tr key={row?.id}>
                   <td>{row?.patientId}</td>
                   <td>{row?.patientFullName}</td>

@@ -12,24 +12,39 @@ import { AiOutlinePlus } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { get } from "../../utility/fetch";
 import TagInputs from "../layouts/TagInputs";
+import ReferralModal from "../modals/RefferalModal";
 
 
 function Patients() {
 
   useEffect(() => {
     getAllPatients();
-  },[])
+  }, [])
 
   const [allPatients, setAllPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [payload, setPayload] = useState('');
+  const [filterSelected, setFilterSelected] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewing, setViewing] = useState({})
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+
+  };
+
+
+  const selectRecord = () => () => {
+    setIsModalOpen(true);
+  };
+
 
 
   // Function to handle date change
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
-let navigate = useNavigate()
+  let navigate = useNavigate()
   // Function to format the date as "dd-MM-yyyy"
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
@@ -73,7 +88,12 @@ let navigate = useNavigate()
 
   const searchPatients = async (searchParam) => {
     try {
-      let res = await get(`/patients/filter?firstName=${searchParam}&pageIndex=1&pageSize=100`);
+      let url = '/patients/filter?';
+      if (filterSelected) {
+        url += `${filterSelected}=${searchParam}&`;
+      }
+      url += `pageIndex=1&pageSize=100`;
+      let res = await get(url);
       console.log(res);
       setAllPatients(res.data);
     } catch (error) {
@@ -82,69 +102,65 @@ let navigate = useNavigate()
     }
   };
 
+
   const handleChange = (event) => {
     const { name, value } = event.target;
-    console.log(value)
-    searchPatients(value)
-    setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
-  }
-  
+    if (name === "filter") {
+      setFilterSelected(value);
+    } else {
+
+      setPayload(value);
+    }
+  };
+
+  useEffect(() => {
+    if (filterSelected && payload) {
+      searchPatients(payload);
+    } else {
+      getAllPatients();
+    }
+  }, [filterSelected, payload]);
+
+
+  const filterOptions = [
+    { value: "", name: "Select Filter" },
+    { value: "firstName", name: "First Name" },
+    { value: "lastName", name: "Last Name" },
+    { value: "email", name: "Email" },
+    { value: "phoneNumber", name: "Phone Number" }
+  ];
+
+
   return (
     <div className="w-100 m-t-80">
-      <div className="flex space-between w-100" >
-
-        <div>
-        <h3>Patients Management</h3>
-        </div>
-        <div className="flex">
-          {/* <div className="m-l-10"><HeaderSearch /></div> */}
-          <div className="m-l-10"><button onClick={()=> {navigate("/patient-details");sessionStorage.setItem("personalInfo", JSON.stringify({}));sessionStorage.setItem("patientId", '')}} className="submit-btn"><div className="flex flex-h-center flex-v-center"><AiOutlinePlus size={24} color="white"/> <p className="m-l-10 m-r-10">Onboard a Patient</p></div></button></div>
-          <div></div>
-        </div>
-      </div>
-      
-      {/* <div className="m-t-20">
-        <div className="flex">
-          {stats.map((stat) => (
-            <div className="m-r-20" key={stat.id}>
-              <StatCard data={stat} icon={stat.icon} />
-            </div>
-          ))}
-        </div>
-      </div> */}
-      <div className="flex w-100 space-between">
-        {/* <div className="flex gap-7 m-t-40">
-          <p>Assigned Waiting Patients</p>|
-          <DatePicker
-            selected={selectedDate}
-            onChange={handleDateChange}
-            dateFormat="dd-MM-yyyy"
-            maxDate={new Date()}
-            customInput={<CustomInput />}
-            icon={<RiCalendar2Fill />}
-          />
-        </div> */}
-
-        <div className="flex flex-v-center  w-50 m-t-20 gap-10">
-          <div className="w-80 ">
-          <TagInputs onChange={handleChange}  name="firstName" label="Find Patient" />
+      <div className="flex flex-v-center flex-h-center space-between  m-t-20">
+        <h3 className="float-left col-4">Patients Management</h3>
+        <div className="flex flex-v-center flex-h-center ">
+          <div className="col-4">
+            <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
           </div>
-
-          {/* <div className="dropdown-input w-25 ">
-            {" "}
-            <select>
-              <option value="Ward A">Ward A</option>
-              <option value="Ward B">Ward B</option>
-              <option value="Ward C">Ward C</option>
-              <option value="Ward D">Ward D</option>
-            </select>
-          </div> */}
+          <div className="col-3 ">
+            <TagInputs
+              onChange={handleChange}
+              name="filter"
+              // label="Filter"
+              type="select"
+              options={filterOptions}
+            />
+          </div>
+          <div className="m-b-10 col-4">
+            <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn"><div className="flex flex-h-center flex-v-center"><AiOutlinePlus size={24} color="white" /> <p className="m-l-10 m-r-10">Refer a Patient</p></div></button>
+          </div>
         </div>
       </div>
-
-      <div className="">
+      <div >
         <PatientsTable data={allPatients} />
       </div>
+      {isModalOpen &&
+        <ReferralModal
+          closeModal={closeModal}
+        />
+      }
     </div>
   );
 }

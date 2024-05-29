@@ -10,6 +10,7 @@ import dashboard from '../assets/images/dshb.svg'
 import facility from '../assets/images/faclty.svg'
 import Customer from '../assets/images/cus eng.svg'
 import patient from '../assets/images/pats.svg'
+import { RiAddCircleFill } from 'react-icons/ri';
 
 
 
@@ -18,13 +19,52 @@ import patient from '../assets/images/pats.svg'
 // import { CgUserList } from 'react-icons/cg';
 
 export default [
-    { title: 'Dashboard', href: '/dashboard', icon: <img src={dashboard}  className="icon"/> },
-    { title: 'Patient', href: '/patients', icon: <img src={patient}  className="icon"/> },
-    { title: 'Facility', href: '/facility', icon: <img src={facility}  className="icon"/> },
-    { title: 'Referrals', href: '/referrals', icon: <img src={referral}  className="icon"/>},
-    { title: 'Finance', href: '/finance', icon: <img src={finance}  className="icon"/>},
-    { title: 'Insurance', href: '/insurance', icon:<img src={insurance}  className="icon"/>  },
-    { title: 'Customer Engagement', href: '/customer-engagement', icon: <img src={Customer}  className="icon"/>},
+    {
+        title: 'Add a Patient',
+        href: '/patient-details',
+        onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        },
+        icon: <RiAddCircleFill className="pointer" style={{ width: '24px', height: '24px', color: '#3C7E2D' }} />
+    },
+    {
+        title: 'Dashboard', onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        }, href: '/dashboard', icon: <img src={dashboard} className="icon" />
+    },
+    {
+        title: 'Patient', onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        }, href: '/patients', icon: <img src={patient} className="icon" />
+    },
+    {
+        title: 'Facility', onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        }, href: '/facility', icon: <img src={facility} className="icon" />
+    },
+    {
+        title: 'Referrals', onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        }, href: '/referrals', icon: <img src={referral} className="icon" />
+    },
+    {
+        title: 'Finance', onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        }, href: '/finance', icon: <img src={finance} className="icon" />
+    },
+    {
+        title: 'Insurance', onClick: () => {
+            sessionStorage.setItem("personalInfo", JSON.stringify({}));
+            sessionStorage.setItem("patientId", '');
+        }, href: '/insurance', icon: <img src={insurance} className="icon" />
+    },
+    { title: 'Customer Engagement', href: '/customer-engagement', icon: <img src={Customer} className="icon" /> },
 
 
 ];

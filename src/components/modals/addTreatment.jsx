@@ -107,7 +107,7 @@ function AddTreatment({ closeModal, visit, id, fetchData }) {
                     )}
                     <TextArea label="Patient Diagnosis" name="diagnosis" onChange={(e) => setDiagnosis(e.target.value)} />
                     <TextArea label="Add Care Plan" name="carePlan" onChange={(e) => setCarePlan(e.target.value)} />
-                    <button className="btn m-t-20 w-100" onClick={addTreatment} disabled={loading}>Add Treatment</button>
+                    <button className="submit-btn m-t-20 w-100" onClick={addTreatment} disabled={loading}>Add Treatment</button>
                 </div>
             </div>
         </div>

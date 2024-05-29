@@ -116,10 +116,31 @@ function Visits({ setSelectedTab }) {
   const submitPayload = async () => {
     try {
       let res = await post("/patients/AddVisitationRecords", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), PatientId: parseFloat(sessionStorage.getItem("patientId")) })
-      if (res) {
+      if (typeof res === 'number') {
         notification({ message: res?.messages, type: "success" });
         getVisitationDetails();
         // sessionStorage.setItem("patientId", res?.patientId)
+      }else if (res.StatusCode === 401) {
+        notification({ message: 'Unathorized Session', type: "error" });
+      }
+      else if (res.StatusCode === 500) {
+        notification({ message: 'Internal Server Error', type: "error" });
+      }
+      else {
+        let errorMessage = "An error occurred";
+
+        if (res && res.errors) {
+          const errors = res.errors;
+
+          // Check if any required fields are missing
+          const missingFields = Object.keys(errors).filter(field => errors[field].includes(`${field} is required`));
+
+          if (missingFields.length > 0) {
+            errorMessage = `The following fields are required: ${missingFields.join(", ")}`;
+          }
+        }
+
+        notification({ message: errorMessage, type: "error" });
       }
     } catch (error) {
       notification({ message: error?.detail, type: "error" })
@@ -151,9 +172,9 @@ function Visits({ setSelectedTab }) {
     <div className="">
       {" "}
       <div className="m-t-40">Visit Record | Vital</div>
-      <div className="w-100 flex p-20">
+      <div className="w-100 flex ">
 
-        <div className="w-40">
+        <div className="col-3-3">
           <div><TagInputs onChange={handleChange} name="dateOfVisit" label="Visit Date" type="date" /></div>
           <div className="flex">
             <div className="w-100">
@@ -216,12 +237,12 @@ function Visits({ setSelectedTab }) {
           /></div>
 
           <div className="w-100 ">
-            <button onClick={submitPayload} className="btn w-100 m-t-20"> Add Vitals</button>
-            <button onClick={next} className="pointer w-100 m-t-20"> Continue</button>
+            <button onClick={submitPayload} className="submit-btn w-100 m-t-20"> Add Vitals</button>
+            <button onClick={next} className=" pointer w-100 m-t-20"> Continue</button>
           </div>
 
         </div>
-        <div className="w-60 m-l-20">
+        <div className="col-5 m-l-20 m-r-20">
           <VisitsTable data={visits} />
         </div>
       </div>

@@ -36,7 +36,8 @@ const makePostRequest = async () => {
       if (data) {
         console.log(data)
         sessionStorage.setItem('token',  data?.jwt?.token);
-        sessionStorage.setItem('clinicId',  data.clinicId);
+        sessionStorage.setItem('clinicId',  data?.clinicId);
+        sessionStorage.setItem('userId',  data?.employeeId);
         localStorage.setItem('USER_INFO', JSON.stringify(data));
        navigate('/dashboard');
       }
@@ -76,7 +77,7 @@ const makePostRequest = async () => {
          <InputField type="password" name={"password"} value={password} placeholder={"password"} onChange={(e) => setPassword(e.target.value)} />
         </div>
 
-        <div className='m-t-40'> <button disabled={loading} onClick={makePostRequest} className='w-100 btn'>Submit</button></div>
+        <div className='m-t-40'> <button disabled={loading} onClick={makePostRequest} className='w-100 submit-btn'>Log In</button></div>
        
         </div>
         </div>
