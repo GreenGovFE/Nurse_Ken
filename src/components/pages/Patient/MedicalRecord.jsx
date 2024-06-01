@@ -7,8 +7,11 @@ import { PatientData, allergyData, stats } from "../mockdata/PatientData";
 import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
 import TagInputs from "../../layouts/TagInputs";
+import { usePatient } from "../../../contexts";
 
 function MedicalRecord() {
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+
   const [selectedTab, setSelectedTab] = useState(1);
   const [allergies, setAllergies] = useState([{ name: "", comment: "" }]);
   const [pastIllnesses, setPastIllnesses] = useState([
@@ -25,7 +28,7 @@ function MedicalRecord() {
   ]);
   const [payload, setPayload] = useState({})
 
-  const patientId = Number(sessionStorage.getItem("patientId"))
+  
   const [medTableData, setMedTableData] = useState([])
 
   useEffect(() => {
@@ -88,9 +91,10 @@ function MedicalRecord() {
 
   const submitPayload = async (payload) => {
     try {
-      const patientId = Number(sessionStorage.getItem("patientId"));
+      
       if (!patientId) {
-        throw new Error("Patient ID not found in session storage");
+        notification({ message: "Patient ID not found", type: "error" });
+        throw new Error("Patient ID not found");
       }
 
       const res = await post("/patients/AddMedicalRecord", { ...payload, PatientId: patientId });

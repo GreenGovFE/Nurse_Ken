@@ -8,9 +8,12 @@ import { allergyData } from "../mockdata/PatientData";
 import ImmunizationTable from "../../tables/immunizationTable";
 import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
+import { usePatient } from "../../../contexts";
 
 
 function Immunization({ setSelectedTab }) {
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+
   const [documentArray, setdocumentArray] = useState([])
   const [docNames, setDocNames] = useState([])
   const [payload, setPayload] = useState()
@@ -26,7 +29,7 @@ function Immunization({ setSelectedTab }) {
 
   const getImmunization = async () => {
     try {
-      let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${sessionStorage?.getItem("patientId")}`);
+      let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${patientId}`);
       console.log(res);
       setImmunizationData(res);
     } catch (error) {
@@ -50,12 +53,12 @@ function Immunization({ setSelectedTab }) {
 
   const submitPayload = async () => {
     try {
-      const patientId = Number(sessionStorage.getItem("patientId"));
+      const patientID = Number(patientId);
       if (!patientId) {
         throw new Error("Patient ID not found in session storage");
       }
 
-      const res = await post("/patients/addImmunizationRecords", { ...payload, patientId: patientId });
+      const res = await post("/patients/addImmunizationRecords", { ...payload, docName: documentArray[0]?.name, docPath: documentArray[0]?.path, patientId: patientID });
       console.log(res);
 
       if (typeof res === 'number') {

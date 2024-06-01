@@ -3,14 +3,23 @@ import { Link } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import EdsgLogo from "../../assets/images/SidebarLogo.png";
-import { AiOutlineHome } from "react-icons/ai";
 import { logout } from "../../utility/auth";
-// import { logout } from "../../utility/auth";
+import useNavigationItems from "../../config/sideBarMenu";
+import { usePatient } from "../../contexts";
 
-const Sidebar = ({ history, menuList }) => {
+const Sidebar = ({ history }) => {
+  const { setPatientId, setPatientInfo } = usePatient();
+
+  const resetPatientInfo = () => {
+    setPatientInfo({});
+    setPatientId('');
+  };
+
   const {
     location: { pathname },
   } = history;
+
+  const navigationItems = useNavigationItems();
 
   return (
     <nav className="page-sidebar">
@@ -20,15 +29,14 @@ const Sidebar = ({ history, menuList }) => {
 
       <div className="sidebar-menu">
         <ul className="menu-items">
-          {/* <li>
-            <AiOutlineHome className="icon" />
-            <Link onClick={logout} className="has-sub-menu">
-              <span className="title">Home</span>
-            </Link>
-          </li> */}
-          {menuList &&
-            menuList.map((item) => (
-              <MenuItem props={item} pathname={pathname} key={item.title} />
+          {navigationItems &&
+            navigationItems.map((item) => (
+              <MenuItem
+                key={item.title}
+                item={item}
+                pathname={pathname}
+                resetPatientInfo={resetPatientInfo}
+              />
             ))}
           <li onClick={logout}>
             <RiLogoutCircleLine className="icon" />
@@ -42,8 +50,13 @@ const Sidebar = ({ history, menuList }) => {
   );
 };
 
-const MenuItem = ({ props: { title, href, icon, children }, pathname }) => {
+const MenuItem = ({ item: { title, href, icon, children, onClick }, pathname, resetPatientInfo }) => {
   const [isShowingSub, setIsShowingSub] = useState(false);
+
+  const handleClick = () => {
+    resetPatientInfo();
+    if (onClick) onClick(); // Execute any specific onClick logic from navigation item
+  };
 
   return (
     <>
@@ -52,7 +65,10 @@ const MenuItem = ({ props: { title, href, icon, children }, pathname }) => {
         {children ? (
           <>
             <Link
-              onClick={() => setIsShowingSub(!isShowingSub)}
+              onClick={() => {
+                setIsShowingSub(!isShowingSub);
+                handleClick();
+              }}
               className="has-sub-menu"
             >
               <span className="title">{title}</span>
@@ -64,7 +80,7 @@ const MenuItem = ({ props: { title, href, icon, children }, pathname }) => {
             )}
           </>
         ) : (
-          <Link to={href}>
+          <Link to={href} onClick={handleClick}>
             <span className="title">{title}</span>
           </Link>
         )}
@@ -77,7 +93,9 @@ const MenuItem = ({ props: { title, href, icon, children }, pathname }) => {
                 className={`${pathname === sub.href ? "active" : ""}`}
                 key={sub.title}
               >
-                <Link to={sub.href}>{sub.title}</Link>
+                <Link to={sub.href} onClick={resetPatientInfo}>
+                  {sub.title}
+                </Link>
               </li>
             ))}
         </ul>

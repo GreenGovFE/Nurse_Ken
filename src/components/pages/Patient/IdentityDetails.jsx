@@ -5,11 +5,11 @@ import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
 import { usePatient } from "../../../contexts";
 
-function EmergencyContact({setSelectedTab}) {
+function IdentityDetails({setSelectedTab}) {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
   const [payload, setPayload] = useState()
-  const [emergencyContact, setEmergencyContact] = useState({})
+  const [IdentityDetails, setIdentityDetails] = useState({})
 
   let gender = [
     { value: "choose", name: "Choose Gender" },
@@ -54,7 +54,7 @@ function EmergencyContact({setSelectedTab}) {
 
   
   const submitPayload = async () => {
-    let res = await post("/patients/emergencyContact", {...payload, patientId:Number(patientId) })
+    let res = await post("/patients/IdentityDetails", {...payload, patientId:Number(patientId) })
     console.log(res.patientId)
     if (res.patientId){
       notification({message:res?.messages, type: "success"})
@@ -68,7 +68,7 @@ function EmergencyContact({setSelectedTab}) {
 
   const getContact = async () => {
     try {
-      let res = await get(`/patients/${Number(patientId)}/emergencycontact`)
+      let res = await get(`/patients/${Number(patientId)}/IdentityDetails`)
       if (res) {
         setPayload(res)
         // sessionStorage.setItem("patientId", res?.patientId)
@@ -103,5 +103,5 @@ function EmergencyContact({setSelectedTab}) {
   );
 }
 
-export default EmergencyContact;
+export default IdentityDetails;
 

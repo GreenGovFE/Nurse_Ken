@@ -1,16 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { usePatient } from "../../contexts";
 
 
 function PatientsTable({ data }) {
+  const { setPatientId, setPatientName, setPatientPage, setHmoId, setPatientInfo } = usePatient();
 
   let navigate = useNavigate()
 
   const continueUpdate =(id, data)=>{
     console.log(data)
-    sessionStorage?.setItem("patientId", id);
-    sessionStorage?.setItem("patientName", `${data?.firstName}  ${data?.lastName}`);
-    sessionStorage.setItem("personalInfo", JSON.stringify(data));
+    setPatientId(id);
+    setPatientName(`${data.firstName} ${data.lastName}`);
+    setHmoId(data?.hmoId);
+    setPatientInfo(data);
     navigate("/patient-details")
   }
 

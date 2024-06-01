@@ -116,7 +116,7 @@ const UploadButton = (props) => {
 
        >
         
-        <span>{props.btnText || 'Upload Document(s)'}</span>
+        <span>{props.btnText || 'Upload Document'}</span>
       </label>
       
     </div>

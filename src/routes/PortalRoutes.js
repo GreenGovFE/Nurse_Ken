@@ -14,6 +14,8 @@ import AddPatients from '../components/pages/AddPatients';
 import { useNavigate } from "react-router-dom";
 import { AiOutlinePlus } from 'react-icons/ai';
 import Personal from '../components/pages/Patient/Personal';
+import FinanceDetails from '../components/pages/Patient/FinanceDetails';
+import PatientHMOetails from '../components/pages/PatientHmoDetails';
 
 
 export default () => {
@@ -26,6 +28,8 @@ export default () => {
             <Route path="/patients" element={<AuthRoute><Patients /> </AuthRoute>} />
             <Route path="/facility" element={<AuthRoute><Facility /></AuthRoute>} />
             <Route path="/patient-details" element={<AuthRoute><PatientDetails /></AuthRoute>} />
+            <Route path="/finance-details" element={<AuthRoute><FinanceDetails/></AuthRoute>} />
+            <Route path="/patient-hmo-details" element={<AuthRoute><PatientHMOetails/></AuthRoute>} />
             <Route path="/patients/add" element={<AuthRoute><AddPatients /></AuthRoute>} />
             <Route path="/finance" element={<AuthRoute><PatientsFinance /></AuthRoute>} />
             <Route path="/insurance" element={<AuthRoute><PatientsInsurance /></AuthRoute>} />

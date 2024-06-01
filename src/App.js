@@ -8,7 +8,7 @@ import "./assets/css/pages-sidebar.css"
 import Homepage from './components/home';
 import { Toaster } from 'react-hot-toast';
 
-import { MyProvider } from './contexts';
+import {PatientProvider } from './contexts';
 import PageLayout from './components/layouts/PageLayout';
 
 
@@ -19,7 +19,7 @@ function App() {
 
 
   return (
-    <MyProvider>
+    <PatientProvider>
       <div>
         <BrowserRouter>
 
@@ -39,7 +39,7 @@ function App() {
         </ BrowserRouter>
         <Toaster />
       </div>
-    </MyProvider>
+    </PatientProvider>
   );
 }
 

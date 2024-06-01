@@ -3,8 +3,10 @@ import InputField from "../../UI/InputField";
 import TagInputs from "../../layouts/TagInputs";
 import notification from "../../../utility/notification";
 import { get, post } from "../../../utility/fetch";
+import { usePatient } from "../../../contexts";
 
 function ContactDetails({setSelectedTab}) {
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
   const [payload, setPayload] = useState({});
   const [contact, setContact] = useState({})
@@ -36,7 +38,7 @@ function ContactDetails({setSelectedTab}) {
   }, [])
 
   const submitPayload = async () => {
-    let res = await post("/patients/updateContact", {...payload, patientId:Number(sessionStorage.getItem("patientId")) })
+    let res = await post("/patients/updateContact", {...payload, patientId:Number(patientId) })
   console.log(res)
     if (res){
       notification({message:res?.messages, type: "success"})
@@ -46,7 +48,7 @@ function ContactDetails({setSelectedTab}) {
 
   const getContact = async () => {
     try {
-      let res = await get(`/patients/${Number(sessionStorage.getItem("patientId"))}/contact`)
+      let res = await get(`/patients/${Number(patientId)}/contact`)
       if (res) {
         setPayload(res)
         // sessionStorage.setItem("patientId", res?.patientId)

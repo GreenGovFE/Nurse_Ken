@@ -6,14 +6,15 @@ import notification from "../../../utility/notification";
 import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 
 import UploadPic from "../../UI/UploadPic";
+import { usePatient } from "../../../contexts";
 function Personal({ setSelectedTab }) {
-  const [personalInfo, setPersonalInfo] = useState(JSON.parse(sessionStorage.getItem("personalInfo")));
-  const [payload, setPayload] = useState(personalInfo || {});
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+  const [payload, setPayload] = useState(patientInfo || {});
 
-  const [pictureUrl, setPictureUrl] = useState(personalInfo?.pictureUrl || '')
+  const [pictureUrl, setPictureUrl] = useState(patientInfo?.pictureUrl || '')
   const [fileName, setFilename] = useState('')
 
-  const patientId = Number(sessionStorage.getItem("patientId"))
+
 
 
   let gender = [
@@ -68,7 +69,7 @@ function Personal({ setSelectedTab }) {
   }
   
 
-  console.log(personalInfo)
+  console.log(patientInfo)
 
 
   const submitPayload = async () => {

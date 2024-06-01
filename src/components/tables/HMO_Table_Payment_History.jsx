@@ -46,28 +46,7 @@ function HMOTableHistory({ data }) {
     }
   };
 
-  const updatePayment = async () => {
-    const Payload = {
-      patientId: Number(sessionStorage.getItem("patientId")),
-      amountPayableBy: personalInfo?.firstName,
-      amountOwed: 65000,
-      amountPaid: 6500,
-      availableBalance: 6000,
-      comment: 'No comment',
-      userId: personalInfo?.nurseId,
-    }
-
-    try {
-      const response = await axios.post(`https://edogoverp.com/healthfinanceapi/api/patient-payment/${paymentId}/add-update-payment`, Payload);
-      console.log(response)
-      notification({ message: response?.messages, type: "success" })
-      setPaymentHistory(response?.data?.resultList);
-    } catch (error) {
-      notification({ message: error?.message, type: "error" })
-      console.error('Error fetching payment history:', error);
-      // Handle the error here, such as displaying an error message to the user
-    }
-  };
+ 
 
 
   const getAllCategories = async () => {

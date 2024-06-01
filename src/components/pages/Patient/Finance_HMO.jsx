@@ -9,10 +9,13 @@ import TagInputs from "../../layouts/TagInputs";
 import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 import axios from "axios";
 import HMOTableHistory from "../../tables/HMO_Table_Payment_History";
+import { usePatient } from "../../../contexts";
 
 
 function Finance_HMO() {
-  const personalInfo = JSON.parse(sessionStorage.getItem("personalInfo"));
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+
+  const personalInfo = patientInfo;
   const [pictureUrl, setPictureUrl] = useState('')
   const [paymentHistory, setPaymentHistory] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -70,8 +73,8 @@ function Finance_HMO() {
 
             </div>
             <div className="m-l-10 flex flex-direction-v ">
-              <span className="m-b-10">Patient Name: {sessionStorage?.getItem("patientName")}</span>
-              <span className="m-b-10">Patient ID: {sessionStorage.getItem("patientId")}</span>
+              <span className="m-b-10">Patient Name: {patientName}</span>
+              <span className="m-b-10">Patient ID: {patientId}</span>
               <span>Visit Date:</span>
             </div>
           </div>
@@ -85,7 +88,7 @@ function Finance_HMO() {
         <div className="flex w-100">
 
           <div className="flex  w-100 space-between">
-            <div className="flex-50"><TagInputs className="no-wrap" value = {`${hmo?.vendorName}  |  ${hmo?.taxIdentityNumber}`} disabled label="HMO Service Provider" /></div>
+            <div className="flex-50"><TagInputs className="no-wrap" value = {`${hmo?.vendorName || ''}  |  ${hmo?.taxIdentityNumber || ''}`} disabled label="HMO Service Provider" /></div>
           </div>
 
         </div>

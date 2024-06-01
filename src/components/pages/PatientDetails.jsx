@@ -12,6 +12,7 @@ import Finance_HMO from "./Patient/Finance_HMO";
 
 function PatientDetails() {
   const [selectedTab, setSelectedTab] = useState("personal");
+
   
   const renderTabContent = (selectedTab) => {
     switch (selectedTab) {

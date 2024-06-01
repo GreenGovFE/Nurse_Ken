@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import LabsTable from "../../tables/LabsTable";
 import { allergyData } from "../mockdata/PatientData";
 import { get } from "../../../utility/fetch";
+import { usePatient } from "../../../contexts";
 function Labs() {
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
   const [labReports, setLabReports] = useState([])
 
@@ -13,7 +15,7 @@ function Labs() {
 
   const getLabReports = async () => {
     try {
-      let res = await get(`/patients/${sessionStorage.getItem("patientId")}/lab_reports`);
+      let res = await get(`/patients/${patientId}/lab_reports`);
       console.log(res);
       setLabReports(res);
     } catch (error) {

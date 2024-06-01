@@ -5,10 +5,13 @@ import VisitsTable from "../../tables/VisitsTable";
 import { allergyData } from "../mockdata/PatientData";
 import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
+import { usePatient } from "../../../contexts";
 
 
 
 function Visits({ setSelectedTab }) {
+  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+
   const [documentArray, setdocumentArray] = useState([])
   const [docNames, setDocNames] = useState([])
   const [payload, setPayload] = useState({})
@@ -102,7 +105,7 @@ function Visits({ setSelectedTab }) {
 
   const getVisitationDetails = async () => {
     try {
-      let res = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${sessionStorage.getItem("patientId")}`);
+      let res = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${patientId}`);
       console.log(res);
       setVisits(res);
     } catch (error) {
@@ -115,7 +118,7 @@ function Visits({ setSelectedTab }) {
 
   const submitPayload = async () => {
     try {
-      let res = await post("/patients/AddVisitationRecords", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), PatientId: parseFloat(sessionStorage.getItem("patientId")) })
+      let res = await post("/patients/AddVisitationRecords", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), PatientId: parseFloat(patientId) })
       if (typeof res === 'number') {
         notification({ message: res?.messages, type: "success" });
         getVisitationDetails();

@@ -1,48 +1,19 @@
-import { createContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
-// Context  For Storing User Information
-const MyContext = createContext();
+const PatientContext = createContext();
 
+export const usePatient = () => useContext(PatientContext);
 
-// Sample stafpayroll
+export const PatientProvider = ({ children }) => {
+  const [patientId, setPatientId] = useState('');
+  const [patientName, setPatientName] = useState('');
+  const [patientPage, setPatientPage] = useState('');
+  const [patientInfo, setPatientInfo] = useState('');
+  const [hmoId, setHmoId] = useState('');
 
-// {
-//     employeeId: 0,
-//     baseSalary: 0,
-//     totalAllowances: 0,
-//     tax: 0,
-//     pensionContribution: 0,
-//     otherDeductions: 0,
-//     netPay: 0,
-//     notes: ""
-// }
-
-const MyProvider = ({ children }) => {
-    // const [payrollData, setPayrollData] = useState({
-    //     mdaId: 0,
-    //     title: "",
-    //     month: null,
-    //     year: null,
-    //     comment: "",
-    //     totalGrossPayment: 0,
-    //     totalDeductions: 0,
-    //     overallNetPayment: 0,
-    //     thirteenthMonth: 0,
-    //     cooperativeDeductions: 0,
-    //     staffPayroll: [
-
-    //     ]
-    // });
-
-    // const [isApprover, setIsApprover] = useState(false);
-
-    // const [isEdit, setIsEdit] = useState(false);
-
-    return (
-        <MyContext.Provider value={{}}>
-            {children}
-        </MyContext.Provider>
-    );
+  return (
+    <PatientContext.Provider value={{ patientId, setPatientId, patientName, setPatientName, patientPage, setPatientPage, hmoId, setHmoId, patientInfo, setPatientInfo }}>
+      {children}
+    </PatientContext.Provider>
+  );
 };
-
-export { MyProvider, MyContext };
