@@ -11,17 +11,7 @@ function PatientsInsurance() {
     <div className="w-100 m-t-80">
       <h3>HMO/Insurance Management</h3>
 
-      <div className="flex w-100 space-between">
-
-        <div className="flex flex-v-center  w-50 m-t-20">
-
-          <input type="text" className="" />
-          <div className="dropdown-input w-25 ">
-
-
-          </div>
-        </div>
-      </div>
+      
 
       <div className="">
         <InsuranceTable />

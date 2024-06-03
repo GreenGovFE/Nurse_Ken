@@ -5,7 +5,7 @@ import notification from "../../../utility/notification";
 import { get, post } from "../../../utility/fetch";
 import { usePatient } from "../../../contexts";
 
-function ContactDetails({setSelectedTab}) {
+function ContactDetails({setSelectedTab, hide}) {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
   const [payload, setPayload] = useState({});
@@ -74,7 +74,9 @@ function ContactDetails({setSelectedTab}) {
         <TagInputs onChange = {handleChange} value ={payload?.email} name ="email" label="Email Address" />
         <TagInputs onChange = {handleChange} value ={payload?.altPhone} name ="altPhone" label="Alt Phone Number" />
 
-        <button onClick={submitPayload} className="submit-btn  m-t-20 w-100" >Continue</button>
+        { hide === true &&
+          <button onClick={submitPayload} className="submit-btn  m-t-20 w-100" >Continue</button>
+        }
 
       </div>
     </div>

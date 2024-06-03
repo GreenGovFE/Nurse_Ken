@@ -7,132 +7,103 @@ import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 
 import UploadPic from "../../UI/UploadPic";
 import { usePatient } from "../../../contexts";
-function Personal({ setSelectedTab }) {
+function Personal({ setSelectedTab, hide }) {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
   const [payload, setPayload] = useState(patientInfo || {});
 
-  const [pictureUrl, setPictureUrl] = useState(patientInfo?.pictureUrl || '')
-  const [fileName, setFilename] = useState('')
+  const [pictureUrl, setPictureUrl] = useState(patientInfo?.pictureUrl || '');
+  const [fileName, setFilename] = useState('');
 
-
-
-
-  let gender = [
+  const gender = [
     { value: "choose", name: "Choose Gender" },
     { value: "Male", name: "Male" },
-    { value: "Female", name: "Female" },
+    { value: "Female", name: "Female" }
+  ];
 
-  ]
-  let maritalStatus = [
+  const maritalStatus = [
     { value: "choose", name: "Choose Marital Status" },
     { value: "Single", name: "Single" },
-    { value: "Married", name: "Married" },
-  ]
-  // const getMedRecords = async () => {
-  //   try {
-  //     let res = await get(`/patients/${patientId}/medicalRecord`)
-  //     if (res) {
-  //       setPersonalInfo(res)
-  //       notification({ message: res?.messages, type: "success" })
-  //       // sessionStorage.setItem("patientId", res?.patientId)
-  //     }
-  //   } catch (error) {
-  //     notification({ message: error?.detail, type: "error" })
-  //   }
+    { value: "Married", name: "Married" }
+  ];
 
-  // }
-
-
-
-  let patientType = [{ value: "New", name: "New" }, { value: "Referred", name: "Referred" }]
+  const patientType = [{ value: "New", name: "New" }, { value: "Referred", name: "Referred" }];
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-  
+
     if (name === "dateOfBirth") {
       const selectedDate = new Date(value);
       const currentDate = new Date();
-  
+
       if (selectedDate >= currentDate) {
         console.log("Invalid input");
-        notification({ message: 'Please select appropriate date', type: "error" })
+        notification({ message: 'Please select appropriate date', type: "error" });
         return;
       }
-    }else if(name === 'phoneNumber'){
-      if((value.length <= 11 && isNaN(value))|| value.length > 11){
-        notification({ message: 'Please enter a valid phone number', type: "error" })
+    } else if (name === 'phoneNumber') {
+      if ((value.length <= 11 && isNaN(value)) || value.length > 11) {
+        notification({ message: 'Please enter a valid phone number', type: "error" });
         return;
       }
     }
-  
+
     setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
-  }
-  
-
-  console.log(patientInfo)
-
+  };
 
   const submitPayload = async () => {
     try {
-      let res = await post("/patients/AddPatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl: pictureUrl })
+      let res = await post("/patients/AddPatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl: pictureUrl });
       if (res.patientId) {
-        notification({ message: res?.messages, type: "success" })
-        setSelectedTab("contactDetails")
-        sessionStorage.setItem("patientId", res?.patientId)
+        notification({ message: res?.messages, type: "success" });
+        setSelectedTab("contactDetails");
+        sessionStorage.setItem("patientId", res?.patientId);
       }
     } catch (error) {
-      notification({ message: error?.detail, type: "error" })
+      notification({ message: error?.detail, type: "error" });
     }
-
-  }
-
+  };
 
   const fetchPatientById = async (id) => {
     try {
-      let res = await get(`/patients/AllPatientById?patientId=${id}`)
-      notification({ message: res?.messages, type: "success" })
-      setPayload(res)
-      sessionStorage.setItem("personalInfo", JSON.stringify(res))
-
+      let res = await get(`/patients/AllPatientById?patientId=${id}`);
+      notification({ message: res?.messages, type: "success" });
+      setPayload(res);
+      sessionStorage.setItem("personalInfo", JSON.stringify(res));
     } catch (error) {
-      notification({ message: error?.detail, type: "error" })
+      notification({ message: error?.detail, type: "error" });
     }
-
-  }
-
-
+  };
 
   const updatePatient = async () => {
     try {
-      let res = await put("/patients/UpdatePatient", { ...payload, pictureUrl: pictureUrl })
+      let res = await put("/patients/UpdatePatient", { ...payload, pictureUrl: pictureUrl });
       if (res.patientId) {
-        notification({ message: res?.messages, type: "success" })
-        sessionStorage.setItem("patientId", res?.patientId)
-        fetchPatientById(res?.patientId)
+        notification({ message: res?.messages, type: "success" });
+        sessionStorage.setItem("patientId", res?.patientId);
+        fetchPatientById(res?.patientId);
       }
     } catch (error) {
-      notification({ message: error?.detail, type: "error" })
+      notification({ message: error?.detail, type: "error" });
     }
-
-  }
+  };
 
   const formatDate = (timestamp) => {
     if (!timestamp) {
-      return
+      return;
     }
     const dateObject = new Date(timestamp);
     const formattedDate = dateObject.toISOString().split("T")[0];
     return formattedDate;
   };
 
-
   const addDefaultSrc = (ev) => {
     ev.target.src = ProfilePix;
   };
 
+  console.log(hide)
+
   return (
     <div className="w-80">
-      {" "}
       <div className="m-t-40 "></div>
       <div className="flex space-between">
         <div className="col-7">
@@ -158,27 +129,24 @@ function Personal({ setSelectedTab }) {
               src={pictureUrl || payload?.pictureUrl || ProfilePix}
               alt={fileName}
             />
-
           </div>
           <div>
             <div className="flex space-between m-t-20 m-b-10">
               <div className="flex-col no-margin">
-                <div>
-                  <UploadPic handlePicChange={setPictureUrl} name={setFilename} />
-                </div>
-                {/* <p className="m-t-10 center-text">{fileName}</p> */}
-
+                <UploadPic handlePicChange={setPictureUrl} name={setFilename} />
               </div>
             </div>
           </div>
         </div>
-
-
-
-
       </div>
-      <button onClick={updatePatient} className="submit-btn  m-t-20 col-7" >Update</button>
-      <button onClick={submitPayload} className="submit-btn  m-t-20 col-7" >Continue</button>
+      <div>
+        {hide === true && (
+          <>
+            <button onClick={updatePatient} className="submit-btn m-t-20 col-7">Update</button>
+            <button onClick={submitPayload} className="submit-btn m-t-20 col-7">Continue</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

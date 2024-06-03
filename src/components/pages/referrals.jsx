@@ -143,8 +143,8 @@ function RefferedPatients() {
     <div className="w-100 m-t-80">
       <div className="flex flex-v-center flex-h-center space-between  m-t-20">
         <h3 className="float-left col-4">Refered Patients</h3>
-        <div className="flex flex-v-center flex-h-center space-between">
-          <div className="col-6">
+        <div className="flex flex-v-center flex-h-center">
+          <div className="col-10">
             <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
           </div>
           <div className="col-4 ">

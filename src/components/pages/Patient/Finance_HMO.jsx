@@ -75,7 +75,7 @@ function Finance_HMO() {
             <div className="m-l-10 flex flex-direction-v ">
               <span className="m-b-10">Patient Name: {patientName}</span>
               <span className="m-b-10">Patient ID: {patientId}</span>
-              <span>Visit Date:</span>
+              {/* <span>Visit Date:</span> */}
             </div>
           </div>
           <div className="col-4 float-right">

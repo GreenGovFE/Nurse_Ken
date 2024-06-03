@@ -879,6 +879,9 @@ section {
 .m-l-20 {
   margin-left: 20px !important;
 }
+.m-l-30 {
+  margin-left: 30px !important;
+}
 
 .m-l-50 {
   margin-left: 50px !important;
@@ -893,6 +896,10 @@ section {
 
 .m-r-20 {
   margin-right: 20px !important;
+}
+
+.m-r-30 {
+  margin-right: 29px !important;
 }
 
 .m-r-80 {
@@ -2003,7 +2010,7 @@ textarea {
   align-content: center;
   width: 50%;
   height: 40px;
-  padding: 10px 16px  ;
+  padding: 2px 16px 2px 16px  ;
 }
 
 .dev-border {

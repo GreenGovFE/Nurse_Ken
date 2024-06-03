@@ -17,10 +17,10 @@ function PatientDetails() {
   const renderTabContent = (selectedTab) => {
     switch (selectedTab) {
       case "personal":
-        return <Personal renderTabContent={renderTabContent} />;
+        return <Personal hide={true} renderTabContent={renderTabContent} />;
 
       case "contactDetails":
-        return <ContactDetails renderTabContent={renderTabContent} />;
+        return <ContactDetails hide={true} renderTabContent={renderTabContent} />;
 
       case "emergencyContact":
         return <EmergencyContact renderTabContent={renderTabContent} />;
@@ -131,11 +131,11 @@ function PatientDetails() {
 
       <div>
         {
-          selectedTab === "personal" ? <Personal setSelectedTab={setSelectedTab} /> :
+          selectedTab === "personal" ? <Personal hide={true} setSelectedTab={setSelectedTab} /> :
             selectedTab === "contactDetails" ?
-              <ContactDetails setSelectedTab={setSelectedTab} /> :
+              <ContactDetails hide={true} setSelectedTab={setSelectedTab} /> :
               selectedTab === "emergencyContact" ?
-                <EmergencyContact setSelectedTab={setSelectedTab} /> :
+                <EmergencyContact  setSelectedTab={setSelectedTab} /> :
                 selectedTab === "medicalRecord" ?
                   <MedicalRecord setSelectedTab={setSelectedTab} /> :
                   selectedTab === "immunization" ?

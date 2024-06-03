@@ -183,7 +183,7 @@ function MembershipCover({ setSelectedTab }) {
         </div>
         <button onClick={submitPayload} className="submit-btn  m-t-20 w-100">Add HMO</button>
       </div>
-      {packageId && packageId.index !== 1 &&
+      {packageId && packageId.index !== -1 &&
         <div className="w-100 none-flex-item m-t-40 m-l-20">
           <table className="bordered-table">
             <thead className="border-top-none">
