@@ -147,7 +147,7 @@ function Facility() {
 
 
                   </div>
-                  <div className="pagination flex space-between float-right col-5">
+                  <div className="pagination flex space-between float-right col-5 m-t-40">
                     <div className="flex gap-8">
                       <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
                     </div>
