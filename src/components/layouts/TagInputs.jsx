@@ -12,7 +12,7 @@ export default function TagInputs(props) {
                 {props.type === 'select' ? (
                     <SelectInput
                         onChange={props.onChange}
-                        isDisabled={props.disabled}
+                        disabled={props.disabled}
                         value={props.value}
                         name={props.name}
                         options={props?.options}
@@ -32,7 +32,7 @@ export default function TagInputs(props) {
                             value={props.value}
                             onChange={props.onChange} 
                             onBlur={props.onBlur}
-                            disabled={props.disabled}
+                            isDisabled={props.disabled}
                             options={props.options}
                             style={{
                                 height: "40px",
@@ -66,6 +66,7 @@ export default function TagInputs(props) {
                                     onChange={props.onChange}
                                     rows={2}
                                     value={props.value}
+                                    name={props.name}
                                     readOnly={props.readOnly}
                                     disabled={props.disabled}
                                     style={{ width: "100%", borderRadius: "0px 4px 4px 0px" }}

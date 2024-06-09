@@ -89,7 +89,7 @@ function HMOTableHistory({ data }) {
 
           <tbody className="white-bg view-det-pane">
             {Array.isArray(data) && data?.map((row) => (
-              <tr className="hovers pointer" onClick={selectRecord(row)} key={row?.id}>
+              <tr  key={row?.id}>
                 <td>{new Date(row?.createdOn).toLocaleDateString()}</td>
                 <td>{row?.diagnosis}</td>
                 <td>

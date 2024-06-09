@@ -49,7 +49,7 @@ function PatientDetails() {
   };
   return (
     <div className="w-100">
-      <div className="m-t-80">PatientDetails</div>
+      <div className="m-t-80"></div>
 
       <div className=" tabs m-t-20 bold-text">
         <div

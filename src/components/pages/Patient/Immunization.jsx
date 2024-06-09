@@ -75,16 +75,27 @@ function Immunization({ setSelectedTab }) {
 
         if (res && res.errors) {
           const errors = res.errors;
+          console.log(errors);
 
           // Check if any required fields are missing
-          const missingFields = Object.keys(errors).filter(field => errors[field].includes(`${field} is required`));
+          const missingFields = Object.keys(errors).filter(field => {
+            return errors[field].some(errorMsg => /is required/i.test(errorMsg));
+          });
+
+          console.log(missingFields);
 
           if (missingFields.length > 0) {
-            errorMessage = `The following fields are required: ${missingFields.join(", ")}`;
+            // Convert camelCase to space-separated words
+            const formattedFields = missingFields.map(field =>
+              field.replace(/([a-z])([A-Z])/g, '$1 $2')
+            );
+
+            errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
           }
         }
 
         notification({ message: errorMessage, type: "error" });
+
       }
     } catch (error) {
       console.log(error);

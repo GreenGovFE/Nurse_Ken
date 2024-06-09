@@ -20,11 +20,11 @@ function Visits({ setSelectedTab }) {
   const [visits, setVisits] = useState([])
 
   const handleChange = (event) => {
-    if(event.target.name === "age" || event.target.name === "temperature" || event.target.name === "heartPulse" || event.target.name === "height" || event.target.name === "nurseEmployeeId" || event.target.name === "doctorEmployeeId" || event.target.name === "careType" || event.target.name === "weight"){
-      setPayload({ ...payload, [event.target.name]: parseFloat(event.target.value )})
+    if (event.target.name === "age" || event.target.name === "temperature" || event.target.name === "heartPulse" || event.target.name === "height" || event.target.name === "nurseEmployeeId" || event.target.name === "doctorEmployeeId" || event.target.name === "careType" || event.target.name === "weight") {
+      setPayload({ ...payload, [event.target.name]: parseFloat(event.target.value) })
 
     }
-    else{
+    else {
       setPayload({ ...payload, [event.target.name]: event.target.value })
     }
     console.log(payload)
@@ -39,18 +39,18 @@ function Visits({ setSelectedTab }) {
           name: nurse?.username, value: parseFloat(nurse?.employeeId)
         };
       });
-  
+
       tempNurses?.unshift({
         name: "Select Nurse", value: ""
       });
-  
+
       setNurses(tempNurses);
     } catch (error) {
       console.error('Error fetching nurses:', error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const getDoctors = async () => {
     try {
       let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem("clinicId")}&pageIndex=1&pageSize=30`);
@@ -60,18 +60,18 @@ function Visits({ setSelectedTab }) {
           name: doc?.username, value: parseFloat(doc?.employeeId)
         };
       });
-  
+
       tempDoc?.unshift({
         name: "Select Doctor", value: ""
       });
-  
+
       setDoctors(tempDoc);
     } catch (error) {
       console.error('Error fetching doctors:', error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const temperatureOptions = [
     { name: "select measurement", value: "" },
     { name: "Temperature (°C)", value: "celsius" },
@@ -92,15 +92,15 @@ function Visits({ setSelectedTab }) {
     { name: "Height (cm)", value: "cm" },
     { name: "Height (m)", value: "m" },
     { name: "Height (ft)", value: "ft" },
-   
+
   ];
 
   const careTypes = [
     { name: "Select Care Type", value: "" },
     { name: "In patient", value: 1 },
-    { name: "Out patient", value: 2},
-    
-   
+    { name: "Out patient", value: 2 },
+
+
   ];
 
   const getVisitationDetails = async () => {
@@ -113,7 +113,7 @@ function Visits({ setSelectedTab }) {
       // Handle the error here, such as displaying an error message to the user
     }
   }
-  
+
 
 
   const submitPayload = async () => {
@@ -123,7 +123,7 @@ function Visits({ setSelectedTab }) {
         notification({ message: res?.messages, type: "success" });
         getVisitationDetails();
         // sessionStorage.setItem("patientId", res?.patientId)
-      }else if (res.StatusCode === 401) {
+      } else if (res.StatusCode === 401) {
         notification({ message: 'Unathorized Session', type: "error" });
       }
       else if (res.StatusCode === 500) {
@@ -134,16 +134,38 @@ function Visits({ setSelectedTab }) {
 
         if (res && res.errors) {
           const errors = res.errors;
+          console.log(errors);
+
+          // Custom mapping for specific field names
+          const customFieldNames = {
+            DoctorEmployeeId: "Assigned Doctor",
+            NurseEmployeeId: "Assigned Nurse"
+          };
 
           // Check if any required fields are missing
-          const missingFields = Object.keys(errors).filter(field => errors[field].includes(`${field} is required`));
+          const missingFields = Object.keys(errors).filter(field => {
+            return errors[field].some(errorMsg => /is required/i.test(errorMsg));
+          });
+
+          console.log(missingFields);
 
           if (missingFields.length > 0) {
-            errorMessage = `The following fields are required: ${missingFields.join(", ")}`;
+            // Convert camelCase to space-separated words and apply custom mappings
+            const formattedFields = missingFields.map(field => {
+              if (customFieldNames[field]) {
+                return customFieldNames[field];
+              }
+              // Add space between camelCased words
+              return field.replace(/([a-z])([A-Z])/g, '$1 $2');
+            });
+
+            errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
           }
         }
 
         notification({ message: errorMessage, type: "error" });
+
+
       }
     } catch (error) {
       notification({ message: error?.detail, type: "error" })
@@ -152,7 +174,7 @@ function Visits({ setSelectedTab }) {
   }
 
 
-  const next = () =>{
+  const next = () => {
     setSelectedTab("treatment")
   }
 
@@ -181,7 +203,7 @@ function Visits({ setSelectedTab }) {
           <div><TagInputs onChange={handleChange} name="dateOfVisit" label="Visit Date" type="date" /></div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange}  name="temperature" label="Temperature" />
+              <TagInputs onChange={handleChange} name="temperature" label="Temperature" />
             </div>
             {/* <div className="w-40 m-l-20">
               <TagInputs onChange={handleChange} options = {temperatureOptions} name="firstName" type="select" />
@@ -211,21 +233,21 @@ function Visits({ setSelectedTab }) {
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange}  name="height" label="Height" />
+              <TagInputs onChange={handleChange} name="height" label="Height" />
             </div>
             {/* <div className="w-40 m-l-20">
               <TagInputs onChange={handleChange} options = {heightOptions} name="firstName" type="select" />
             </div> */}
           </div>
-            <div className="w-100">
-              <TagInputs onChange={handleChange} name="weight" label="Weight" />
-            </div>
-            {/* <div className="w-40 m-l-20">
+          <div className="w-100">
+            <TagInputs onChange={handleChange} name="weight" label="Weight" />
+          </div>
+          {/* <div className="w-40 m-l-20">
               <TagInputs onChange={handleChange} options = {weightOptions} name="firstName" type="select" />
             </div> */}
 
-          <div><TagInputs onChange={handleChange} type = 'select' options = {careTypes} name="careType" label="Care Type"  /></div>
-          <div><TagInputs onChange={handleChange} options = {doctors} name="doctorEmployeeId" label="Assign Doctor" type="select" /></div>
+          <div><TagInputs onChange={handleChange} type='select' options={careTypes} name="careType" label="Care Type" /></div>
+          <div><TagInputs onChange={handleChange} options={doctors} name="doctorEmployeeId" label="Assign Doctor" type="select" /></div>
           <div><TagInputs onChange={handleChange} name="nurseEmployeeId" label="Assign Nurse" options={nurses} type="select" /></div>
           <div><TextArea
             label="Notes"

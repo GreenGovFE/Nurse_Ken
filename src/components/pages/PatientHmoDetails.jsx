@@ -8,6 +8,7 @@ import TagInputs from "../layouts/TagInputs";
 import Personal from "./Patient/Personal";
 import ContactDetails from "./Patient/ContactDetails";
 import MembershipCover from "./Patient/MembershipCover";
+import Spinner from "../UI/Spinner";
 
 function PatientHMOetails() {
   const { patientId, patientName, hmoId, patientInfo, setPatientInfo } = usePatient();
@@ -18,6 +19,7 @@ function PatientHMOetails() {
   const [hmo, setHmo] = useState([]);
   const [patientInformation, setPatientInfomation] = useState('');
   const [selectedTab, setSelectedTab] = useState("personal");
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const renderTabContent = (selectedTab) => {
     switch (selectedTab) {
@@ -57,15 +59,17 @@ function PatientHMOetails() {
   };
 
   const fetchPatientById = async () => {
+    setLoading(true); // Set loading to true before fetch
     try {
       const res = await get(`/patients/AllPatientById?patientId=${patientId}`);
       const data = res;
-      const hmo = await fetchHmoById(11);
+      const hmo = await fetchHmoById(res?.hmoId);
       console.log("HMO details for ID", res?.hmoId, ":", hmo);
       setPatientInfomation({ data, hmo });
     } catch (error) {
       console.error('Error fetching patient details:', error);
-      return null;
+    } finally {
+      setLoading(false); // Set loading to false after fetch
     }
   };
 
@@ -75,61 +79,65 @@ function PatientHMOetails() {
 
   return (
     <div style={{ width: '100%', height: '100%', padding: '20px' }}>
-      <div style={{ marginTop: '80px' }}>
-        <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{  display: 'flex', flexDirection: 'column' }}>
-              <h2 style={{ marginBottom: '10px' }}>{`${patientInformation?.data?.firstName} ${patientInformation?.data?.lastName}`}</h2>
-              <span style={{ marginBottom: '10px' }}>Patient ID: {patientId}</span>
+      {loading ? ( // Conditionally render loader
+        <div className="m-t-80"><Spinner/></div>
+      ) : (
+        <div style={{ marginTop: '80px' }}>
+          <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <h2 style={{ marginBottom: '10px' }}>{`${patientInfo?.firstName} ${patientInfo?.lastName}`}</h2>
+                <span style={{ marginBottom: '10px' }}>Patient ID: {patientId}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <div>
+                <TagInputs className="no-wrap" value={patientInformation?.hmo?.packages && patientInformation?.hmo?.packages.length > 0 ? patientInformation?.hmo?.packages[0].name : ''} disabled label="HMO Class" />
+              </div>
+              <div className="m-r-30">
+                <TagInputs className="no-wrap " disabled label="Validity" />
+              </div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-            <div>
-              <TagInputs className="no-wrap" value={patientInformation?.hmo?.packages && patientInformation?.hmo?.packages.length > 0 ? patientInformation?.hmo?.packages[0].name : ''} disabled label="HMO Class" />
-            </div>
-            <div className="m-r-30">
-              <TagInputs className="no-wrap " disabled label="Validity" />
+
+          <div className="col-5">
+            <div style={{ flex: '50%' }}>
+              <TagInputs className="no-wrap" value={`${patientInformation?.hmo?.vendorName || ''}  |  ${patientInformation?.hmo?.taxIdentityNumber || ''}`} disabled label="HMO Service Provider" />
             </div>
           </div>
-        </div>
 
-        <div className="col-5">
-          <div style={{ flex: '50%' }}>
-            <TagInputs className="no-wrap" value={`${patientInformation?.hmo?.vendorName || ''}  |  ${patientInformation?.hmo?.taxIdentityNumber || ''}`} disabled label="HMO Service Provider" />
+          <div style={{ marginTop: '20px', fontWeight: 'bold', display: 'flex' }}>
+            <div
+              style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "personal" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "personal" ? '#3C7E2D' : '#393939' }}
+              onClick={() => setSelectedTab("personal")}
+            >
+              Personal
+            </div>
+            <div
+              style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "contactDetails" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "contactDetails" ? '#3C7E2D' : '#393939' }}
+              onClick={() => setSelectedTab("contactDetails")}
+            >
+              Contact Details
+            </div>
+            <div
+              style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "membershipCover" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "membershipCover" ? '#3C7E2D' : '#393939' }}
+              onClick={() => setSelectedTab("membershipCover")}
+            >
+              Membership Cover
+            </div>
           </div>
-        </div>
 
-        <div style={{ marginTop: '20px', fontWeight: 'bold', display: 'flex' }}>
-          <div
-            style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "personal" ? '2px  solid #3C7E2D' : 'none', color: selectedTab === "personal" ? '#3C7E2D' : '#393939' }}
-            onClick={() => setSelectedTab("personal")}
-          >
-            Personal
-          </div>
-          <div
-            style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "contactDetails" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "contactDetails" ? '#3C7E2D' : '#393939' }}
-            onClick={() => setSelectedTab("contactDetails")}
-          >
-            Contact Details
-          </div>
-          <div
-            style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "membershipCover" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "membershipCover" ? '#3C7E2D' : '#393939' }}
-            onClick={() => setSelectedTab("membershipCover")}
-          >
-            Membership Cover
+          <div>
+            {
+              selectedTab === "personal" ? <Personal hide={false} setSelectedTab={setSelectedTab} /> :
+                selectedTab === "contactDetails" ?
+                  <ContactDetails hide={false} setSelectedTab={setSelectedTab} /> :
+                  selectedTab === "membershipCover" ?
+                    <MembershipCover hide={true} setSelectedTab={setSelectedTab} /> : null
+            }
           </div>
         </div>
-
-        <div>
-          {
-            selectedTab === "personal" ? <Personal hide={false} setSelectedTab={setSelectedTab} /> :
-              selectedTab === "contactDetails" ?
-                <ContactDetails hide={false} setSelectedTab={setSelectedTab} /> :
-                selectedTab === "membershipCover" ?
-                  <MembershipCover setSelectedTab={setSelectedTab} /> : null
-          }
-        </div>
-      </div>
+      )}
     </div>
   );
 }

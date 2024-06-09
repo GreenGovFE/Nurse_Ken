@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import FinanceTable from "../tables/financeTable";
 import TagInputs from "../layouts/TagInputs";
+import Spinner from "../UI/Spinner";
 
 function PatientsFinance() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,6 +11,7 @@ function PatientsFinance() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [filterSelected, setFilterSelected] = useState("");
   const [payload, setPayload] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (filterSelected && payload) {
@@ -20,6 +22,7 @@ function PatientsFinance() {
   }, [filterSelected, payload, currentPage]);
 
   const getPaymentHistory = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `https://edogoverp.com/healthfinanceapi/api/patientpayment/list/${currentPage}/30/patient-payment-list`
@@ -28,10 +31,13 @@ function PatientsFinance() {
       setTotalPages(response?.data?.totalPages || 1);
     } catch (error) {
       console.error("Error fetching payment history:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const getPaymentHistorySearch = async (searchParam) => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `https://edogoverp.com/healthfinanceapi/api/patientpayment/filter-list/${filterSelected}/${searchParam}/${currentPage}/30`
@@ -40,6 +46,8 @@ function PatientsFinance() {
       setTotalPages(response?.data?.totalPages || 1);
     } catch (error) {
       console.error("Error fetching payment history:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,9 +113,13 @@ function PatientsFinance() {
         </div>
       </div>
 
-      <div>
-        <FinanceTable data={paymentHistory} />
-      </div>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div>
+          <FinanceTable data={paymentHistory} />
+        </div>
+      )}
 
       <div className="pagination flex space-between float-right col-3 m-t-20">
         <div className="flex gap-8">

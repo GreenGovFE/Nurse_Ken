@@ -793,6 +793,7 @@ div,
 header,
 section {
   margin: 0;
+  
 }
 
 input {
@@ -885,6 +886,10 @@ section {
 
 .m-l-50 {
   margin-left: 50px !important;
+}
+
+.m-l-100 {
+  margin-left: 100px !important;
 }
 .m-r-5 {
   margin-right: 5px !important;

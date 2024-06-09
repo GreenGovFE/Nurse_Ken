@@ -10,6 +10,7 @@ import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 import axios from "axios";
 import HMOTableHistory from "../../tables/HMO_Table_Payment_History";
 import { usePatient } from "../../../contexts";
+import MembershipCover from "./MembershipCover";
 
 
 function Finance_HMO() {
@@ -78,34 +79,11 @@ function Finance_HMO() {
               {/* <span>Visit Date:</span> */}
             </div>
           </div>
-          <div className="col-4 float-right">
-            <div className="flex-50"><TagInputs className="no-wrap" value={hmo?.packages && hmo.packages.length > 0 ? hmo.packages[0].name : ''} disabled label="HMO Class" /></div>
-            <div className="flex-50"><TagInputs className="no-wrap" disabled label="Validity" /></div>
-          </div>
         </div>
 
-
-        <div className="flex w-100">
-
-          <div className="flex  w-100 space-between">
-            <div className="flex-50"><TagInputs className="no-wrap" value = {`${hmo?.vendorName || ''}  |  ${hmo?.taxIdentityNumber || ''}`} disabled label="HMO Service Provider" /></div>
-          </div>
-
-        </div>
-
-        <h3 className="m-t-40 m-b-40">Payment Breakdown</h3>
+        <h3 className="m-t-40 m-b-40">HMO Details</h3>
         <div className="">
-          <HMOTable
-           data={PatientData}
-           hmoPackages={hmo?.packages && hmo?.packages[0]?.packageBenefits}
-           hmoId={hmo?.packages && hmo.packages.length > 0 ? hmo.packages[0].hmoId : ''}
-           hmoClass={hmo?.packages && hmo.packages.length > 0 ? hmo.packages[0].name : ''}
-           />
-        </div>
-
-        <div className="">
-        <h3 className="m-t-40">Historical Payments</h3>
-          <HMOTableHistory data={paymentHistory} />
+        <MembershipCover hide={false}/> 
         </div>
       </div>
     </div>

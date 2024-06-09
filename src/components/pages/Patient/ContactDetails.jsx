@@ -38,6 +38,7 @@ function ContactDetails({setSelectedTab, hide}) {
   }, [])
 
   const submitPayload = async () => {
+    
     let res = await post("/patients/updateContact", {...payload, patientId:Number(patientId) })
   console.log(res)
     if (res){
@@ -66,13 +67,13 @@ function ContactDetails({setSelectedTab, hide}) {
       <div className="w-50">
         {" "}
         <div className="m-t-40"></div>
-        <TagInputs onChange = {handleChange} value ={payload?.stateOfResidence} name ="stateOfResidence"  label="State Of Residence" />
-        <TagInputs onChange = {handleChange} value ={payload?.lgaResidence} name ="lgaResidence" label="LGA" />
-        <TagInputs onChange = {handleChange} value ={payload?.city} name ="city" label="City" />
-        <TagInputs onChange = {handleChange} value ={payload?.homeAddress} name ="homeAddress" label="Home Address" />
-        <TagInputs onChange = {handleChange} value ={payload?.phone} name ="phone" label="Phone Number" />
-        <TagInputs onChange = {handleChange} value ={payload?.email} name ="email" label="Email Address" />
-        <TagInputs onChange = {handleChange} value ={payload?.altPhone} name ="altPhone" label="Alt Phone Number" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.stateOfResidence} name ="stateOfResidence"  label="State Of Residence" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.lgaResidence} name ="lgaResidence" label="LGA" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.city} name ="city" label="City" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.homeAddress} name ="homeAddress" label="Home Address" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.phone} name ="phone" label="Phone Number" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.email} name ="email" label="Email Address" />
+        <TagInputs onChange = {handleChange}  disabled ={!hide} value ={payload?.altPhone} name ="altPhone" label="Alt Phone Number" />
 
         { hide === true &&
           <button onClick={submitPayload} className="submit-btn  m-t-20 w-100" >Continue</button>

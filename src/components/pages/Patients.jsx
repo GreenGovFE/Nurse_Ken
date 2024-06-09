@@ -13,39 +13,35 @@ import { useNavigate } from "react-router-dom";
 import { get } from "../../utility/fetch";
 import TagInputs from "../layouts/TagInputs";
 import ReferralModal from "../modals/RefferalModal";
-
+import Spinner from "../UI/Spinner";
 
 function Patients() {
-
-  useEffect(() => {
-    getAllPatients();
-  }, [])
-
   const [allPatients, setAllPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [payload, setPayload] = useState('');
   const [filterSelected, setFilterSelected] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewing, setViewing] = useState({})
+  const [viewing, setViewing] = useState({});
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  useEffect(() => {
+    getAllPatients();
+  }, []);
 
   const closeModal = () => {
     setIsModalOpen(false);
-
   };
-
 
   const selectRecord = () => () => {
     setIsModalOpen(true);
   };
 
-
-
-  // Function to handle date change
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
-  let navigate = useNavigate()
-  // Function to format the date as "dd-MM-yyyy"
+
+  let navigate = useNavigate();
+
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -53,7 +49,6 @@ function Patients() {
     return `${day}-${month}-${year}`;
   };
 
-  // Function to check if the selected date is today
   const isToday = (date) => {
     const today = new Date();
     return (
@@ -63,11 +58,10 @@ function Patients() {
     );
   };
 
-  // Custom input for the date picker
   const CustomInput = ({ value, onClick }) => (
     <button
       onClick={onClick}
-      onKeyDown={(e) => e.preventDefault()} // Prevent typing in the date field
+      onKeyDown={(e) => e.preventDefault()}
       className="custom-datepicker-input flex gap-6 flex-v-center"
     >
       {isToday(selectedDate) ? "Today" : formatDate(selectedDate)}
@@ -76,17 +70,20 @@ function Patients() {
   );
 
   const getAllPatients = async () => {
+    setLoading(true); // Set loading to true before fetch
     try {
       let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30`);
       console.log(res);
       setAllPatients(res.data);
     } catch (error) {
       console.error('Error fetching all patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+    } finally {
+      setLoading(false); // Set loading to false after fetch
     }
   };
 
   const searchPatients = async (searchParam) => {
+    setLoading(true); // Set loading to true before search
     try {
       let url = '/patients/filter?';
       if (filterSelected) {
@@ -98,17 +95,16 @@ function Patients() {
       setAllPatients(res.data);
     } catch (error) {
       console.error('Error fetching all patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+    } finally {
+      setLoading(false); // Set loading to false after search
     }
   };
-
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     if (name === "filter") {
       setFilterSelected(value);
     } else {
-
       setPayload(value);
     }
   };
@@ -121,7 +117,6 @@ function Patients() {
     }
   }, [filterSelected, payload]);
 
-
   const filterOptions = [
     { value: "", name: "Select Filter" },
     { value: "firstName", name: "First Name" },
@@ -129,7 +124,6 @@ function Patients() {
     { value: "email", name: "Email" },
     { value: "phoneNumber", name: "Phone Number" }
   ];
-
 
   return (
     <div className="w-100 m-t-80">
@@ -143,18 +137,26 @@ function Patients() {
             <TagInputs
               onChange={handleChange}
               name="filter"
-              // label="Filter"
               type="select"
               options={filterOptions}
             />
           </div>
           <div className="m-b-10 col-4">
-            <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn"><div className="flex flex-h-center flex-v-center"><AiOutlinePlus size={24} color="white" /> <p className="m-l-10 m-r-10">Refer a Patient</p></div></button>
+            <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn">
+              <div className="flex flex-h-center flex-v-center">
+                <AiOutlinePlus size={24} color="white" />
+                <p className="m-l-10 m-r-10">Refer a Patient</p>
+              </div>
+            </button>
           </div>
         </div>
       </div>
-      <div >
-        <PatientsTable data={allPatients} />
+      <div>
+        {loading ? ( // Conditionally render loader
+          <Spinner /> // Use Spinner component
+        ) : (
+          <PatientsTable data={allPatients} />
+        )}
       </div>
       {isModalOpen &&
         <ReferralModal

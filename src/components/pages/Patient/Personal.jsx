@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputField from "../../UI/InputField";
 import TagInputs from "../../layouts/TagInputs";
 import { get, post, put } from "../../../utility/fetch";
@@ -9,9 +9,9 @@ import UploadPic from "../../UI/UploadPic";
 import { usePatient } from "../../../contexts";
 function Personal({ setSelectedTab, hide }) {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
-  const [payload, setPayload] = useState(patientInfo || {});
+  const [payload, setPayload] = useState({});
 
-  const [pictureUrl, setPictureUrl] = useState(patientInfo?.pictureUrl || '');
+  const [pictureUrl, setPictureUrl] = useState('');
   const [fileName, setFilename] = useState('');
 
   const gender = [
@@ -27,7 +27,10 @@ function Personal({ setSelectedTab, hide }) {
   ];
 
   const patientType = [{ value: "New", name: "New" }, { value: "Referred", name: "Referred" }];
-
+  useEffect(()=>{
+   
+     setPayload(patientInfo)
+  },[patientInfo])
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -51,6 +54,10 @@ function Personal({ setSelectedTab, hide }) {
   };
 
   const submitPayload = async () => {
+    if (patientInfo) {
+      setSelectedTab("contactDetails")
+      return
+    }
     try {
       let res = await post("/patients/AddPatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl: pictureUrl });
       if (res.patientId) {
@@ -100,25 +107,25 @@ function Personal({ setSelectedTab, hide }) {
     ev.target.src = ProfilePix;
   };
 
-  console.log(hide)
+  console.log(patientInfo)
 
   return (
     <div className="w-80">
       <div className="m-t-40 "></div>
       <div className="flex space-between">
         <div className="col-7">
-          <TagInputs onChange={handleChange} name="referal" label="New or Referred" type="select" options={patientType} />
-          <TagInputs onChange={handleChange} value={payload?.firstName || ''} name="firstName" label="First Name" />
-          <TagInputs onChange={handleChange} value={payload?.lastName || ''} name="lastName" label="Last Name" />
-          <TagInputs onChange={handleChange} value={payload?.gender || ''} name="gender" type="select" label="Gender" options={gender} />
-          <TagInputs onChange={handleChange} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth" type="date" label="Date Of Birth" />
-          <TagInputs onChange={handleChange} value={payload?.email || ''} name="email" label="Email" />
-          <TagInputs onChange={handleChange} value={payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number" />
-          <TagInputs onChange={handleChange} value={payload?.nationality || ''} name="nationality" label="Nationality" />
-          <TagInputs onChange={handleChange} value={payload?.stateOfOrigin || ''} name="stateOfOrigin" label="State Of Origin" />
-          <TagInputs onChange={handleChange} value={payload?.lga || ''} name="lga" label="LGA" />
-          <TagInputs onChange={handleChange} value={payload?.placeOfBirth || ''} name="placeOfBirth" label="Place Of Birth" />
-          <TagInputs onChange={handleChange} value={payload?.maritalStatus || ''} name="maritalStatus" type="select" label="Marital Status" options={maritalStatus} />
+          <TagInputs onChange={handleChange}  disabled ={!hide} name="referal" label="New or Referred" type="select" options={patientType} />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.firstName || ''} name="firstName" label="First Name" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.lastName || ''} name="lastName" label="Last Name" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.gender || ''} name="gender" type="select" label="Gender" options={gender} />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth" type="date" label="Date Of Birth" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.email || ''} name="email" label="Email" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.nationality || ''} name="nationality" label="Nationality" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.stateOfOrigin || ''} name="stateOfOrigin" label="State Of Origin" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.lga || ''} name="lga" label="LGA" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.placeOfBirth || ''} name="placeOfBirth" label="Place Of Birth" />
+          <TagInputs onChange={handleChange}  disabled ={!hide} value={payload?.maritalStatus || ''} name="maritalStatus" type="select" label="Marital Status" options={maritalStatus} />
         </div>
         <div className="col-4">
           <p className="m-b-20">Profile Picture</p>

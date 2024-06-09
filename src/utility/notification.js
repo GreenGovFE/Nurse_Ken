@@ -6,11 +6,11 @@ const notification = ({
   message,
   type,
   onRemoval = () => {},
-  duration = 5000
+  duration = 10000
 }) => {
   try {
     toast(message, {
-      autoClose: 5000,
+      autoClose: 10000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,

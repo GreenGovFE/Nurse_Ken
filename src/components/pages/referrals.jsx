@@ -1,36 +1,28 @@
 import "react-datepicker/dist/react-datepicker.css";
-import { PatientData, stats } from "./mockdata/PatientData";
-import ReferralTable from "../tables/referralTable";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import PatientsTable from "../tables/PatientsTable";
-import StatCard from "../UI/StatCard";
-import { RiCalendar2Fill } from "react-icons/ri";
-import SearchInput from "../../Input/SearchInput";
-import SelectInput from "../../Input/SelectInput";
-import HeaderSearch from "../../Input/HeaderSearch";
-import { AiOutlinePlus } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
-import { get } from "../../utility/fetch";
+import ReferralTable from "../tables/referralTable";
 import TagInputs from "../layouts/TagInputs";
+import { get } from "../../utility/fetch";
+import { RiCalendar2Fill } from "react-icons/ri";
+import Spinner from "../UI/Spinner";
 
-function RefferedPatients() {
-
+function ReferredPatients() {
   const [allPatients, setAllPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [payload, setPayload] = useState('');
   const [filterSelected, setFilterSelected] = useState("");
-  const [filterOption, setFilterOptions] = useState("");
+  const [filterOptions, setFilterOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
 
-
-  // Function to handle date change
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
-  let navigate = useNavigate()
-  // Function to format the date as "dd-MM-yyyy"
+
   const formatDate = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -38,7 +30,6 @@ function RefferedPatients() {
     return `${day}-${month}-${year}`;
   };
 
-  // Function to check if the selected date is today
   const isToday = (date) => {
     const today = new Date();
     return (
@@ -48,11 +39,10 @@ function RefferedPatients() {
     );
   };
 
-  // Custom input for the date picker
   const CustomInput = ({ value, onClick }) => (
     <button
       onClick={onClick}
-      onKeyDown={(e) => e.preventDefault()} // Prevent typing in the date field
+      onKeyDown={(e) => e.preventDefault()}
       className="custom-datepicker-input flex gap-6 flex-v-center"
     >
       {isToday(selectedDate) ? "Today" : formatDate(selectedDate)}
@@ -61,57 +51,52 @@ function RefferedPatients() {
   );
 
   const getAllReferralFilters = async () => {
+    setLoading(true);
     try {
       let res = await get(`/Referrals/GetAllFilterBy`);
-      console.log(res);
-      let tempDoc = res?.map((doc, idx) => {
-        return {
-          name: doc?.value, value: parseFloat(doc?.index)
-        };
-      });
-  
-      tempDoc?.unshift({
-        name: "Select Filter", value: ""
-      });
-  
+      let tempDoc = res?.map((doc, idx) => ({
+        name: doc?.value, value: parseFloat(doc?.index)
+      }));
+
+      tempDoc?.unshift({ name: "Select Filter", value: "" });
       setFilterOptions(tempDoc);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+      console.error('Error fetching filter options:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-
   const getAllReferralNotes = async () => {
+    setLoading(true);
     try {
       let res = await get(`/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30`);
-      console.log(res);
       setAllPatients(res.data);
     } catch (error) {
       console.error('Error fetching all patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+    } finally {
+      setLoading(false);
     }
   };
 
   const searchPatients = async (searchParam) => {
+    setLoading(true);
     try {
-      let url = `/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30&search=${searchParam}&FilterBy=${filterSelected}`;     
+      let url = `/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30&search=${searchParam}&FilterBy=${filterSelected}`;
       let res = await get(url);
-      console.log(res);
       setAllPatients(res.data);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+      console.error('Error fetching patients:', error);
+    } finally {
+      setLoading(false);
     }
   };
-
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     if (name === "filter") {
       setFilterSelected(value);
     } else {
-
       setPayload(value);
     }
   };
@@ -129,42 +114,33 @@ function RefferedPatients() {
     }
   }, [filterSelected, payload]);
 
-
-  const filterOptions = [
-    { value: "", name: "Select Filter" },
-    { value: "firstName", name: "First Name" },
-    { value: "lastName", name: "Last Name" },
-    { value: "email", name: "Email" },
-    { value: "phoneNumber", name: "Phone Number" }
-  ];
-
-
   return (
     <div className="w-100 m-t-80">
-      <div className="flex flex-v-center flex-h-center space-between  m-t-20">
-        <h3 className="float-left col-4">Refered Patients</h3>
+      <div className="flex flex-v-center flex-h-center space-between m-t-20">
+        <h3 className="float-left col-4">Referred Patients</h3>
         <div className="flex flex-v-center flex-h-center">
           <div className="col-10">
             <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
           </div>
-          <div className="col-4 ">
+          <div className="col-4">
             <TagInputs
               onChange={handleChange}
               name="filter"
-              // label="Filter"
               type="select"
-              options={filterOption}
+              options={filterOptions}
             />
           </div>
-          {/* <div className="m-b-10 col-4"><button onClick={() => { navigate("/patient-details"); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn"><div className="flex flex-h-center flex-v-center"><AiOutlinePlus size={24} color="white" /> <p className="m-l-10 m-r-10">Onboard a Patient</p></div></button>
-          </div> */}
         </div>
       </div>
-      <div >
-        <ReferralTable data={allPatients} />
-      </div>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div>
+          <ReferralTable data={allPatients} fetch={getAllReferralNotes} />
+        </div>
+      )}
     </div>
   );
 }
 
-export default RefferedPatients;
+export default ReferredPatients;

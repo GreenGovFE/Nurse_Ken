@@ -7,7 +7,7 @@ import UploadButton from "../../../Input/UploadButton";
 import { RiDeleteBinLine } from "react-icons/ri";
 import axios from "axios";
 
-function MembershipCover({ setSelectedTab }) {
+function MembershipCover({ setSelectedTab, hide }) {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
   const [payload, setPayload] = useState({});
@@ -102,31 +102,67 @@ function MembershipCover({ setSelectedTab }) {
     setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
   };
 
- 
+
   console.log(packageId?.index);
 
   const submitPayload = async () => {
-    const hmoDetails = JSON.parse(payload?.hmoProviderId);
-    
+    const hmoDetails = payload?.hmoProviderId ? JSON.parse(payload?.hmoProviderId) : '';
+  
     const Payload = {
       ...payload,
       patientId: Number(patientId),
-      hmoProviderId: hmoDetails?.id,
+      hmoProviderId: hmoDetails?.id ? hmoDetails?.id : 0,
       patientHMOCardDocumentUrl: documentArray[0]?.path,
-      hmoPackageId: Number(packageId.id),
-      patientHMOId: Number(payload?.patientHMOId)
+      hmoPackageId: packageId?.id ? Number(packageId.id) : 0,
+      membershipValidity:payload?.membershipValidity ? payload?.membershipValidity : "",
+      patientHMOId: payload?.patientHMOId ? Number(payload?.patientHMOId) : 0 
     };
-
+  
     console.log(packageId);
+  
+    // Custom mapping for specific field names
+    const customFieldNames = {
+      hmoPackageId: "HMO Package",
+      patientHMOId: "Patient HMO ID",
+      hmoProviderId: "HMO Provider",
+      membershipValidity: "Membership Validity",
 
+    };
+  
+    // Validation function to check for fields that are 0 or empty 
+    const validatePayload = (payload) => {
+      const fieldsToCheck = Object.keys(payload).filter(field => field !== 'notes' && field !== 'patientId');
+      return fieldsToCheck.filter(field => payload[field] === 0 || payload[field] === '');
+    };
+  
+    const invalidFields = validatePayload(Payload);
+  
+    if (invalidFields.length > 0) {
+      const formattedFields = invalidFields.map(field => {
+        if (customFieldNames[field]) {
+          return customFieldNames[field];
+        }
+        // Add space between camelCased words
+        return field.replace(/([a-z])([A-Z])/g, '$1 $2');
+      });
+  
+      const errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
+      notification({ message: errorMessage, type: "error" });
+      return;
+    }
+  
     let res = await post("/HMO/AddHMOPlan", Payload);
-    console.log(res.patientId);
-    if (res.patientId) {
+    console.log(res);
+  
+    if (res.message === 'Successfully assigned the patientHMO') {
       notification({ message: 'Added HMO to patient', type: "success" });
+      setPayload({});
     } else {
+     
       notification({ message: 'Failed to add HMO to patient', type: "error" });
     }
   };
+  
 
   const getHmoList = async () => {
     try {
@@ -144,33 +180,36 @@ function MembershipCover({ setSelectedTab }) {
     <div className="flex ">
       <div className="w-50">
         <div className="m-t-40"></div>
-        <TagInputs onChange={handleChange}
+        <TagInputs onChange={handleChange}  value={payload?.hmoProviderId ? Number(JSON.parse(payload.hmoProviderId)) : ''}
+
           options={[
             { value: '', name: 'Select HMO Provider' },
             ...hmoList?.map((item) => {
               return { value: JSON.stringify(item), name: item.vendorName }
             })
           ]}
-          name="hmoProviderId" label="Select HMO Provider" type={'select'}
+          name="hmoProviderId" disabled ={hide} label="Select HMO Provider" type={'select'}
         />
-        <TagInputs onChange={handleChange} 
+        <TagInputs onChange={handleChange}  value={packageId ? Number(packageId.id) : ''}
           options={[
-            { value: '', name: 'Select HMO Provider' },
+            { value: '', name: 'Select HMO Package' },
             ...selectedHmoPackages?.map((item, index) => {
               return { value: JSON.stringify({ index: index, id: item.id }), name: item.name }
             })
           ]}
-          name="hmoPackageId" label="Select Package" type={'select'} />
-        <TagInputs onChange={handleChange} value={payload?.patientHMOId || ''} name="patientHMOId" label="Patient's HMO ID" />
-        <TagInputs onChange={handleChange} value={payload?.membershipValidity || payload?.phone} name="membershipValidity" type={'date'} label="Membership Validity" />
-        <TagInputs onChange={handleChange} value={payload?.notes || ''} name="notes" label="Notes" type={'textArea'} />
+          name="hmoPackageId" disabled ={hide} label="Select HMO Package" type={'select'} />
+        <TagInputs onChange={handleChange} disabled ={hide} value={payload?.patientHMOId || ''} name="patientHMOId" label="Patient's HMO ID" />
+        <TagInputs onChange={handleChange} disabled ={hide} value={payload?.membershipValidity || payload?.phone} name="membershipValidity" type={'date'} label="Membership Validity" />
+        <TagInputs onChange={handleChange} disabled ={hide} value={payload?.notes || ''} name="notes" label="Notes" type={'textArea'} />
         <div className="w-100 flex flex-h-end flex-direction-v m-t-10">
-          <div className="m-t-20 m-b-20">
-            <UploadButton
-              setDocNames={setDocNames}
-              setdocumentArray={setdocumentArray}
-              sendImagg={receiveImage} />
-          </div>
+          {hide !== true &&
+            <div className="m-t-20 m-b-20">
+              <UploadButton
+                setDocNames={setDocNames}
+                setdocumentArray={setdocumentArray}
+                sendImagg={receiveImage} />
+            </div>
+          }
 
           {documentArray?.map((item, index) => (
             <div key={index} className="m-t-10 flex">
@@ -181,7 +220,9 @@ function MembershipCover({ setSelectedTab }) {
             </div>
           ))}
         </div>
-        <button onClick={submitPayload} className="submit-btn  m-t-20 w-100">Add HMO</button>
+        {hide !== true &&
+          <button onClick={submitPayload} className="submit-btn  m-t-20 w-100">Add HMO</button>
+        }
       </div>
       {packageId && packageId.index !== -1 &&
         <div className="w-100 none-flex-item m-t-40 m-l-20">
@@ -202,7 +243,7 @@ function MembershipCover({ setSelectedTab }) {
                   <td>{row.benefitProvision}</td>
                   <td>{row.benefitLimit}</td>
                   <td>{findCategoryName(row.categoryId)}</td>
-                  
+
                 </tr>
               ))}
             </tbody>

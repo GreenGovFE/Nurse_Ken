@@ -1,37 +1,34 @@
 import React, { useEffect, useState } from "react";
 import FacilityCard from "../UI/FacilityCard";
 import StatCard from "../UI/StatCard";
-import { RiAccountCircleFill, RiGroup2Fill, RiHotelBedFill } from "react-icons/ri";
+import { RiHotelBedFill } from "react-icons/ri";
 import { get } from "../../utility/fetch";
 import TagInputs from "../layouts/TagInputs";
 import axios from "axios";
+import notification from "../../utility/notification";
+import Spinner from "../UI/Spinner";
 
 function Facility() {
-  // Sample data with a patient's name
   const [selectedTab, setSelectedTab] = useState("beds");
-  const [admittedpatients, setAdmittedPatients] = useState(0)
-  const [beds, setBeds] = useState([])
-  const [availableBed, setAvailableBed] = useState(0)
+  const [admittedpatients, setAdmittedPatients] = useState(0);
+  const [beds, setBeds] = useState([]);
+  const [availableBed, setAvailableBed] = useState(0);
   const [occupiedBeds, setOccupiedBeds] = useState(0);
-  const [wards, setWards] = useState([])
+  const [wards, setWards] = useState("");
   const [bedList, setBedList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false)
-
+  const [loading, setLoading] = useState(false);
 
   const getAdmittedPatients = async () => {
     try {
-      let res = await get("/dashboard/doctor/admittedpatients")
-      console.log(res)
-      setAdmittedPatients(res)
-
+      let res = await get("/dashboard/doctor/admittedpatients");
+      console.log(res);
+      setAdmittedPatients(res);
     } catch (error) {
-      console.error('Error fetching in and out patients:', error);
-
+      console.error('Error fetching admitted patients:', error);
     }
-
-  }
+  };
 
   const getAvailableBed = async () => {
     try {
@@ -39,8 +36,7 @@ function Facility() {
       console.log(res);
       setAvailableBed(res);
     } catch (error) {
-      console.error('Error fetching in and out patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+      console.error('Error fetching available beds:', error);
     }
   };
 
@@ -50,29 +46,23 @@ function Facility() {
       console.log(res);
       setOccupiedBeds(res);
     } catch (error) {
-      console.error('Error fetching in and out patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+      console.error('Error fetching occupied beds:', error);
     }
   };
 
-  const getAssigneddBed = async () => {
+  const getAssignedBed = async () => {
     try {
       let res = await get("/facilities/beds/assignedtodoctor");
       console.log(res);
       setBeds(res);
     } catch (error) {
-      console.error('Error fetching in and out patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+      console.error('Error fetching assigned beds:', error);
     }
   };
-
-
-
 
   const getBedList = async () => {
     const token = sessionStorage.getItem('token');
 
-    // If token is not available, handle accordingly
     if (!token) {
       console.error('Token not found in session storage');
       return;
@@ -85,29 +75,36 @@ function Facility() {
       }
     };
     try {
-      setLoading(true)
+      setLoading(true);
       let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/list/${currentPage}/10`, options);
       console.log(res);
-      setBedList(res?.data?.resultList);
-      setTotalPages(res?.data?.totalPages);
-      setLoading(false)
+      if (res.status === 200) {
+        setBedList(res?.data?.resultList || []);
+        setTotalPages(res?.data?.totalPages || 1);
+      } else if (res.status === 500) {
+        notification({ message: 'Server Error', type: "error" });
+        setBedList([]);
+      } else {
+        setBedList([]);
+      }
     } catch (error) {
-      setLoading(false)
-      console.error('Error fetching in and out patients:', error);
-      // Handle the error here, such as displaying an error message to the user
+      setBedList([]);
+      console.error('Error fetching bed list:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-
+  useEffect(() => {
+    getAdmittedPatients();
+    getAvailableBed();
+    getOccupiedBed();
+    getAssignedBed();
+  }, []);
 
   useEffect(() => {
-    getAdmittedPatients()
-    getAvailableBed()
-    getOccupiedBed()
-    getAssigneddBed()
-    getBedList()
-  }, [])
-
+    getBedList();
+  }, [currentPage]);
 
   const wardOptions = [
     { name: "Select Ward", value: "" },
@@ -117,50 +114,50 @@ function Facility() {
     { name: "Ward D", value: "Ward D" }
   ];
 
-  console.log(wards)
-
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
 
-  useEffect(() => {
-    getBedList()
-  }, [currentPage])
-
   const renderTabContent = () => {
     switch (selectedTab) {
       case "beds":
         return (
-          <div className="flex space-betwen">
+          <div className="flex flex-direction-h">
             <div>
-              <div className="m-t-20 m-b-20  bold-text">
-                {wards} | {availableBed} Beds Available  | {occupiedBeds} Beds Occupied
+              <div className="m-t-20 m-b-20 bold-text">
+                {wards} | {availableBed} Beds Available | {occupiedBeds} Beds Occupied
               </div>
-              {loading === false &&
+              {loading ? ( // Conditionally render spinner
+                <Spinner /> // Use Spinner component
+              ) : (
                 <div>
                   <div className="grid gap-16 m-t-20">
-                    {Array.isArray(bedList) && bedList?.map((patient, index) => (
-                      <FacilityCard wards={wards} availableBed={availableBed} occupiedBeds={occupiedBeds} key={index} fetchBedList={getBedList} data={patient} />
+                    {Array.isArray(bedList) && bedList.map((patient, index) => (
+                      <FacilityCard
+                        key={index}
+                        wards={wards}
+                        availableBed={availableBed}
+                        occupiedBeds={occupiedBeds}
+                        fetchBedList={getBedList}
+                        data={patient}
+                      />
                     ))}
-
-
                   </div>
                   <div className="pagination flex space-between float-right col-5 m-t-40">
                     <div className="flex gap-8">
-                      <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+                      <div className="bold-text">Page</div>
+                      <div>{currentPage}/{totalPages}</div>
                     </div>
                     <div className="flex gap-8">
-                      {/* Previous button */}
                       <button
                         className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
                       >
-                        {"Previous"}
+                        Previous
                       </button>
-                      {/* Page numbers */}
                       {Array.from({ length: totalPages > 3 ? 3 : totalPages }, (_, i) => (
                         <button
                           key={`page-${i + 1}`}
@@ -170,58 +167,53 @@ function Facility() {
                           {i + 1}
                         </button>
                       ))}
-                      {/* Ellipsis */}
                       {totalPages > 3 && <span>...</span>}
-                      {/* Next button */}
                       <button
                         className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
                       >
-                        {"Next"}
+                        Next
                       </button>
                     </div>
                   </div>
                 </div>
-              }
+              )}
             </div>
-
-            <div className="flex m-t-60 flex-direction-v">
-              {" "}
-
+            <div className="flex m-t-60 m-l-100 flex-direction-v">
               <div className="m-b-10 m-r-20">
-                <StatCard data={{
-                  number: admittedpatients,
-                  title: "Admitted Patients",
-                }} icon={<RiHotelBedFill className="icon" size={32} />}
+                <StatCard
+                  data={{
+                    number: admittedpatients,
+                    title: "Admitted Patients",
+                  }}
+                  icon={<RiHotelBedFill className="icon" size={32} />}
                 />
               </div>
               <div className="m-b-10 m-r-20">
-                <StatCard data={{
-                  number: availableBed,
-                  title: "Available Beds",
-                }} icon={<RiHotelBedFill className="icon" size={32} />}
+                <StatCard
+                  data={{
+                    number: availableBed,
+                    title: "Available Beds",
+                  }}
+                  icon={<RiHotelBedFill className="icon" size={32} />}
                 />
               </div>
               <div className="m-b-10 m-r-20">
-                <StatCard data={{
-                  number: occupiedBeds,
-                  title: "Occupied Beds",
-                }} icon={<RiHotelBedFill className="icon" size={32} />}
+                <StatCard
+                  data={{
+                    number: occupiedBeds,
+                    title: "Occupied Beds",
+                  }}
+                  icon={<RiHotelBedFill className="icon" size={32} />}
                 />
               </div>
-
-
             </div>
-
-
           </div>
         );
       case "equipments":
-        // Render equipment content here
         return <div>Equipment Content</div>;
       case "ambulance":
-        // Render ambulance content here
         return <div>Ambulance Content</div>;
       default:
         return null;
@@ -232,7 +224,6 @@ function Facility() {
     <div className="w-100">
       <div className="m-t-20">...</div>
       <div className="m-t-20 bold-text">Facility | Bed Management</div>
-
       <div className="tabs m-t-20 bold-text">
         <div
           className={`tab-item ${selectedTab === "beds" ? "active" : ""}`}
@@ -240,29 +231,16 @@ function Facility() {
         >
           Beds
         </div>
-
-        <div
-          className={` ${selectedTab === "equipments" ? "active" : ""}`}
-        // onClick={() => setSelectedTab("equipments")}
-        >
-
+        <div className={` ${selectedTab === "equipments" ? "active" : ""}`}>
+          {/* Equipments */}
         </div>
-
-        {/* <div
-          className={`tab-item ${selectedTab === "ambulance" ? "active" : ""}`}
-          onClick={() => setSelectedTab("ambulance")}
-        >
+        {/* <div className={`tab-item ${selectedTab === "ambulance" ? "active" : ""}`}>
           Ambulance
         </div> */}
       </div>
-
-      <div className="w-25 m-t-20 ">
-        <TagInputs label="Select Ward" onChange={(value) => { setWards(value?.target?.value) }} options={wardOptions} name="ward" type='select' />
-
-      </div>
-
-
-
+      {/* <div className="w-25 m-t-20">
+        <TagInputs label="Select Ward" onChange={(value) => setWards(value?.target?.value)} options={wardOptions} name="ward" type="select" />
+      </div> */}
       {renderTabContent()}
     </div>
   );

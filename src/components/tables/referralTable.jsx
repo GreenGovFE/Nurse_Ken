@@ -3,7 +3,7 @@ import { RiAddBoxFill, RiDeleteBin3Fill, RiEdit2Fill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import ActionReferralModal from "../modals/ActionRefferalModal";
 
-function ReferralTable({ data }) {
+function ReferralTable({ data, fetch }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [referralId, setRefferalId] = useState('');
@@ -68,6 +68,7 @@ function ReferralTable({ data }) {
       <ActionReferralModal
         closeModal={closeModal}
         referralId={referralId}
+        fetch = {fetch}
       />}
     </div>
   );

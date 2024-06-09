@@ -31,6 +31,7 @@ async function fetchBackend(endpoint, method, auth, body, params) {
     }
   }
 
+
   return fetch(url, fetchObject)
     .then(checkHttpStatus)
     .then(parseJSON);
@@ -71,7 +72,7 @@ function checkHttpStatus(response) {
     return response;
   }
 
- 
+
 
   const errorText = response && response.statusText ? response.statusText : 'Unknown Error';
   const error = new Error(errorText);
@@ -82,5 +83,17 @@ function checkHttpStatus(response) {
 }
 
 function parseJSON(response) {
-  return response.json();
+  // Check if the response status is OK
+  if (response.ok) {
+    // Attempt to parse JSON
+    return response.json()
+      .catch(error => {
+        // If parsing fails, throw an error with the response status
+        throw new Error(`Failed to parse JSON. Status: ${response.status}`);
+      });
+  } else {
+    // If the response status is not OK, throw an error with the response status
+    throw new Error(`Response status: ${response.status}`);
+  }
 }
+
