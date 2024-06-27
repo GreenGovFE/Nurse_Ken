@@ -9,9 +9,24 @@ import Treatments from "./Patient/Treatments";
 import { allergyData } from "./mockdata/PatientData";
 import Labs from "./Patient/Labs";
 import Finance_HMO from "./Patient/Finance_HMO";
+import { AiOutlinePlus } from "react-icons/ai";
+import ReferralModal from "../modals/RefferalModal";
 
 function PatientDetails() {
   const [selectedTab, setSelectedTab] = useState("personal");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewing, setViewing] = useState({});
+  const [loading, setLoading] = useState(true); // Add loading state
+
+ 
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const selectRecord = () => () => {
+    setIsModalOpen(true);
+  };
 
   
   const renderTabContent = (selectedTab) => {
@@ -49,7 +64,16 @@ function PatientDetails() {
   };
   return (
     <div className="w-100">
-      <div className="m-t-80"></div>
+      <div className="m-t-80">
+      <div className="m-b-10 float-right col-2">
+            <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn">
+              <div className="flex flex-h-center flex-v-center">
+                <AiOutlinePlus size={24} color="white" />
+                <p className="m-l-10 m-r-10">Refer Patient</p>
+              </div>
+            </button>
+          </div>
+      </div>
 
       <div className=" tabs m-t-20 bold-text">
         <div
@@ -125,7 +149,7 @@ function PatientDetails() {
           className={`tab-item ${selectedTab === "financeHmo" ? "active" : ""}`}
           onClick={() => setSelectedTab("financeHmo")}
         >
-          Finance/Hmo
+          Hmo
         </div>
       </div>
 
@@ -151,6 +175,12 @@ function PatientDetails() {
 
         }
       </div>
+
+      {isModalOpen &&
+        <ReferralModal
+          closeModal={closeModal}
+        />
+      }
     </div>
   )
 }

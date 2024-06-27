@@ -7,6 +7,11 @@ import TagInputs from "../layouts/TagInputs";
 import axios from "axios";
 import notification from "../../utility/notification";
 import Spinner from "../UI/Spinner";
+import AssignedBed from "../tables/AssignedBed";
+import AmbulanceTableAssigned from "../tables/AmbulanceAssignedTable";
+import EquipmentTableAssigned from "../tables/AssignedEquipmentTable";
+import EquipmentTable from "../tables/EquipmentTable";
+import AmbulanceTable from "../tables/AmbulanceTable";
 
 function Facility() {
   const [selectedTab, setSelectedTab] = useState("beds");
@@ -19,6 +24,52 @@ function Facility() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assignmentData, setAssignmentData] = useState([]);
+  const [ambulances, setAmbulances] = useState([]);
+  const [equipment, setEquipment] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [selectedTabInner, setSelectedTabInner] = useState("identityDetails");
+
+
+
+
+  let handleAssign = (data) => {
+    setShowAssignModal(true);
+    setAssignmentData(data);
+  }
+
+  const getRooms = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET', // Change method to GET for axios.get
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
+    try {
+      let res = await axios.get("https://edogoverp.com/clinicapi/api/room/list/1/100", options);
+      console.log(res);
+      let roomList = res?.data?.resultList || []; // Adjusted to access data property
+
+      roomList.unshift({ name: "Select Room", id: "" });
+      setRooms(roomList.map((item) => ({ value: item?.id, name: item.name })));
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+    }
+  };
+
+
+
+
+
 
   const getAdmittedPatients = async () => {
     try {
@@ -50,15 +101,15 @@ function Facility() {
     }
   };
 
-  const getAssignedBed = async () => {
-    try {
-      let res = await get("/facilities/beds/assignedtodoctor");
-      console.log(res);
-      setBeds(res);
-    } catch (error) {
-      console.error('Error fetching assigned beds:', error);
-    }
-  };
+  // const getAssignedBed = async () => {
+  //   try {
+  //     let res = await get("/facilities/beds/assignedtodoctor");
+  //     console.log(res);
+  //     setBeds(res);
+  //   } catch (error) {
+  //     console.error('Error fetching assigned beds:', error);
+  //   }
+  // };
 
   const getBedList = async () => {
     const token = sessionStorage.getItem('token');
@@ -69,7 +120,7 @@ function Facility() {
     }
 
     const options = {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -99,7 +150,7 @@ function Facility() {
     getAdmittedPatients();
     getAvailableBed();
     getOccupiedBed();
-    getAssignedBed();
+    getRooms();
   }, []);
 
   useEffect(() => {
@@ -124,28 +175,35 @@ function Facility() {
     switch (selectedTab) {
       case "beds":
         return (
-          <div className="flex flex-direction-h">
-            <div>
-              <div className="m-t-20 m-b-20 bold-text">
-                {wards} | {availableBed} Beds Available | {occupiedBeds} Beds Occupied
-              </div>
-              {loading ? ( // Conditionally render spinner
-                <Spinner /> // Use Spinner component
-              ) : (
+          <div>
+            <div className="flex flex-direction-h space-between">
+              <div className="col-8">
+                <div className="m-t-20 m-b-20 bold-text">
+                  {wards} | {availableBed} Beds Available | {occupiedBeds} Beds Occupied
+                </div>
+
                 <div>
-                  <div className="grid gap-16 m-t-20">
+                  <div className="grid gap-16 m-t-20 m-b-20">
                     {Array.isArray(bedList) && bedList.map((patient, index) => (
-                      <FacilityCard
-                        key={index}
-                        wards={wards}
-                        availableBed={availableBed}
-                        occupiedBeds={occupiedBeds}
-                        fetchBedList={getBedList}
-                        data={patient}
-                      />
+                      <div>
+
+                        <FacilityCard
+                          key={index}
+                          wards={wards}
+                          availableBed={availableBed}
+                          occupiedBeds={occupiedBeds}
+                          fetchBedList={getBedList}
+                          data={patient}
+                        />
+
+                      </div>
                     ))}
                   </div>
-                  <div className="pagination flex space-between float-right col-5 m-t-40">
+
+
+                </div>
+                <div>
+                  <div className="pagination flex space-between float-right col-6 m-t-20 m-b-80">
                     <div className="flex gap-8">
                       <div className="bold-text">Page</div>
                       <div>{currentPage}/{totalPages}</div>
@@ -178,43 +236,92 @@ function Facility() {
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+              <div className="flex m-t-50 m-l-100  flex-direction-v">
+                <div className="m-b-10 m-r-20">
+                  <StatCard
+                    data={{
+                      number: admittedpatients,
+                      title: "Admitted Patients",
+                    }}
+                    icon={<RiHotelBedFill className="icon" size={32} />}
+                  />
+                </div>
+                <div className="m-b-10 m-r-20">
+                  <StatCard
+                    data={{
+                      number: availableBed,
+                      title: "Available Beds",
+                    }}
+                    icon={<RiHotelBedFill className="icon" size={32} />}
+                  />
+                </div>
+                <div className="m-b-10 m-r-20">
+                  <StatCard
+                    data={{
+                      number: occupiedBeds,
+                      title: "Occupied Beds",
+                    }}
+                    icon={<RiHotelBedFill className="icon" size={32} />}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex m-t-60 m-l-100 flex-direction-v">
-              <div className="m-b-10 m-r-20">
-                <StatCard
-                  data={{
-                    number: admittedpatients,
-                    title: "Admitted Patients",
-                  }}
-                  icon={<RiHotelBedFill className="icon" size={32} />}
-                />
-              </div>
-              <div className="m-b-10 m-r-20">
-                <StatCard
-                  data={{
-                    number: availableBed,
-                    title: "Available Beds",
-                  }}
-                  icon={<RiHotelBedFill className="icon" size={32} />}
-                />
-              </div>
-              <div className="m-b-10 m-r-20">
-                <StatCard
-                  data={{
-                    number: occupiedBeds,
-                    title: "Occupied Beds",
-                  }}
-                  icon={<RiHotelBedFill className="icon" size={32} />}
-                />
-              </div>
+            <div className="m-t-40">
+              <AssignedBed fetchBedList={getBedList} />
             </div>
           </div>
         );
       case "equipments":
-        return <div>Equipment Content</div>;
+        return (
+          <div>
+            <div className="flex m-t-40">
+              <div
+                style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTabInner === "equipmentList" ? '2px solid #3C7E2D' : 'none', color: selectedTabInner === "equipmentList" ? '#3C7E2D' : '#393939' }}
+                onClick={() => setSelectedTabInner('equipmentList')}
+              >
+                Equipment List
+              </div>
+              <div
+                style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTabInner === "assignedEquipment" ? '2px solid #3C7E2D' : 'none', color: selectedTabInner === "assignedEquipment" ? '#3C7E2D' : '#393939' }}
+                onClick={() => setSelectedTabInner('assignedEquipment')}
+              >
+                View Patent Usage
+              </div>
+            </div>
+            {
+              selectedTabInner === "equipmentList" ?
+                <EquipmentTable /> :
+                selectedTabInner === "assignedEquipment" ?
+                  <EquipmentTableAssigned  /> : null
+            }
+          </div>
+        );
       case "ambulance":
-        return <div>Ambulance Content</div>;
+        return (
+          <div>
+            <div className="flex m-t-40">
+              <div
+                style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTabInner === "ambulanceList" ? '2px solid #3C7E2D' : 'none', color: selectedTabInner === "ambulanceList" ? '#3C7E2D' : '#393939' }}
+                onClick={() => setSelectedTabInner('ambulanceList')}
+              >
+                Ambulance List
+              </div>
+              <div
+                style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTabInner === "assignedAmbulance" ? '2px solid #3C7E2D' : 'none', color: selectedTabInner === "assignedAmbulance" ? '#3C7E2D' : '#393939' }}
+                onClick={() => setSelectedTabInner('assignedAmbulance')}
+              >
+                View Patent Usage
+              </div>
+            </div>
+            {
+              selectedTabInner === "ambulanceList" ?
+                <AmbulanceTable /> :
+                selectedTabInner === "assignedAmbulance" ?
+                  <AmbulanceTableAssigned /> : null
+            }
+          </div>
+        );
       default:
         return null;
     }
@@ -231,12 +338,13 @@ function Facility() {
         >
           Beds
         </div>
-        <div className={` ${selectedTab === "equipments" ? "active" : ""}`}>
-          {/* Equipments */}
+        <div className={` tab-item ${selectedTab === "equipments" ? "active" : ""}`} onClick={() => { setSelectedTab("equipments"); setSelectedTabInner('equipmentList') }}>
+          Equipments
         </div>
-        {/* <div className={`tab-item ${selectedTab === "ambulance" ? "active" : ""}`}>
+
+        <div className={`tab-item ${selectedTab === "ambulance" ? "active" : ""}`} onClick={() => { setSelectedTab("ambulance"); setSelectedTabInner('ambulanceList') }}>
           Ambulance
-        </div> */}
+        </div>
       </div>
       {/* <div className="w-25 m-t-20">
         <TagInputs label="Select Ward" onChange={(value) => setWards(value?.target?.value)} options={wardOptions} name="ward" type="select" />

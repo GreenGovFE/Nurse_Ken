@@ -24,18 +24,18 @@ function PatientsTable({ data }) {
         <table className="bordered-table">
           <thead className="border-top-none">
             <tr className="border-top-none">
-              <th>Patient ID</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>User Name</th>
+              <th className="center-text">S/N</th>
+              <th className="center-text">First Name</th>
+              <th className="center-text">Last Name</th>
+              <th className="center-text">Email</th>
               
             </tr>
           </thead>
 
           <tbody className="white-bg view-det-pane ">
-            {Array.isArray(data) && data?.map((row) => (
+            {Array.isArray(data) && data?.map((row, index) => (
               <tr className="hovers pointer" onClick={()=>continueUpdate(row?.patientId || row?.id, row)} key={row?.id}>
-                <td>{row?.patientId || row?.id}</td>
+                <td>{index + 1}</td>
                 <td>{row?.firstName}</td>
                 <td>{row?.lastName}</td>
                 <td>{row?.email}</td>

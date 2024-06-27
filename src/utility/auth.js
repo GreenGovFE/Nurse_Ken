@@ -5,7 +5,8 @@ export const logout = async () => {
   sessionStorage.removeItem('token');
   localStorage.removeItem('USER_INFO');
   localStorage.removeItem('homeLink');
+  localStorage.removeItem('LOGIN_TIME');
  
 
-  window.location.assign(link || '/');
+  window.location.assign('/');
 };

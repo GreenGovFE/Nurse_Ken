@@ -81,31 +81,31 @@ function VisitsTable({ data }) {
         <table className="bordered-table">
           <thead className="border-top-none">
             <tr className="border-top-none">
-              <th>Date</th>
-              <th>Blood Pressure (mmHg)</th>
-              <th>Weight (Kg)</th>
-              <th>Temperature  (°C)</th>
-              <th>Height (cm)</th>
-              <th>Heart (bpm)</th>
-              <th>Respiration (bpm)</th>
-              <th>Admin Nurse</th>
-              <th>Assigned Doctor</th>
-              <th></th>
+              <th className="center-text">Date</th>
+              <th className="center-text">Blood Pressure (mmHg)</th>
+              <th className="center-text">Weight (Kg)</th>
+              <th className="center-text">Temp  (°C)</th>
+              <th className="center-text">Height (cm)</th>
+              <th className="center-text">Heart (bpm)</th>
+              <th className="center-text">Respiration (bpm)</th>
+              <th className="center-text">Admin Nurse</th>
+              <th className="center-text">Assigned Doctor</th>
+              <th className="center-text"></th>
             </tr>
           </thead>
 
           <tbody className="white-bg view-det-pane">
             {Array.isArray(data) && data?.map((row) => (  
               <tr key={row.id}>
-                <td>{formatDate(row.dateOfVisit)}</td>
+                <td style={{minWidth: '100px'}}>{formatDate(row.dateOfVisit)}</td>
                 <td>{row.bloodPressure}</td>
                 <td>{row.weight}</td>
                 <td>{row.temperature}</td>
                 <td>{row.height}</td>
                 <td>{row.heartPulse}</td>
                 <td>{row.respiratory}</td>
-                <td>{getNurseName(row.nurseId)}</td>
-                <td>{getDoctorName(row.doctorId)}</td>
+                <td>{(row.nurseName)}</td>
+                <td>{(row.doctorName)}</td>
                 <td onClick={selectRecord(row)}><img className="hovers pointer" src="/details.png" /></td>
               </tr>
 

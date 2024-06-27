@@ -2,92 +2,208 @@ import React, { useEffect, useState } from "react";
 import TagInputs from "../../layouts/TagInputs";
 import TextArea from "../../UI/TextArea";
 import UploadButton from "../../../Input/UploadButton";
-import { RiDeleteBinLine } from "react-icons/ri"
-import AllergyTable from "../../tables/AlllergyTable";
-import { allergyData } from "../mockdata/PatientData";
+import { RiDeleteBinLine } from "react-icons/ri";
 import ImmunizationTable from "../../tables/immunizationTable";
 import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
 import { usePatient } from "../../../contexts";
 
-
 function Immunization({ setSelectedTab }) {
-  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+  const { patientId } = usePatient();
 
-  const [documentArray, setdocumentArray] = useState([])
-  const [docNames, setDocNames] = useState([])
-  const [payload, setPayload] = useState()
-  const [immunizationData, setImmunizationData] = useState([])
+  const [documentArray, setDocumentArray] = useState([]);
+  const [payload, setPayload] = useState({});
+  const [immunizationData, setImmunizationData] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [docNames, setDocNames] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+
+
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const generatePageNumbers = () => {
+    let pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages = [1, 2, 3, 4, totalPages];
+      } else if (currentPage >= totalPages - 2) {
+        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
+      }
+    }
+    return pages;
+  };
+
 
   const receiveImage = (value) => {
-    console.log(value)
-  }
+    console.log(value);
+  };
+
   const deleteDoc = (doc) => {
-    let newarr = documentArray.filter((id) => id.name !== doc)
-    setdocumentArray(newarr)
-  }
+    let newArr = documentArray.filter((id) => id.name !== doc);
+    setDocumentArray(newArr);
+  };
 
   const getImmunization = async () => {
     try {
-      let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${patientId}`);
+      let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
       console.log(res);
-      setImmunizationData(res);
+      setImmunizationData(res.data);
+      setTotalPages(res.pageCount)
+
     } catch (error) {
-      console.error('Error fetching immunization data:', error);
+      console.error("Error fetching immunization data:", error);
       // Handle the error here, such as displaying an error message to the user
     }
-  }
-
-
+  };
 
   const handleChange = (event) => {
-    if (event.target.name === "quantity" || event.target.name === "age" || event.target.name === "weight" || event.target.name === "temperature") {
-      setPayload({ ...payload, [event.target.name]: parseFloat(event.target.value) })
-    } else {
-      setPayload({ ...payload, [event.target.name]: event.target.value })
+    const { name, value } = event.target;
+    if (name === "dateGiven") {
+      const selectedDate = new Date(value);
+      const currentDate = new Date();
+
+      selectedDate.setHours(0, 0, 0, 0);
+      currentDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate > currentDate) {
+        console.log("Invalid input");
+        notification({ message: 'Date selected cannot be a future date', type: "error" });
+
+        // Reset the date input to an empty string
+        event.target.value = "";
+        setPayload(prevPayload => ({ ...prevPayload, [name]: "" }));
+        return;
+      }
+    }
+    setPayload({ ...payload, [name]: value });
+
+    console.log(payload);
+  };
+
+  const fieldLabels = {
+    vaccine: "Vaccine",
+    vaccineBrand: "Vaccine brand",
+    batchId: "Batch ID",
+    quantity: "Quantity",
+    age: "Age",
+    weight: "Weight",
+    temperature: "Temperature",
+    dateGiven: "Date given",
+    notes: "Notes",
+  };
+
+  const validatePayload = () => {
+    let validationErrors = {};
+    let missingFields = [];
+
+    if (!payload.vaccine) {
+      validationErrors.vaccine = "Vaccine is required";
+      missingFields.push(fieldLabels.vaccine);
+    }
+    if (!payload.vaccineBrand) {
+      validationErrors.vaccineBrand = "Vaccine brand is required";
+      missingFields.push(fieldLabels.vaccineBrand);
+    }
+    if (!payload.batchId) {
+      validationErrors.batchId = "Batch ID is required";
+      missingFields.push(fieldLabels.batchId);
+    }
+    if (!payload.quantity) {
+      validationErrors.quantity = "Quantity is required";
+      missingFields.push(fieldLabels.quantity);
+    }
+    if (!payload.age) {
+      validationErrors.age = "Age is required";
+      missingFields.push(fieldLabels.age);
+    }
+    if (!payload.weight) {
+      validationErrors.weight = "Weight is required";
+      missingFields.push(fieldLabels.weight);
+    }
+    if (!payload.temperature) {
+      validationErrors.temperature = "Temperature is required";
+      missingFields.push(fieldLabels.temperature);
+    }
+    if (!payload.dateGiven) {
+      validationErrors.dateGiven = "Date given is required";
+      missingFields.push(fieldLabels.dateGiven);
+    }
+    if (!payload.notes) {
+      validationErrors.notes = "Notes is required";
+      missingFields.push(fieldLabels.notes);
     }
 
-    console.log(payload)
-  }
+    setErrors(validationErrors);
 
+    if (missingFields.length > 0) {
+      const errorMessage = `The following fields are required: ${missingFields.join(", ")}`;
+      notification({ message: errorMessage, type: "error" });
+    }
+
+    return Object.keys(validationErrors).length === 0;
+  };
 
   const submitPayload = async () => {
+    if (!validatePayload()) {
+      return;
+    }
+
     try {
       const patientID = Number(patientId);
       if (!patientId) {
         throw new Error("Patient ID not found in session storage");
       }
 
-      const res = await post("/patients/addImmunizationRecords", { ...payload, docName: documentArray[0]?.name, docPath: documentArray[0]?.path, patientId: patientID });
+      const res = await post("/patients/addImmunizationRecords", {
+        ...payload,
+        age: parseInt(payload?.age),
+        weight: parseInt(payload?.weight),
+        temperature: parseInt(payload?.temperature),
+        quantity: parseInt(payload?.quantity),
+        dateGiven: payload?.dateGiven,
+        docName: documentArray[0]?.name,
+        docPath: documentArray[0]?.path,
+        patientId: patientID,
+      });
       console.log(res);
 
-      if (typeof res === 'number') {
+      if (typeof res === "object") {
         notification({ message: res?.message, type: "success" });
         getImmunization();
+        setPayload({});
       } else if (res.StatusCode === 401) {
-        notification({ message: 'Unathorized Session', type: "error" });
-      }
-      else if (res.StatusCode === 500) {
-        notification({ message: 'Internal Server Error', type: "error" });
-      }
-      else {
+        notification({ message: "Unauthorized Session", type: "error" });
+      } else if (res.StatusCode === 500) {
+        notification({ message: "Internal Server Error", type: "error" });
+      } else {
         let errorMessage = "An error occurred";
 
         if (res && res.errors) {
           const errors = res.errors;
           console.log(errors);
 
-          // Check if any required fields are missing
-          const missingFields = Object.keys(errors).filter(field => {
-            return errors[field].some(errorMsg => /is required/i.test(errorMsg));
+          const missingFields = Object.keys(errors).filter((field) => {
+            return errors[field].some((errorMsg) => /is required/i.test(errorMsg));
           });
 
           console.log(missingFields);
 
           if (missingFields.length > 0) {
-            // Convert camelCase to space-separated words
-            const formattedFields = missingFields.map(field =>
-              field.replace(/([a-z])([A-Z])/g, '$1 $2')
+            const formattedFields = missingFields.map((field) =>
+              fieldLabels[field] || field.replace(/([a-z])([A-Z])/g, "$1 $2")
             );
 
             errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
@@ -95,119 +211,72 @@ function Immunization({ setSelectedTab }) {
         }
 
         notification({ message: errorMessage, type: "error" });
-
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-
   const next = () => {
-    setSelectedTab("visits")
-  }
-
-
-  const temperatureOptions = [
-    { name: "select measurement", value: "" },
-    { name: "Temperature (°C)", value: "celsius" },
-    { name: "Temperature (°F)", value: "fahrenheit" },
-  ];
-
-  const weightOptions = [
-    { name: "select measurement", value: "" },
-    { name: "Weight (kg)", value: "kg" },
-    { name: "Weight (lbs)", value: "lbs" },
-    { name: "Weight (g)", value: "g" },
-    { name: "Weight (oz)", value: "oz" },
-    { name: "Weight (mg)", value: "mg" },
-  ];
-
-  const ageOptions = [
-    { name: "select measurement", value: "" },
-    { name: "Age (months)", value: "months" },
-    { name: "Age (years)", value: "years" },
-  ];
-
-  const quantityOptions = [
-    { name: "select measurement", value: "" },
-    { name: "drops (drps)", value: "drops" },
-    { name: "Pieces (pcs)", value: "pieces" },
-    { name: "Milliliters (ml)", value: "milliliters" },
-    { name: "Liters (L)", value: "liters" },
-    { name: "Centiliters (cl)", value: "centiliters" },
-    { name: "Deciliters (dl)", value: "deciliters" },
-    // Add more units as needed
-  ];
-
+    setSelectedTab("visits");
+  };
 
   useEffect(() => {
     getImmunization();
-  }, [])
+  }, []);
 
   return (
     <div className="">
-      {" "}
-      <div className="m-t-40">Immunization</div>
-      <div className="w-100 flex p-20">
-
-        <div className="w-40">
-          <div><TagInputs onChange={handleChange} name="vaccine" label="Select Vaccine" /></div>
-          <div><TagInputs onChange={handleChange} name="vaccineBrand" label="Vaccine Brand" /></div>
-          <div><TagInputs onChange={handleChange} name="batchId" label="Batch #ID" /></div>
-          <div className="flex">
-            <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="quantity" label="Quantity" />
-            </div>
-            {/* <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange}  options = {quantityOptions} type="select" />
-          </div> */}
+      <div className="w-100 flex ">
+        <div className="col-3-3">
+          <div>
+            <TagInputs onChange={handleChange} name="vaccine" label="Vaccine" error={errors.vaccine} />
+          </div>
+          <div>
+            <TagInputs onChange={handleChange} name="vaccineBrand" label="Vaccine Brand" error={errors.vaccineBrand} />
+          </div>
+          <div>
+            <TagInputs onChange={handleChange} name="batchId" label="Batch #ID" error={errors.batchId} />
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="age" label="Select Age" />
+              <TagInputs onChange={handleChange} variation={true} name="quantity" label="Quantity" error={errors.quantity} />
             </div>
-            {/* <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange}  options = {ageOptions} name ="relationship" type="select" />
-          </div> */}
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="weight" label="Select Weight" />
+              <TagInputs onChange={handleChange} variation={true} name="age" label="Age" error={errors.age} />
             </div>
-            {/* <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange}  options = {weightOptions} name ="relationship" type="select" />
-          </div> */}
-          </div><div className="flex">
-            <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="temperature" label="Temperature" />
-            </div>
-            {/* <div className="w-40 m-l-20">
-            <TagInputs onChange = {handleChange}  options = {temperatureOptions} name ="relationship" type="select" />
-          </div> */}
           </div>
-
-          <div><TagInputs onChange={handleChange} name="dateGiven" label="Date Given" type="date" /></div>
-          <div><TextArea
-            label="Notes"
-            name="notes"
-            type="text"
-            placeholder="Write your notes here..."
-            //value={}
-            onChange={
-              handleChange
-            }
-          /></div>
+          <div className="flex">
+            <div className="w-100">
+              <TagInputs onChange={handleChange} variation={true} name="weight" label="Weight" error={errors.weight} />
+            </div>
+          </div>
+          <div className="flex">
+            <div className="w-100">
+              <TagInputs onChange={handleChange} variation={true} name="temperature" label="Temperature" error={errors.temperature} />
+            </div>
+          </div>
+          <div>
+            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven} label="Date Given" type="date" error={errors.dateGiven} />
+          </div>
+          <div>
+            <TextArea
+              label="Notes"
+              name="notes"
+              type="text"
+              placeholder="Write your notes here..."
+              onChange={handleChange}
+            />
+          </div>
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">
-              <UploadButton
-                setDocNames={setDocNames}
-                setdocumentArray={setdocumentArray}
-                sendImagg={receiveImage} />
+              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray} sendImage={receiveImage} />
             </div>
 
             {documentArray?.map((item, index) => (
-              <div key={index} className="m-t-10 flex" >
+              <div key={index} className="m-t-10 flex">
                 <a href={item.path} target="_blank" className="m-r-10">
                   {item.name}
                 </a>
@@ -216,13 +285,50 @@ function Immunization({ setSelectedTab }) {
             ))}
           </div>
           <div className="w-100 ">
-            <button onClick={submitPayload} className="submit-btn w-100 m-t-20"> Add Record</button>
-            <button onClick={next} className="save-drafts w-100 m-t-20"> Continue</button>
+            <button onClick={submitPayload} className="submit-btn w-100 m-t-20">
+              Add Record
+            </button>
+            <button onClick={next} className="save-drafts w-100 m-t-20">
+              Continue
+            </button>
           </div>
-
         </div>
-        <div className="w-60 m-l-20">
+        <div className="col-8 m-l-20">
           <ImmunizationTable data={immunizationData} />
+          <div>
+            <div className="pagination flex space-between float-right  col-5 m-t-20">
+              <div className="flex gap-8">
+                <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+              </div>
+              <div className="flex gap-8">
+                <button
+                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {"Previous"}
+                </button>
+
+                {generatePageNumbers().map((page, index) => (
+                  <button
+                    key={`page-${index}`}
+                    className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  {"Next"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ import axios from "axios";
 import HMOTableHistory from "../../tables/HMO_Table_Payment_History";
 import { usePatient } from "../../../contexts";
 import MembershipCover from "./MembershipCover";
+import IdentityDetails from "./IdentityDetails";
 
 
 function Finance_HMO() {
@@ -21,9 +22,10 @@ function Finance_HMO() {
   const [paymentHistory, setPaymentHistory] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hmo, setHmo] = useState([])
+  const [selectedTab, setSelectedTab] = useState("identityDetails");
 
   useEffect(() => {
-    getPaymentHistory()
+    // getPaymentHistory()
     getHmo()
   }, [])
   const getPaymentHistory = async () => {
@@ -51,6 +53,16 @@ function Finance_HMO() {
     }
   };
 
+  const renderTabContent = (selectedTab) => {
+    switch (selectedTab) {
+      case "membershipCover":
+        return <MembershipCover renderTabContent={renderTabContent} />;
+      case "identityDetails":
+        return <IdentityDetails renderTabContent={renderTabContent} />;
+      default:
+        return <IdentityDetails renderTabContent={renderTabContent} />;
+    }
+  };
 
   console.log(paymentHistory)
 
@@ -59,31 +71,28 @@ function Finance_HMO() {
   };
   return (
     <div>
-      {" "}
-      <div className="w-100 m-t-80">
-
-        <div className=" m-t-20 m-b-20 flex space-between flex-h-center">
-          <div className="flex space-between flex-v-center ">
-            <div style={{ border:'4px solid #3C7E2D', boxShadow: '1px 4px 11px 0px #CEBDE440', borderRadius: '6px', width: "120px", height: "120px", overflow: "hidden", position: "relative" }}>
-              <img
-                style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", maxWidth: "100%", maxHeight: "100%" }}
-                onError={addDefaultSrc}
-                src={pictureUrl || personalInfo?.pictureUrl || ProfilePix}
-                alt={pictureUrl}
-              />
-
-            </div>
-            <div className="m-l-10 flex flex-direction-v ">
-              <span className="m-b-10">Patient Name: {patientName}</span>
-              <span className="m-b-10">Patient ID: {patientId}</span>
-              {/* <span>Visit Date:</span> */}
-            </div>
+      <div className="w-100 ">
+        <div className="flex m-t-40">
+          <div
+            style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "identityDetails" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "identityDetails" ? '#3C7E2D' : '#393939' }}
+            onClick={() => setSelectedTab("identityDetails")}
+          >
+            Identity Details
+          </div>
+          <div
+            style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "membershipCover" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "membershipCover" ? '#3C7E2D' : '#393939' }}
+            onClick={() => setSelectedTab("membershipCover")}
+          >
+            Membership Cover
           </div>
         </div>
-
-        <h3 className="m-t-40 m-b-40">HMO Details</h3>
         <div className="">
-        <MembershipCover hide={false}/> 
+          {
+            selectedTab === "identityDetails" ?
+              <IdentityDetails hide={false} setSelectedTab={setSelectedTab} /> :
+              selectedTab === "membershipCover" ?
+                <MembershipCover hide={false} setSelectedTab={setSelectedTab} /> : null
+          }
         </div>
       </div>
     </div>

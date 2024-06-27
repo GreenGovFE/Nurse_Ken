@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { RiHotelBedFill } from "react-icons/ri";
+import { RiEdit2Fill, RiHotelBedFill } from "react-icons/ri";
 import AddBed from "../modals/AddBed";
 import { get } from "../../utility/fetch";
 
@@ -28,23 +28,29 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
     <div>
       {data?.status !== 'Occupied' ? (
         <div>
-          <div onClick={openModal} className="cards pointer">
+          <div onClick={openModal} className="cards ">
             <RiHotelBedFill size={98} className="text-green" />
             <p>{data?.name}</p>
           </div>
-          <div className="comments-btn w-80">
-            <p className="text-center">{data?.status}</p>
+          <div className="flex">
+            <div className="comments-btn w-80">
+              <p className="text-center">{data?.status}</p>
+            </div>
+            <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill/></button>
           </div>
         </div>
       ) : (
         <div>
-          <div className="cards pointer gray-bg">
+          <div className="cards  gray-bg">
             <RiHotelBedFill size={98} className="text-gray" />
             <p>{data?.name}</p>
           </div>
-          <button className="comments-btn w-80" disabled={data?.status === 'Occupied'}>
-            <p className="text-center">{data?.status}</p>
-          </button>
+          <div className="flex">
+            <button className="comments-btn w-80" disabled={data?.status === 'Occupied'}>
+              <p className="text-center">{data?.status}</p>
+            </button>
+            <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill/></button>
+          </div>
         </div>
       )}
 

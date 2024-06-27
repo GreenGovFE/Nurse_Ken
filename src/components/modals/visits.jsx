@@ -31,31 +31,31 @@ function ViewVisit({ closeModal, visit, next }) {
 
     const getNurses = async () => {
         try {
-          let res = await get(
-            `/patients/Allnurse/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem(
-              "clinicId"
-            )}&pageIndex=1&pageSize=10`
-          );
-          setNurses(Array.isArray(res?.data) ? res?.data : []);
+            let res = await get(
+                `/patients/Allnurse/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem(
+                    "clinicId"
+                )}&pageIndex=1&pageSize=10`
+            );
+            setNurses(Array.isArray(res?.data) ? res?.data : []);
         } catch (error) {
-          console.error('Error fetching nurses:', error);
-          // Handle the error here, such as displaying an error message to the user
+            console.error('Error fetching nurses:', error);
+            // Handle the error here, such as displaying an error message to the user
         }
-      };
-      
-      const getDoctors = async () => {
+    };
+
+    const getDoctors = async () => {
         try {
-          let res = await get(
-            `/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem(
-              "clinicId"
-            )}&pageIndex=1&pageSize=30`
-          );
-          setDoctors(Array.isArray(res?.data) ? res?.data : []);
+            let res = await get(
+                `/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem(
+                    "clinicId"
+                )}&pageIndex=1&pageSize=30`
+            );
+            setDoctors(Array.isArray(res?.data) ? res?.data : []);
         } catch (error) {
-          console.error('Error fetching doctors:', error);
-          // Handle the error here, such as displaying an error message to the user
+            console.error('Error fetching doctors:', error);
+            // Handle the error here, such as displaying an error message to the user
         }
-      };
+    };
 
     const getNotes = async () => {
         try {
@@ -72,7 +72,7 @@ function ViewVisit({ closeModal, visit, next }) {
     const addNotes = async () => {
         try {
             let res = await post(
-                `/patients/${sessionStorage.getItem("patientId")}/addpatientnote`, {...payload, nursesId: visit?.nurseId, doctorId: visit?.doctorId});
+                `/patients/${sessionStorage.getItem("patientId")}/addpatientnote`, { ...payload, nursesId: visit?.nurseId, doctorId: visit?.doctorId });
         } catch (error) {
             // Handle the error here
             console.error('Error fetching notes:', error);
@@ -112,28 +112,28 @@ function ViewVisit({ closeModal, visit, next }) {
     };
 
     return (
-        <div className='modal'>
+        <div className='overlay'>
+            <RiCloseFill className='close-btn pointer' onClick={closeModal} />
             <div className="modal-contents">
-                <span className="close m-b-20" onClick={closeModal}>&times;</span>
-                <div className="flex space-between">
-                    <div className="flex space-between flex-v-center m-t-20 col-3">
+                <div className="flex ">
+                    <div className="flex space-between flex-v-center m-t-20 m-l-20 col-3">
                         <p>Visit Record</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
-                    <p>Time: {formattedTime}</p>
+                    <div className="flex m-l-240 flex-v-center m-t-20 col-4">
+                        <p>Time: {formattedTime}</p>
                     </div>
                 </div>
-                <div className="p-40">
+                <div className="p-20">
 
                     <table className="bordered-table-2">
                         <thead className="border-top-none">
                             <tr className="border-top-none">
                                 <th className="w-20">Date</th>
-                                <th>weight</th>
-                                <th>temp</th>
+                                <th>Weight</th>
+                                <th>Temp</th>
                                 <th>Height</th>
                                 <th>Heart</th>
-                                <th>Respiratory</th>
+                                <th>Resp</th>
                                 <th>Blood Pressure</th>
 
                             </tr>
@@ -159,9 +159,20 @@ function ViewVisit({ closeModal, visit, next }) {
                         </tbody>
                     </table>
 
-                    <TagInputs label="Assigned Nurse" name="assignedNurse" value={getNurseName(visit.nurseId)} readOnly={true} />
-                    <TagInputs label="Assigned Doctor" name="assignedDoctor" value={getDoctorName(visit.doctorId)} readOnly={true} />
-                    <TagInputs label="Additional Notes" name="additonalNoteOnTreatment" value={visit.DoctorName} onChange = {handleChange} readOnly={true} type='textArea' />
+                    <TagInputs label="Assigned Nurse" name="assignedNurse" value={visit?.nurseName} readOnly={true} />
+                    <TagInputs label="Assigned Doctor" name="assignedDoctor" value={visit?.doctorName} readOnly={true} />
+                    {
+                        visit?.notes &&
+
+                        visit.notes.map((data, index) => (
+                            <div>
+                                <TagInputs label="Additional Notes" name="additonalNoteOnTreatment" value={data} onChange={handleChange} readOnly={true} type='textArea' />
+                            </div>
+                        )
+
+                        )
+                    }
+                    
 
                     {/* <button className="submit-btn m-t-20 w-100" onClick={() => addNotes}>Add Notes</button> */}
                 </div>

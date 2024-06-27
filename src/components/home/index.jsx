@@ -12,6 +12,8 @@ import Footer from '../layouts/Footer';
 import notification from '../../utility/notification';
 import { useNavigate } from 'react-router-dom';
 import InputField from '../UI/InputField';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 
 const Home = (props) => {
@@ -19,6 +21,7 @@ const Home = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
 
@@ -54,6 +57,10 @@ const Home = (props) => {
     setLoading(false);
   };
 
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
 
   return (
     <div className="w-100">
@@ -69,9 +76,25 @@ const Home = (props) => {
               <label>Username or Email</label>
               <InputField type="text" name={"email"} value={email} placeholder={"username or email"} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <div className='m-t-40'>
+            <div className='m-t-40 flex flex-direction-v'>
               <label>Password</label>
-              <InputField type="password" name={"password"} value={password} placeholder={"password"} onChange={(e) => setPassword(e.target.value)} />
+              <div className='password-input-container'>
+                <InputField
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={password}
+                  placeholder="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={toggleShowPassword}
+                  className='password-toggle-btn pointer'
+                >
+                  <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                </button>
+              </div>
             </div>
 
             <div className='m-t-40'> <button disabled={loading} onClick={makePostRequest} className='w-100 submit-btn'>Log In</button></div>

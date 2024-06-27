@@ -129,7 +129,7 @@ function Dashboard() {
           <h3>{userInfo?.firstName} {userInfo?.lastName}</h3>
           <span>{userInfo?.role}</span>
         </div>
-        <div className="flex">
+        <div className="flex space-between">
 
           <div className="m-r-20">
             <StatCard data={{
@@ -173,9 +173,9 @@ function Dashboard() {
                   PatientAdmission={patientAdmission}
                 />
               </div>
-              <div className="w-50">
+              {/* <div className="w-50">
                 <PatientsBreakdown />
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="col-4 m-t-40 ">

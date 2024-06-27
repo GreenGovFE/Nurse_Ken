@@ -1,35 +1,51 @@
 import React, { useEffect, useState } from "react";
-import InputField from "../../UI/InputField";
-import TextArea from "../../UI/TextArea";
-import { RiToggleFill } from "react-icons/ri";
-import AllergyTable from "../../tables/AlllergyTable";
-import { PatientData, allergyData, stats } from "../mockdata/PatientData";
-import { get, post } from "../../../utility/fetch";
-import notification from "../../../utility/notification";
 import TagInputs from "../../layouts/TagInputs";
+import notification from "../../../utility/notification";
+import AllergyTable from "../../tables/AlllergyTable";
+import { get, post } from "../../../utility/fetch";
 import { usePatient } from "../../../contexts";
 
 function MedicalRecord() {
-  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+  const { patientId } = usePatient();
 
   const [selectedTab, setSelectedTab] = useState(1);
   const [allergies, setAllergies] = useState([{ name: "", comment: "" }]);
-  const [pastIllnesses, setPastIllnesses] = useState([
-    { name: "", comment: "" },
-  ]);
-  const [chronicConditions, setChronicConditions] = useState([
-    { name: "", comment: "" },
-  ]);
-  const [surgicalHistory, setSurgicalHistory] = useState([
-    { name: "", comment: "" },
-  ]);
-  const [familyHistory, setFamilyHistory] = useState([
-    { name: "", comment: "" },
-  ]);
-  const [payload, setPayload] = useState({})
+  const [pastIllnesses, setPastIllnesses] = useState([{ name: "", comment: "" }]);
+  const [chronicConditions, setChronicConditions] = useState([{ name: "", comment: "" }]);
+  const [surgicalHistory, setSurgicalHistory] = useState([{ name: "", comment: "" }]);
+  const [familyHistory, setFamilyHistory] = useState([{ name: "", comment: "" }]);
+  const [payload, setPayload] = useState({});
+  const [medTableData, setMedTableData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  
-  const [medTableData, setMedTableData] = useState([])
+
+
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const generatePageNumbers = () => {
+    let pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages = [1, 2, 3, 4, totalPages];
+      } else if (currentPage >= totalPages - 2) {
+        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
+      }
+    }
+    return pages;
+  };
+
 
   useEffect(() => {
     getMedRecords();
@@ -69,19 +85,19 @@ function MedicalRecord() {
 
   const handleAddField = () => {
     switch (selectedTab) {
-      case "allergies":
+      case 1:
         setAllergies([...allergies, { name: "", comment: "" }]);
         break;
-      case "pastIllnesses":
+      case 2:
         setPastIllnesses([...pastIllnesses, { name: "", comment: "" }]);
         break;
-      case "chronicConditions":
+      case 3:
         setChronicConditions([...chronicConditions, { name: "", comment: "" }]);
         break;
-      case "surgicalHistory":
+      case 4:
         setSurgicalHistory([...surgicalHistory, { name: "", comment: "" }]);
         break;
-      case "familyHistory":
+      case 5:
         setFamilyHistory([...familyHistory, { name: "", comment: "" }]);
         break;
       default:
@@ -89,11 +105,18 @@ function MedicalRecord() {
     }
   };
 
+  const resetFields = () => {
+    setAllergies([{ name: "", comment: "" }]);
+    setPastIllnesses([{ name: "", comment: "" }]);
+    setChronicConditions([{ name: "", comment: "" }]);
+    setSurgicalHistory([{ name: "", comment: "" }]);
+    setFamilyHistory([{ name: "", comment: "" }]);
+  };
+
   const submitPayload = async (payload) => {
     try {
-      
       if (!patientId) {
-        notification({ message: "Patient ID not found", type: "error" });
+        notification({ message: "No Patient found please create one and try again", type: "error" });
         throw new Error("Patient ID not found");
       }
 
@@ -101,26 +124,24 @@ function MedicalRecord() {
       console.log(res);
 
       if (res.recordId) {
-        notification({ message: res?.messages, type: "success" });
-        // sessionStorage.setItem("patientId", res?.patientId);
-      }else if (res.StatusCode === 401) {
-        notification({ message: 'Unathorized Session', type: "error" });
-      }
-      else if (res.StatusCode === 500) {
+        notification({ message: res?.message, type: "success" });
+        resetFields();
+        getMedRecords()
+      } else if (res.StatusCode === 401) {
+        notification({ message: 'Unauthorized Session', type: "error" });
+      } else if (res.StatusCode === 500) {
         notification({ message: 'Internal Server Error', type: "error" });
-      }
-       else {
+      } else {
         console.log(res);
 
         let errorMessage = "An error occurred";
 
         if (res && res.errors) {
-          // Check if 'Name' or 'Comment' field has an error
           if (res.errors.Name && res.errors.Comment) {
             errorMessage = "Both Name and Comment are required";
           } else if (res.errors.Comment) {
             errorMessage = res.errors.Comment[0];
-          }else if (res.errors.Name) {
+          } else if (res.errors.Name) {
             errorMessage = res.errors.Name[0];
           }
         }
@@ -128,23 +149,36 @@ function MedicalRecord() {
       }
     } catch (error) {
       console.log(error);
-    };
-  }
+    }
+  };
 
   const getMedRecords = async () => {
     try {
-      let res = await get(`/patients/${patientId}/medicalRecord`)
+      let res = await get(`/patients/GetAllMedicalRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
       if (res) {
-        setMedTableData(res)
-        // sessionStorage.setItem("patientId", res?.patientId)
+        setMedTableData(res.data);
+        setTotalPages(res.pageCount)
       }
     } catch (error) {
-      console.error('Error fetching payment history:', error);
-
+      console.error('Error fetching medical records:', error);
     }
+  };
 
-  }
-
+  const validateFields = (data) => {
+    for (let item of data) {
+      if (!item.name || !item.comment) {
+        if (!item.name && !item.comment) {
+          notification({ message: "Both Name and Comment are required", type: "error" });
+        } else if (!item.name) {
+          notification({ message: "Name is required", type: "error" });
+        } else if (!item.comment) {
+          notification({ message: "Comment is required", type: "error" });
+        }
+        return false;
+      }
+    }
+    return true;
+  };
 
   const handleContinue = () => {
     let currentTabData = {};
@@ -168,71 +202,59 @@ function MedicalRecord() {
         break;
     }
 
-    const payload = {
-      medicalRecordType: selectedTab,
-      name: currentTabData[0]?.name,
-      comment: currentTabData[0]?.comment,
-    };
-    console.log("Allergies:", allergies, payload, Number(sessionStorage.getItem("patientId")));
-    console.log("Past Illnesses:", pastIllnesses);
-    console.log("Chronic Conditions:", chronicConditions);
-    console.log("Surgical History:", surgicalHistory);
-    console.log("Family History:", familyHistory);
-    submitPayload(payload);
+
+    if (validateFields(currentTabData)) {
+      const payload = {
+        medicalRecordType: selectedTab,
+        name: currentTabData[0]?.name,
+        comment: currentTabData[0]?.comment,
+      };
+      submitPayload(payload);
+    }
   };
-
-
 
   return (
     <div>
-      <div className="m-t-40">Medical Record</div>
-      {/* Render tabs */}
       <div className="flex">
         <div className="m-r-80">
           <div
-            className={`pointer m-t-20  ${selectedTab === 1 ? "pilled bold-text" : ""
-              }`}
+            className={`pointer m-t-20 ${selectedTab === 1 ? "pilled bold-text" : ""}`}
             onClick={() => setSelectedTab(1)}
           >
             1. Allergies
           </div>
           <div
-            className={`pointer m-t-20  ${selectedTab === 2 ? "pilled bold-text" : ""
-              }`}
+            className={`pointer m-t-20 ${selectedTab === 2 ? "pilled bold-text" : ""}`}
             onClick={() => setSelectedTab(2)}
           >
             2. Past Illnesses
           </div>
           <div
-            className={`pointer m-t-20  ${selectedTab === 3 ? "pilled bold-text" : ""
-              }`}
+            className={`pointer m-t-20 ${selectedTab === 3 ? "pilled bold-text" : ""}`}
             onClick={() => setSelectedTab(3)}
           >
             3. Chronic Conditions
           </div>
           <div
-            className={`pointer m-t-20  ${selectedTab === 4 ? "pilled bold-text" : ""
-              }`}
+            className={`pointer m-t-20 ${selectedTab === 4 ? "pilled bold-text" : ""}`}
             onClick={() => setSelectedTab(4)}
           >
             4. Surgical History
           </div>
           <div
-            className={`pointer m-t-20 ${selectedTab === 5 ? "pilled bold-text" : ""
-              }`}
+            className={`pointer m-t-20 ${selectedTab === 5 ? "pilled bold-text" : ""}`}
             onClick={() => setSelectedTab(5)}
           >
-            5. Family History
+            5. Family Medical History
+
           </div>
         </div>
-        {/* Render content based on the selected tab */}
 
         <div>
           {selectedTab === 1 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
               </div>
-
               {allergies.map((allergy, index) => (
                 <div key={index}>
                   <TagInputs
@@ -240,26 +262,17 @@ function MedicalRecord() {
                     type="text"
                     placeholder="Allergy Name"
                     value={allergy.name}
-                    onChange={(e) =>
-                      handleInputChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
                   />
                   <TagInputs
                     label="Comment"
                     type="textArea"
                     placeholder="Comment"
                     value={allergy.comment}
-                    onChange={(e) =>
-                      handleInputChange(index, "comment", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
                   />
                 </div>
               ))}
-              {/* <div className="w-100 flex flex-h-end">
-                <button className="rounded-btn m-t-20" onClick={handleAddField}>
-                  Add Allergy
-                </button>
-              </div> */}
             </div>
           )}
           {selectedTab === 2 && (
@@ -273,29 +286,19 @@ function MedicalRecord() {
                     type="text"
                     placeholder="Illness Name"
                     value={Illness.name}
-                    onChange={(e) =>
-                      handleInputChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
                   />
                   <TagInputs
                     label="Comment"
                     type="textArea"
                     placeholder="Comment"
                     value={Illness.comment}
-                    onChange={(e) =>
-                      handleInputChange(index, "comment", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
                   />
                 </div>
               ))}
-              {/* <div className="w-100 flex flex-h-end">
-                <button className="rounded-btn m-t-20" onClick={handleAddField}>
-                  Add Illness
-                </button>
-              </div> */}
             </div>
           )}
-
           {selectedTab === 3 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
@@ -307,29 +310,19 @@ function MedicalRecord() {
                     type="text"
                     placeholder="Condition Name"
                     value={condition.name}
-                    onChange={(e) =>
-                      handleInputChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
                   />
                   <TagInputs
                     label="Comment"
                     type="textArea"
                     placeholder="Comment"
                     value={condition.comment}
-                    onChange={(e) =>
-                      handleInputChange(index, "comment", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
                   />
                 </div>
               ))}
-              {/* <div className="w-100 flex flex-h-end">
-                <button className="rounded-btn m-t-20" onClick={handleAddField}>
-                  Add Chronic Conditions
-                </button>
-              </div> */}
             </div>
           )}
-
           {selectedTab === 4 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
@@ -341,32 +334,19 @@ function MedicalRecord() {
                     type="text"
                     placeholder="Surgery Name"
                     value={surgery.name}
-                    onChange={(e) =>
-                      handleInputChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
                   />
                   <TagInputs
                     label="Comment"
                     type="textArea"
                     placeholder="Comment"
                     value={surgery.comment}
-                    onChange={(e) =>
-                      handleInputChange(index, "comment", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
                   />
                 </div>
               ))}
-              {/* <div className="w-100 flex flex-h-end">
-                <button
-                  className="rounded-btn m-t-20"
-                  onClick={() => handleAddField("surgicalHistory")}
-                >
-                  Add Surgery
-                </button>
-              </div> */}
             </div>
           )}
-
           {selectedTab === 5 && (
             <div>
               <div className="w-100 flex flex-h-end flex-v-center gap-4">
@@ -378,47 +358,65 @@ function MedicalRecord() {
                     type="text"
                     placeholder="Family Member Name"
                     value={familyMember.name}
-                    onChange={(e) =>
-                      handleInputChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
                   />
                   <TagInputs
                     label="Comment"
                     type="textArea"
                     placeholder="Comment"
                     value={familyMember.comment}
-                    onChange={(e) =>
-                      handleInputChange(index, "comment", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
                   />
                 </div>
               ))}
-              {/* <div className="w-100 flex flex-h-end">
-                <button
-                  className="rounded-btn m-t-20"
-                  onClick={() => handleAddField("familyHistory")}
-                >
-                  Add Family History
-                </button>
-              </div> */}
             </div>
           )}
 
-          {/* Repeat the above structure for other tabs */}
-          {/* ... */}
           <button className="submit-btn w-100 m-t-20" onClick={handleContinue}>
             Add
           </button>
         </div>
       </div>
+      <h3 className="m-t-20">Medical History</h3>
       <div>
-        <AllergyTable data={medTableData} />
+        <div>
+          <AllergyTable data={medTableData} />
+          <div className="pagination flex space-between float-right col-3 m-t-20">
+            <div className="flex gap-8">
+              <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+            </div>
+            <div className="flex gap-8">
+              <button
+                className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                {"Previous"}
+              </button>
 
+              {generatePageNumbers().map((page, index) => (
+                <button
+                  key={`page-${index}`}
+                  className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                {"Next"}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 export default MedicalRecord;
-
-// i want this code to be a component where i can input data and submit. from the left it has five(5) tabs allergies, past illnesses, chronic conditions, Surgical history, family history. next is a each tab displays eg(alergy tab would have alergy 1 input field and comment and a plus button to add allergy 2 and comment etc) same with the rest tabs. and a continue button at the bottom

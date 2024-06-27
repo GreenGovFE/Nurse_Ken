@@ -16,6 +16,33 @@ function ReferredPatients() {
   const [filterSelected, setFilterSelected] = useState("");
   const [filterOptions, setFilterOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const generatePageNumbers = () => {
+    let pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages = [1, 2, 3, 4, totalPages];
+      } else if (currentPage >= totalPages - 2) {
+        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
+      }
+    }
+    return pages;
+  };
+
 
   const navigate = useNavigate();
 
@@ -70,8 +97,9 @@ function ReferredPatients() {
   const getAllReferralNotes = async () => {
     setLoading(true);
     try {
-      let res = await get(`/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30`);
+      let res = await get(`/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30`);
       setAllPatients(res.data);
+      setTotalPages(res.pageCount);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
@@ -82,9 +110,10 @@ function ReferredPatients() {
   const searchPatients = async (searchParam) => {
     setLoading(true);
     try {
-      let url = `/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30&search=${searchParam}&FilterBy=${filterSelected}`;
+      let url = `/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30&search=${searchParam}&FilterBy=${filterSelected}`;
       let res = await get(url);
       setAllPatients(res.data);
+      setTotalPages(res.pageCount);
     } catch (error) {
       console.error('Error fetching patients:', error);
     } finally {
@@ -104,7 +133,7 @@ function ReferredPatients() {
   useEffect(() => {
     getAllReferralFilters();
     getAllReferralNotes();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     if (filterSelected && payload) {
@@ -115,14 +144,14 @@ function ReferredPatients() {
   }, [filterSelected, payload]);
 
   return (
-    <div className="w-100 m-t-80">
+    <div className="w-100 m-t-40">
       <div className="flex flex-v-center flex-h-center space-between m-t-20">
         <h3 className="float-left col-4">Referred Patients</h3>
         <div className="flex flex-v-center flex-h-center">
           <div className="col-10">
             <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
           </div>
-          <div className="col-4">
+          <div className="col-6">
             <TagInputs
               onChange={handleChange}
               name="filter"
@@ -136,7 +165,41 @@ function ReferredPatients() {
         <Spinner />
       ) : (
         <div>
-          <ReferralTable data={allPatients} fetch={getAllReferralNotes} />
+          <div>
+            <ReferralTable data={allPatients} fetch={getAllReferralNotes} />
+            <div className="pagination flex space-between float-right col-3 m-t-20">
+              <div className="flex gap-8">
+                <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+              </div>
+              <div className="flex gap-8">
+                <button
+                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {"Previous"}
+                </button>
+
+                {generatePageNumbers().map((page, index) => (
+                  <button
+                    key={`page-${index}`}
+                    className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  {"Next"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import TagInputs from "../layouts/TagInputs";
+import { RiCloseFill, RiFileDownloadFill } from "react-icons/ri";
 
 const LabrequestModal = ({ closeModal, record }) => {
 
@@ -17,12 +18,12 @@ const LabrequestModal = ({ closeModal, record }) => {
     const formattedDate = currentDateTime.toLocaleDateString();
     const formattedTime = currentDateTime.toLocaleTimeString();
 
-    
+
     const downloadFile = async (docName) => {
         try {
             // Get the token from local storage
             const token = sessionStorage.getItem('token');
-           
+
             // If token is not available, handle accordingly
             if (!token) {
                 console.error('Token not found in session storage');
@@ -69,34 +70,37 @@ const LabrequestModal = ({ closeModal, record }) => {
 
     return (
         <div className="modal  ">
-            <div className="modal-contents col-10  ">
-                <span className="close m-b-10" onClick={closeModal}>&times;</span>
-                <div className="flex space-between">
-                    <div className="flex space-between flex-v-center m-t-20 col-3">
-                        <h3 >{record?.patientFullName}</h3> |
-                        <p>Lab Report</p>
+            <RiCloseFill className='close-btn pointer' onClick={closeModal} />
+
+            <div className="modal-contents col-12  p-10 ">
+                <div className="flex  m-l-20">
+                    <div className="flex flex-v-center m-t-20  col-7">
+                        <h3 className="m-r-10" >{record?.patientFullName}</h3> |
+                        <p className="m-l-10">Lab Report</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
-                        <h4>Date: {new Date(record?.createdOn).toLocaleDateString()}</h4> |
-                        <p>Time: {formattedTime}</p>
+                    <div className="flex flex-v-center m-t-20 m-l-160 col-6">
+                        {/* <h4 className="m-r-10">Date: {new Date(record?.createdOn).toLocaleDateString()}</h4> | */}
+                        <p className="m-l-10">Time: {formattedTime}</p>
                     </div>
                 </div>
-                <div className="m-t-10 ">
-                    <TagInputs disabled={true} value={record?.subject} label='Subject' />
-                </div>
 
-                <div >
+                <div className="p-20" >
 
+                    <div className="m-t-10 ">
+                        <TagInputs disabled={true} value={record?.subject} label='Subject' />
+                    </div>
                     <div className='flex flex-v-center m-t-20 '><div className='findings w-100'>Lab Findings</div>  </div>
                     <div className='outline-box'>{record?.labFindings}</div>
                     <div>
-                       
+
                         <div className="m-t-20" >
 
                             {record?.patientLabDocuments.map((doc, index) => (
-                                <div className="flex flex-direction-v" key={index}>
-                                    <a href={doc.docUrl} target="_blank" rel="noopener noreferrer">{doc.docName}</a>
-                                    <button className="submit-btn col-2 m-t-10" onClick={() => downloadFile(doc.docName)}>Download</button>
+                                <div key={index}>
+                                    <div className='text-green pointer flex flex-direction-v flex-h-center '>
+                                        <RiFileDownloadFill onClick={() => downloadFile(doc?.docName)} size={20} />
+                                        <a href={doc.docUrl} target="_blank" rel="noopener noreferrer">{doc.docName}</a>
+                                    </div>
                                 </div>
                             ))}
                         </div>

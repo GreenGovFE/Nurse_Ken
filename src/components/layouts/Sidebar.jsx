@@ -8,11 +8,12 @@ import useNavigationItems from "../../config/sideBarMenu";
 import { usePatient } from "../../contexts";
 
 const Sidebar = ({ history }) => {
-  const { setPatientId, setPatientInfo } = usePatient();
+  const { setPatientId, setPatientInfo, setHmoDetails } = usePatient();
 
   const resetPatientInfo = () => {
-    setPatientInfo({});
-    setPatientId('');
+    setPatientInfo(null);
+    setPatientId(0);
+    setHmoDetails(null);
   };
 
   const {

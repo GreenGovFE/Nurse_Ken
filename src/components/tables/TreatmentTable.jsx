@@ -1,94 +1,118 @@
 import { useEffect, useState } from "react";
 import { get } from "../../utility/fetch";
+import NurseNoteTreatment from "../modals/NurseNoteTreatment";
+import { usePatient } from "../../contexts";
 
 function TreatmentTable({ data }) {
+  const { patientId } = usePatient();
+  const [combinedData, setCombinedData] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewing, setViewing] = useState({});
+  const [notes, setNotes] = useState('');
+  const [add, setAdd] = useState(false); // Add loading state
 
-  const [nurses, setNurses] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+  const fetchData = async () => {
+    try {
+      const response = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${patientId}`);
+      const combined = data.map(treatment => {
+        const correspondingVisit = response.data.find(visit => visit.visitId === treatment.visitId);
+        return {
+          ...treatment,
+          nurseName: correspondingVisit ? correspondingVisit.nurseName : 'No Nurse Assigned',
+          nurseNotes: correspondingVisit ? correspondingVisit.notes : 'No Notes',
+          nurseId: correspondingVisit ? correspondingVisit.nurseId : 0
+        };
+      });
+      console.log(combined);
+
+      setCombinedData(combined);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
-    getNurses();
-    getDoctors();
-  }, []);
+    fetchData();
+  }, [patientId, data]);
 
-  const getNurses = async () => {
-    try {
-      let res = await get(
-        `/patients/Allnurse/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem(
-          "clinicId"
-        )}&pageIndex=1&pageSize=10`
-      );
-      setNurses(Array.isArray(res?.data) ? res?.data : []);
-    } catch (error) {
-      console.error('Error fetching nurses:', error);
-      // Handle the error here, such as displaying an error message to the user
-    }
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setAdd(false)
   };
 
-  const getDoctors = async () => {
-    try {
-      let res = await get(
-        `/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?clinicId=${sessionStorage.getItem(
-          "clinicId"
-        )}&pageIndex=1&pageSize=30`
-      );
-      setDoctors(Array.isArray(res?.data) ? res?.data : []);
-    } catch (error) {
-      console.error('Error fetching doctors:', error);
-      // Handle the error here, such as displaying an error message to the user
-    }
+  const selectRecord = (record) => () => {
+    setViewing(record);
+    setNotes(record.nurseNotes);
+    setIsModalOpen(true);
   };
 
-
-  const getNurseName = (nurseId) => {
-    const nurse = nurses?.find((nurse) => nurse?.nurseEmployeeId === nurseId);
-    return nurse ? nurse?.username : "Nurse Not Found";
+  const addNotes = (record) => () => {
+    setViewing(record);
+    setNotes(record.nurseNotes);
+    setIsModalOpen(true);
+    setAdd(true)
   };
 
-  const getDoctorName = (doctorId) => {
-    const doctor = doctors?.find((doctor) => doctor?.doctorEmployeeId === doctorId);
-    return doctor ? doctor?.username : "None Assigned";
-  };
+  console.log(combinedData)
+
   return (
-    <div className="w-100 ">
+    <div className="w-100">
       <div className="w-100 none-flex-item m-t-40">
         <table className="bordered-table">
           <thead className="border-top-none">
             <tr className="border-top-none">
-              <th>Date</th>
-              <th>Age</th>
-              <th>Weight (Kg)</th>
-              <th>Temperature  (°C)</th>
-              <th>Admin Nurse</th>
-              <th>Nurse Note</th>
-              <th>Diagnosis</th>
-              <th>Medication/Prescription</th>
+              <th className="center-text">Date</th>
+              <th className="center-text">Age</th>
+              <th className="center-text">Weight (Kg)</th>
+              <th className="center-text">Temperature (°C)</th>
+              <th className="center-text">Admin Nurse</th>
+              <th className="center-text">Nurse Note</th>
+              <th className="center-text">Diagnosis</th>
+              <th className="center-text">Medication/Prescription</th>
             </tr>
           </thead>
-
           <tbody className="white-bg view-det-pane">
-            {Array.isArray(data) && data?.map((row) => (
+            {combinedData.map((row) => (
               <tr key={row?.id}>
                 <td>{new Date(row?.dateOfVisit).toLocaleDateString()}</td>
                 <td>{row?.age}</td>
                 <td>{row?.weight}</td>
                 <td>{row?.temperature}</td>
-                <td>{getDoctorName(row?.doctorId)}</td>
-                <td>{row?.additionalNote || 'No Note'}</td>
-                <td>{row?.diagnosis}</td>
+                <td>{row.nurseName}</td>
+                <td onClick={selectRecord(row)}>
+                  <img className="hovers pointer" src="/details.png" alt="Details" />
+                </td>
+                <td style={{ maxWidth: '650px', whiteSpace: 'wrap', textAlign: 'left', paddingLeft: '12px' }}>
+                  {row?.diagnosis}
+                </td>
                 <td>
-                  {row?.medications?.map((med) => (
-                    <div key={med.id} className="m-b-10">
-                      {med ? med.name : 'No Medication'}
+                  {row?.medications?.map((med, index) => (
+                    <div key={med.id} className="m-b-10 flex flex-direction-v">
+                      <div className="flex">
+                        <span>{index + 1}.</span>
+                        <span className="m-l-20">{med ? med.name : 'No Medication'}</span>
+                      </div>
                     </div>
                   ))}
+                  <span className="m-t-10 m-b-10 add-note" onClick={addNotes(row)}>
+                    Add to patient's note
+                  </span>
                 </td>
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
+      {isModalOpen && (
+        <NurseNoteTreatment
+          visit={viewing}
+          notes={notes}
+          add={add}
+          closeModal={closeModal}
+        />
+      )}
+
+
     </div>
   );
 }

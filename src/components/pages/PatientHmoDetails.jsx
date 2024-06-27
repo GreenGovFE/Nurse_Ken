@@ -8,10 +8,11 @@ import TagInputs from "../layouts/TagInputs";
 import Personal from "./Patient/Personal";
 import ContactDetails from "./Patient/ContactDetails";
 import MembershipCover from "./Patient/MembershipCover";
+import IdentityDetails from "./Patient/IdentityDetails";
 import Spinner from "../UI/Spinner";
 
 function PatientHMOetails() {
-  const { patientId, patientName, hmoId, patientInfo, setPatientInfo } = usePatient();
+  const { patientId, patientName, hmoId, patientInfo, hmoDetails } = usePatient();
 
   const [pictureUrl, setPictureUrl] = useState('');
   const [paymentHistory, setPaymentHistory] = useState(false);
@@ -29,6 +30,8 @@ function PatientHMOetails() {
         return <ContactDetails renderTabContent={renderTabContent} />;
       case "membershipCover":
         return <MembershipCover renderTabContent={renderTabContent} />;
+      case "identityDetails":
+        return <IdentityDetails renderTabContent={renderTabContent} />;
       default:
         return <Personal renderTabContent={renderTabContent} />;
     }
@@ -47,6 +50,8 @@ function PatientHMOetails() {
       console.error('Error fetching payment history:', error);
     }
   };
+
+  console.log(hmoDetails)
 
   const fetchHmoById = async (hmoId) => {
     try {
@@ -80,29 +85,33 @@ function PatientHMOetails() {
   return (
     <div style={{ width: '100%', height: '100%', padding: '20px' }}>
       {loading ? ( // Conditionally render loader
-        <div className="m-t-80"><Spinner/></div>
+        <div className="m-t-80"><Spinner /></div>
       ) : (
-        <div style={{ marginTop: '80px' }}>
+        <div style={{ marginTop: '40px' }}>
           <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <h2 style={{ marginBottom: '10px' }}>{`${patientInfo?.firstName} ${patientInfo?.lastName}`}</h2>
-                <span style={{ marginBottom: '10px' }}>Patient ID: {patientId}</span>
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
               <div>
-                <TagInputs className="no-wrap" value={patientInformation?.hmo?.packages && patientInformation?.hmo?.packages.length > 0 ? patientInformation?.hmo?.packages[0].name : ''} disabled label="HMO Class" />
+                <TagInputs className="no-wrap" value={hmoDetails?.hmoPackageName || ''} disabled label="HMO Class" />
               </div>
-              <div className="m-r-30">
-                <TagInputs className="no-wrap " disabled label="Validity" />
+              <div className="w-100">
+                <TagInputs
+                  className="no-wrap"
+                  value={hmoDetails?.membershipValidity ? new Date(hmoDetails.membershipValidity).toDateString() : ''}
+                  disabled
+                  label="Validity"
+                />
               </div>
             </div>
           </div>
 
           <div className="col-5">
             <div style={{ flex: '50%' }}>
-              <TagInputs className="no-wrap" value={`${patientInformation?.hmo?.vendorName || ''}  |  ${patientInformation?.hmo?.taxIdentityNumber || ''}`} disabled label="HMO Service Provider" />
+              <TagInputs className="no-wrap" value={`${hmoDetails?.hmoProviderName || ''}  |  ${patientInformation?.hmo?.taxIdentityNumber || ''}`} disabled label="HMO Service Provider" />
             </div>
           </div>
 
@@ -120,6 +129,12 @@ function PatientHMOetails() {
               Contact Details
             </div>
             <div
+              style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "identityDetails" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "identityDetails" ? '#3C7E2D' : '#393939' }}
+              onClick={() => setSelectedTab("identityDetails")}
+            >
+              Identity Details
+            </div>
+            <div
               style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "membershipCover" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "membershipCover" ? '#3C7E2D' : '#393939' }}
               onClick={() => setSelectedTab("membershipCover")}
             >
@@ -132,6 +147,8 @@ function PatientHMOetails() {
               selectedTab === "personal" ? <Personal hide={false} setSelectedTab={setSelectedTab} /> :
                 selectedTab === "contactDetails" ?
                   <ContactDetails hide={false} setSelectedTab={setSelectedTab} /> :
+                  selectedTab === "identityDetails" ?
+                  <IdentityDetails hide={true} setSelectedTab={setSelectedTab} /> : 
                   selectedTab === "membershipCover" ?
                     <MembershipCover hide={true} setSelectedTab={setSelectedTab} /> : null
             }

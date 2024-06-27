@@ -8,25 +8,19 @@ import { get, post, put } from '../../utility/fetch';
 import axios from 'axios';
 import notification from '../../utility/notification';
 
-function ActionReferralModal({ closeModal, referralId, next, fetch }) {
+function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
+    const [errors, setErrors] = useState({});
 
-    const actionOptions = [{ name: 'Accept/Decline', value: '' }, { name: 'Accept', value: 1 }, { name: 'Decline', value: 2 }]
+    const actionOptions = [{ name: 'Accept/Decline', value: '' }, { name: 'Accept', value: 1 }, { name: 'Decline', value: 2 }];
 
+    console.log(referralInfo)
     const handleChange = (field, event) => {
-
-        console.log(event);
-        const value = event;
-        const name = field
-
-        if (name === 'acceptanceStatus') {
-            setPayload(prevPayload => ({ ...prevPayload, [name]: Number(value?.target.value), }));
-
-        } else {
-            setPayload(prevPayload => ({ ...prevPayload, [name]: value?.target.value }));
-        }
-    }
+        const value = event?.target?.value ?? event;
+        setPayload(prevPayload => ({ ...prevPayload, [field]: value }));
+        setErrors(prevErrors => ({ ...prevErrors, [field]: '' })); // Clear the error for this field
+    };
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -37,9 +31,34 @@ function ActionReferralModal({ closeModal, referralId, next, fetch }) {
         return () => clearInterval(intervalId);
     }, []);
 
+    const validate = () => {
+        console.log(payload)
+        const newErrors = {};
+        if (!payload.acceptanceStatus) {
+            newErrors.acceptanceStatus = 'Decision is required';
+            notification({ message: 'Decision is required', type: "error" });
+        }
+        if (!payload.notes) {
+            newErrors.notes = 'Additional Notes are required';
+            notification({ message: 'Additional Notes are required', type: "error" });
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const ActionReferral = async () => {
+        if (!validate()) {
+            return;
+        }
+
+        if (referralInfo.acceptanceStatus === 'Rejected' && payload.acceptanceStatus == 2) {
+            notification({ message: 'Can not reject an already rejected patient', type: "error" });
+            return;
+        }
+
         const Payload = {
             ...payload,
+            acceptanceStatus: parseInt(payload.acceptanceStatus),
             referralId: referralId,
         };
 
@@ -71,29 +90,40 @@ function ActionReferralModal({ closeModal, referralId, next, fetch }) {
         }
     };
 
-
-
-    const formattedDate = currentDateTime.toLocaleDateString();
     const formattedTime = currentDateTime.toLocaleTimeString();
-
 
     return (
         <div className='modal'>
+            <RiCloseFill className='close-btn pointer' onClick={closeModal} />
+
             <div className="modal-contents">
-                <span className="close m-b-20" onClick={closeModal}>&times;</span>
-                <div className="flex space-between">
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
-                        <p>Admit Referred Patient</p>
+                <div className="flex m-l-40 ">
+                    <div className="flex flex-v-center m-t-20 col-5">
+                        <p className='m-l-'>Admit Referred Patient</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
+                    <div className="flex space-between flex-v-center m-l-100 m-t-20 col-4">
                         <p>Time: {formattedTime}</p>
                     </div>
                 </div>
                 <div className="p-40">
-                    <TagInputs label="Decision" onChange={(value) => handleChange("acceptanceStatus", value)} options={actionOptions} name="acceptanceStatus" type='select' />
-                    <TagInputs label="Additional Notes" name="notes" onChange={(value) => handleChange("notes", value)} type='textArea' />
+                    <TagInputs
+                        label="Decision"
+                        onChange={(value) => handleChange("acceptanceStatus", (value))}
+                        options={actionOptions}
+                        name="acceptanceStatus"
+                        type='select'
+                    />
+                    {/* {errors.acceptanceStatus && <div className="error">{errors.acceptanceStatus}</div>} */}
 
-                    <button onClick={ActionReferral} className="submit-btn m-t-20 w-100" >Submit</button>
+                    <TagInputs
+                        label="Additional Notes"
+                        name="notes"
+                        onChange={(value) => handleChange("notes", value)}
+                        type='textArea'
+                    />
+                    {/* {errors.notes && <div className="error">{errors.notes}</div>} */}
+
+                    <button onClick={ActionReferral} className="submit-btn m-t-20 w-100">Submit</button>
                 </div>
             </div>
         </div>

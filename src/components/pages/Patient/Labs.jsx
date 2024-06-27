@@ -26,8 +26,6 @@ function Labs() {
 
   return (
     <div>
-      {" "}
-      <div className="m-t-40">Labs</div>
       <div className="w-100">
         <LabsTable data={labReports} />
       </div>

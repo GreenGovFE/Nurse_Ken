@@ -19,7 +19,8 @@ const data = [
   { name: "Group B", value: 300 },
   { name: "Group C", value: 300 },
 ];
-const COLORS = ["#109615", "#FFC700", "#FF0000"];
+const COLORS = ["#17AD21", "#CBCF02", "#D42023"];
+
 
 function CustomerEngagement() {
   const [customerEngagements, setCustomerEngagements] = useState([]);
@@ -29,7 +30,7 @@ function CustomerEngagement() {
   const [avg, setAvg] = useState([]);
   const [totalValue, setTotalValue] = useState(0);
   const [typeNum, setTypeNum] = useState(1)
-  const [selectedTab, setSelectedTab] = useState("patients");
+  const [selectedTab, setSelectedTab] = useState("Patients");
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchAvg = async () => {
@@ -89,7 +90,7 @@ function CustomerEngagement() {
   };
 
   const handleTypeChange = () => {
-    if (selectedTab === "patients") {
+    if (selectedTab === "Patients") {
       setCurrentPage(1);
       setTypeNum(1);
     } else {
@@ -123,20 +124,20 @@ function CustomerEngagement() {
       <div className="m-t-20"><h3>Customer Engagement</h3></div>
       <div className="tabs flex m-t-20 bold-text">
         <div
-          className={`tab-item ${selectedTab === "patients" ? "active" : ""}`}
-          onClick={() => setSelectedTab("patients")}
+          className={`tab-item ${selectedTab === "Patients" ? "active" : ""}`}
+          onClick={() => setSelectedTab("Patients")}
         >
           Patients
         </div>
 
         <div
-          className={`tab-item ${selectedTab === "colleagues" ? "active" : ""}`}
-          onClick={() => setSelectedTab("colleagues")}
+          className={`tab-item ${selectedTab === "Colleagues" ? "active" : ""}`}
+          onClick={() => setSelectedTab("Colleagues")}
         >
           Colleagues
         </div>
       </div>
-      <div className="flex gap-16">
+      <div className="flex  gap-16">
         {/* Dropdown for month selection */}
 
 
@@ -145,15 +146,17 @@ function CustomerEngagement() {
 
           <div className="container">
             <div className="flex flex-v-center w-100 space-between border-bottom p-b-20">
-              <div className="bold-text">{selectedTab + " evaluation"}</div>
-              <div className="dropdown">
-                <select value={month} onChange={handleMonthChange}>
-                  {months.map((monthOption) => (
-                    <option key={monthOption} value={monthOption}>
-                      {monthOption}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex">
+                <div className="bold-text m-t-2 col-7 ">{selectedTab + " Evaluation"}</div>
+                <div className="dropdown-input m-l-80  col-5">
+                  <select value={month} onChange={handleMonthChange}>
+                    {months.map((monthOption) => (
+                      <option key={monthOption} value={monthOption}>
+                        {monthOption}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -185,7 +188,7 @@ function CustomerEngagement() {
                   <span className="created-at">
                     {new Date(engagement.createdAt).toLocaleDateString()}
                   </span>
-                  <div className="engagement-details m-t-20">
+                  <div className="engagement-comments m-t-10 m-b-40">
                     <span className="comment-text">{engagement.comments}</span>
                   </div>
                 </div>

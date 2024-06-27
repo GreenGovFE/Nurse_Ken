@@ -68,7 +68,7 @@ function AddTreatment({ closeModal, visit, id, fetchData }) {
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
             <div className="modal-box max-w-600">
                 <div className="p-40">
-                    <h3 className="bold-text">Add Treatment</h3>
+                    <h3 className="">Add Treatment</h3>
                     <div className="w-80 m-t-20 flex">
                         <label htmlFor="category" className='label'>Treatment Category</label>
                         <select id="category" className="input-field" value={selectedCategoryId} onChange={(e) => setSelectedCategoryId(e.target.value)}>

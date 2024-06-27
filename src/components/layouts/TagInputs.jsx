@@ -19,24 +19,26 @@ export default function TagInputs(props) {
                         className="w-100"
                         style={{
                             height: "40px",
-                            border: "1px solid #3C7E2D",
+                            border: "1px solid #3c7e2d73",
                             width: "100%",
-                            borderRadius: "0px 4px 4px 0px"
+                            borderRadius: "0px 4px 4px 0px",
+                            paddingRight: "20px" 
                         }}
                     />
+
                 ) : (
                     props.type === 'R-select' ? (
                         <Select
                             name={props.name}
                             id={props.name}
                             value={props.value}
-                            onChange={props.onChange} 
+                            onChange={props.onChange}
                             onBlur={props.onBlur}
                             isDisabled={props.disabled}
                             options={props.options}
                             style={{
                                 height: "40px",
-                                border: "1px solid #3C7E2D",
+                                border: "1px solid #3c7e2d73",
                                 width: "100% !important",
                                 borderRadius: "0px 4px 4px 0px"
                             }}
@@ -45,7 +47,7 @@ export default function TagInputs(props) {
                     ) : (
                         <div style={{
                             width: "100%", ...(props.type !== "textArea" && {
-                                border: "1px solid #3C7E2D", borderRadius: "0px 4px 4px 0px"
+                                border: "1px solid #3c7e2d73", borderRadius: "0px 4px 4px 0px"
                             })
                         }}>
                             {props.type === "date" ? (

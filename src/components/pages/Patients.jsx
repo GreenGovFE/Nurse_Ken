@@ -14,6 +14,7 @@ import { get } from "../../utility/fetch";
 import TagInputs from "../layouts/TagInputs";
 import ReferralModal from "../modals/RefferalModal";
 import Spinner from "../UI/Spinner";
+import { usePatient } from "../../contexts";
 
 function Patients() {
   const [allPatients, setAllPatients] = useState([]);
@@ -22,11 +23,43 @@ function Patients() {
   const [filterSelected, setFilterSelected] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewing, setViewing] = useState({});
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const { setPatientId, setPatientInfo, setHmoDetails } = usePatient();
+
+
+
+
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const generatePageNumbers = () => {
+    let pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        pages = [1, 2, 3, 4, totalPages];
+      } else if (currentPage >= totalPages - 2) {
+        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
+      }
+    }
+    return pages;
+  };
 
   useEffect(() => {
     getAllPatients();
-  }, []);
+  }, [currentPage]);
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -72,9 +105,10 @@ function Patients() {
   const getAllPatients = async () => {
     setLoading(true); // Set loading to true before fetch
     try {
-      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=30`);
+      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30`);
       console.log(res);
       setAllPatients(res.data);
+      setTotalPages(res.pageCount);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
@@ -126,7 +160,7 @@ function Patients() {
   ];
 
   return (
-    <div className="w-100 m-t-80">
+    <div className="w-100 m-t-40">
       <div className="flex flex-v-center flex-h-center space-between  m-t-20">
         <h3 className="float-left col-4">Patients Management</h3>
         <div className="flex flex-v-center flex-h-center ">
@@ -142,20 +176,55 @@ function Patients() {
             />
           </div>
           <div className="m-b-10 col-4">
-            <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn">
+            <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null)  }} className="submit-btn">
               <div className="flex flex-h-center flex-v-center">
                 <AiOutlinePlus size={24} color="white" />
-                <p className="m-l-10 m-r-10">Refer a Patient</p>
+                <p className="m-l-10 m-r-10">Onboard a Patient</p>
               </div>
             </button>
           </div>
         </div>
       </div>
       <div>
-        {loading ? ( // Conditionally render loader
-          <Spinner /> // Use Spinner component
+        {loading ? (
+          <Spinner />
         ) : (
-          <PatientsTable data={allPatients} />
+          <div>
+            <PatientsTable data={allPatients} />
+
+            <div className="pagination flex space-between float-right col-3 m-t-20">
+              <div className="flex gap-8">
+                <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+              </div>
+              <div className="flex gap-8">
+                <button
+                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {"Previous"}
+                </button>
+
+                {generatePageNumbers().map((page, index) => (
+                  <button
+                    key={`page-${index}`}
+                    className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  {"Next"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
       {isModalOpen &&
