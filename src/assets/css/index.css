@@ -103,6 +103,25 @@
   padding: 10px; */
 }
 
+.cards-unavailable {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 100px;
+  left: 348px;
+  background-color: white;
+  top: 245px;
+  border: 1px solid #ff000073;
+  border-radius: 5px 5px 5px 0;
+  width: 122px;
+  box-shadow: 1px 4px 11px 0px #35353628;
+  padding: 10px;
+  align-items: center;
+  font-size: smaller;
+  /* margin: 10px;
+  padding: 10px; */
+}
+
 
 .card-Image {
   display: flex;
@@ -138,7 +157,7 @@
   flex-direction: column;
   height: 100px;
   background-color: white;
-  width: 200px;
+  width: 245px;
   border-radius: 5px;
   box-shadow: 1px 4px 11px 0px #CEBDE440;
   margin-top: 10px;
@@ -1158,7 +1177,6 @@ section {
 
 .space-between {
   justify-content: space-between !important;
-  flex-wrap: wrap;
 }
 
 .float-right {
@@ -1280,16 +1298,24 @@ footer {
 
 div.banner {
   width: 100%;
-  height: 750px;
+  height: 100vh;
   background-image: url('../images/bg-login.png');
   background-color: #1C811C55;
-
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
 }
+
 
 div.banner .login {
   margin: 0 auto;
   max-width: 600px;
-  height: 750px;
+  height: 100%;
   padding: 40px;
   position: unset;
   background-color: #ffffff;

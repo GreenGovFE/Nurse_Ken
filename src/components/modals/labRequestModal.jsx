@@ -6,14 +6,14 @@ const LabrequestModal = ({ closeModal, record }) => {
 
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        return () => clearInterval(intervalId);
-    }, []);
+    //     // Cleanup function to clear the interval when the component unmounts
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
     const formattedDate = currentDateTime.toLocaleDateString();
     const formattedTime = currentDateTime.toLocaleTimeString();
@@ -78,10 +78,9 @@ const LabrequestModal = ({ closeModal, record }) => {
                         <h3 className="m-r-10" >{record?.patientFullName}</h3> |
                         <p className="m-l-10">Lab Report</p>
                     </div>
-                    <div className="flex flex-v-center m-t-20 m-l-160 col-6">
-                        {/* <h4 className="m-r-10">Date: {new Date(record?.createdOn).toLocaleDateString()}</h4> | */}
+                    {/* <div className="flex flex-v-center m-t-20 m-l-160 col-6">
                         <p className="m-l-10">Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="p-20" >

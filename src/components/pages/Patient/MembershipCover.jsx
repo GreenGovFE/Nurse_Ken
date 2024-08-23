@@ -183,6 +183,8 @@ function MembershipCover({ setSelectedTab, hide }) {
     if (res.message === 'Successfully assigned the patientHMO') {
       notification({ message: 'Added HMO to patient', type: "success" });
       setPayload({});
+      setSelectedHmoPackages([])
+      setPackageId([])
     } else {
 
       notification({ message: 'Failed to add HMO to patient', type: "error" });
@@ -190,8 +192,22 @@ function MembershipCover({ setSelectedTab, hide }) {
   };
 
   const getHmoList = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
     try {
-      let res = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/list/1/100`);
+      let res = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/list/1/100`, options);
       console.log(res);
       if (res) {
         setHmoList(res.data?.resultList);

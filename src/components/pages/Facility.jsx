@@ -39,6 +39,8 @@ function Facility() {
     setAssignmentData(data);
   }
 
+  const itemsPerPage = 10
+
   const getRooms = async () => {
     const token = sessionStorage.getItem('token');
 
@@ -176,7 +178,7 @@ function Facility() {
       case "beds":
         return (
           <div>
-            <div className="flex flex-direction-h space-between">
+            <div style={{ display: 'flex', flexDirection: 'horizontal', justifyContent: 'space-between', flexWrap: 'wrap'}}>
               <div className="col-8">
                 <div className="m-t-20 m-b-20 bold-text">
                   {wards} | {availableBed} Beds Available | {occupiedBeds} Beds Occupied
@@ -237,7 +239,7 @@ function Facility() {
                   </div>
                 </div>
               </div>
-              <div className="flex m-t-50 m-l-100  flex-direction-v">
+              <div className="flex m-t-40  col-3  flex-direction-v">
                 <div className="m-b-10 m-r-20">
                   <StatCard
                     data={{
@@ -268,7 +270,7 @@ function Facility() {
               </div>
             </div>
             <div className="m-t-40">
-              <AssignedBed fetchBedList={getBedList} />
+              <AssignedBed  fetchBedList={getBedList} />
             </div>
           </div>
         );
@@ -286,14 +288,14 @@ function Facility() {
                 style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTabInner === "assignedEquipment" ? '2px solid #3C7E2D' : 'none', color: selectedTabInner === "assignedEquipment" ? '#3C7E2D' : '#393939' }}
                 onClick={() => setSelectedTabInner('assignedEquipment')}
               >
-                View Patent Usage
+                View Patient Usage
               </div>
             </div>
             {
               selectedTabInner === "equipmentList" ?
-                <EquipmentTable /> :
+                <EquipmentTable  /> :
                 selectedTabInner === "assignedEquipment" ?
-                  <EquipmentTableAssigned  /> : null
+                  <EquipmentTableAssigned   /> : null
             }
           </div>
         );
@@ -311,14 +313,14 @@ function Facility() {
                 style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTabInner === "assignedAmbulance" ? '2px solid #3C7E2D' : 'none', color: selectedTabInner === "assignedAmbulance" ? '#3C7E2D' : '#393939' }}
                 onClick={() => setSelectedTabInner('assignedAmbulance')}
               >
-                View Patent Usage
+                View Patient Usage
               </div>
             </div>
             {
               selectedTabInner === "ambulanceList" ?
-                <AmbulanceTable /> :
+                <AmbulanceTable  /> :
                 selectedTabInner === "assignedAmbulance" ?
-                  <AmbulanceTableAssigned /> : null
+                  <AmbulanceTableAssigned  /> : null
             }
           </div>
         );

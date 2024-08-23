@@ -13,6 +13,8 @@ function PatientsFinance() {
   const [payload, setPayload] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const itemsPerPage = 10
+
   useEffect(() => {
     if (filterSelected && payload) {
       getPaymentHistorySearch(payload);
@@ -23,9 +25,25 @@ function PatientsFinance() {
 
   const getPaymentHistory = async () => {
     setLoading(true);
+
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
     try {
       const response = await axios.get(
-        `https://edogoverp.com/healthfinanceapi/api/patientpayment/list/${currentPage}/30/patient-payment-list`
+        `https://edogoverp.com/healthfinanceapi/api/patientpayment/list/${currentPage}/10/patient-payment-list`,
+        options
       );
       setPaymentHistory(response?.data?.resultList || []);
       setTotalPages(response?.data?.totalPages || 1);
@@ -38,9 +56,23 @@ function PatientsFinance() {
 
   const getPaymentHistorySearch = async (searchParam) => {
     setLoading(true);
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
     try {
       const response = await axios.get(
-        `https://edogoverp.com/healthfinanceapi/api/patientpayment/filter-list/${filterSelected}/${searchParam}/${currentPage}/30`
+        `https://edogoverp.com/healthfinanceapi/api/patientpayment/filter-list/${filterSelected}/${searchParam}/${currentPage}/10`,
+        options
       );
       setPaymentHistory(response?.data?.resultList || []);
       setTotalPages(response?.data?.totalPages || 1);
@@ -117,7 +149,7 @@ function PatientsFinance() {
         <Spinner />
       ) : (
         <div>
-          <FinanceTable data={paymentHistory} />
+          <FinanceTable currentPage={currentPage} itemsPerPage={itemsPerPage} data={paymentHistory} />
         </div>
       )}
 

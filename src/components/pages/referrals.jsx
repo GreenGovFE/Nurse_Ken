@@ -19,6 +19,9 @@ function ReferredPatients() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const itemsPerPage = 10
+
+
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -97,7 +100,7 @@ function ReferredPatients() {
   const getAllReferralNotes = async () => {
     setLoading(true);
     try {
-      let res = await get(`/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30`);
+      let res = await get(`/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=10`);
       setAllPatients(res.data);
       setTotalPages(res.pageCount);
     } catch (error) {
@@ -110,7 +113,7 @@ function ReferredPatients() {
   const searchPatients = async (searchParam) => {
     setLoading(true);
     try {
-      let url = `/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30&search=${searchParam}&FilterBy=${filterSelected}`;
+      let url = `/Referrals/GetAll-Referral-notes/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=10&search=${searchParam}&FilterBy=${filterSelected}`;
       let res = await get(url);
       setAllPatients(res.data);
       setTotalPages(res.pageCount);
@@ -166,7 +169,7 @@ function ReferredPatients() {
       ) : (
         <div>
           <div>
-            <ReferralTable data={allPatients} fetch={getAllReferralNotes} />
+            <ReferralTable itemsPerPage={itemsPerPage} currentPage={currentPage} data={allPatients} fetch={getAllReferralNotes} />
             <div className="pagination flex space-between float-right col-3 m-t-20">
               <div className="flex gap-8">
                 <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>

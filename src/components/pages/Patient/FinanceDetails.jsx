@@ -55,8 +55,22 @@ function FinanceDetails() {
   }, []);
 
   const getPaymentHistory = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${patientId}/${currentPage}/10/patient-payment-history`);
+      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${patientId}/${currentPage}/10/patient-payment-history`, options);
       console.log(response);
       setPaymentHistory(response?.data?.resultList);
       setTotalPages(response?.data?.totalPages);
@@ -66,8 +80,22 @@ function FinanceDetails() {
   };
 
   const getHmo = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${hmoId}`);
+      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${hmoId}`, options);
       console.log(response);
       setHmo(response?.data);
     } catch (error) {

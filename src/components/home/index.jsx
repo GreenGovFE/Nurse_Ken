@@ -3,7 +3,6 @@ import React, { useEffect, useContext, useState } from 'react';
 
 
 import { post } from '../../utility/fetch';
-import coatOfArm from '../../assets/images/coat-of-arm.png';
 import greenz from '../../assets/images/Greenzone.png';
 import icon from '../../assets/images/Group-2.png';
 
@@ -28,7 +27,7 @@ const Home = (props) => {
   const makePostRequest = async () => {
     setLoading(true);
     const payload = {
-      usernameOrEmail: email,
+      email: email,
       password: password,
     };
     try {
@@ -39,6 +38,7 @@ const Home = (props) => {
         sessionStorage.setItem('clinicId', data?.clinicId);
         sessionStorage.setItem('userId', data?.employeeId);
         localStorage.setItem('USER_INFO', JSON.stringify(data));
+        sessionStorage.setItem('isAdmin', data?.isAdmin)
 
         // Set login timestamp
         const loginTime = new Date().getTime();
@@ -50,8 +50,8 @@ const Home = (props) => {
       localStorage.removeItem('USER_INFO');
       notification({
         title: 'ACCESS DENIED',
-        message: 'Sorry, This user does not have access to this application. Please Contact Admin',
-        type: 'warning',
+        message: 'Sorry, This user does not have access to this application. Please Contact Admin Or Check your internet connection',
+        type: 'error',
       });
     }
     setLoading(false);

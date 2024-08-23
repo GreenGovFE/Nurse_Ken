@@ -12,24 +12,24 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
     const [errors, setErrors] = useState({});
+    const [actionOptions, setActionOptions] = useState([]);
 
-    const actionOptions = [{ name: 'Accept/Decline', value: '' }, { name: 'Accept', value: 1 }, { name: 'Decline', value: 2 }];
 
     console.log(referralInfo)
     const handleChange = (field, event) => {
         const value = event?.target?.value ?? event;
         setPayload(prevPayload => ({ ...prevPayload, [field]: value }));
-        setErrors(prevErrors => ({ ...prevErrors, [field]: '' })); // Clear the error for this field
+        setErrors(prevErrors => ({ ...prevErrors, [field]: '' }));
     };
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        return () => clearInterval(intervalId);
-    }, []);
+    //     // Cleanup function to clear the interval when the component unmounts
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
     const validate = () => {
         console.log(payload)
@@ -45,6 +45,35 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    const getActionTypes = async () => {
+        try {
+            let res = await get(`/Referrals/GetAllAcceptanceStatus`);
+            console.log(res);
+
+            let filteredRes = res?.filter(action => action?.index !== 1);
+
+            let tempDoc = filteredRes?.map((action, idx) => {
+                return {
+                    name: `${action?.value}`,
+                    value: parseFloat(action?.index),
+                };
+            });
+
+            tempDoc?.unshift({
+                name: "Select Action",
+                value: ""
+            });
+
+            setActionOptions(tempDoc);
+        } catch (error) {
+            console.error('Error fetching all actions:', error);
+        }
+    };
+
+    useEffect(() => {
+        getActionTypes();
+    }, [])
 
     const ActionReferral = async () => {
         if (!validate()) {
@@ -66,7 +95,7 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
             let res = await post(`/Referrals/Update-patient-Referral`, Payload);
             console.log(res);
             if (res.message === "Referral note updated successfully") {
-                if (Payload.acceptanceStatus === 1) {
+                if (Payload.acceptanceStatus === 3) {
                     notification({ message: 'Accepted Successfully', type: "success" });
                 } else {
                     notification({ message: 'Declined Successfully', type: "success" });
@@ -101,9 +130,9 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
                     <div className="flex flex-v-center m-t-20 col-5">
                         <p className='m-l-'>Admit Referred Patient</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-l-100 m-t-20 col-4">
+                    {/* <div className="flex space-between flex-v-center m-l-100 m-t-20 col-4">
                         <p>Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="p-40">
                     <TagInputs

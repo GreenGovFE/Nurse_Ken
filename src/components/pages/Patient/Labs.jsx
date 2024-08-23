@@ -17,7 +17,7 @@ function Labs() {
     try {
       let res = await get(`/patients/${patientId}/lab_reports`);
       console.log(res);
-      setLabReports(res);
+      setLabReports(res?.data);
     } catch (error) {
       console.error('Error fetching lab reports:', error);
       // Handle the error here, such as displaying an error message to the user

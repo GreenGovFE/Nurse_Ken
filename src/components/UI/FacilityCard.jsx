@@ -28,16 +28,33 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
     <div>
       {data?.status !== 'Occupied' ? (
         <div>
-          <div onClick={openModal} className="cards ">
-            <RiHotelBedFill size={98} className="text-green" />
-            <p>{data?.name}</p>
-          </div>
-          <div className="flex">
-            <div className="comments-btn w-80">
-              <p className="text-center">{data?.status}</p>
+          {data?.status === 'Unavailable' ?
+            <div>
+              <div onClick={openModal} className="cards-unavailable">
+                <RiHotelBedFill size={98} className="text-red" />
+                <p>{data?.name}</p>
+              </div>
+              <div className="flex">
+                <div style={{border: '1px solid red !important', color: 'white', backgroundColor: 'red'}} className="comments-btn w-80">
+                  <p className="text-center">{data?.status}</p>
+                </div>
+                {/* <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill /></button> */}
+              </div>
             </div>
-            <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill/></button>
-          </div>
+            :
+            <div>
+              <div onClick={openModal} className="cards ">
+                <RiHotelBedFill size={98} className="text-green" />
+                <p>{data?.name}</p>
+              </div>
+              <div className="flex">
+                <div className="comments-btn w-80">
+                  <p className="text-center">{data?.status}</p>
+                </div>
+                <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill /></button>
+              </div>
+            </div>
+          }
         </div>
       ) : (
         <div>
@@ -49,7 +66,7 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
             <button className="comments-btn w-80" disabled={data?.status === 'Occupied'}>
               <p className="text-center">{data?.status}</p>
             </button>
-            <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill/></button>
+            {/* <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill/></button> */}
           </div>
         </div>
       )}
@@ -60,6 +77,7 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
             closeModal={closeModal}
             bedId={data?.id}
             fetchBedList={fetchBedList}
+            assigned={data?.status}
           />
         </div>
       }

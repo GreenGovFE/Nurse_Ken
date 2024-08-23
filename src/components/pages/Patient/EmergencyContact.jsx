@@ -3,9 +3,12 @@ import TagInputs from "../../layouts/TagInputs";
 import notification from "../../../utility/notification";
 import { get, post } from "../../../utility/fetch";
 import { usePatient } from "../../../contexts";
+import axios from "axios";
 
 function EmergencyContact({ setSelectedTab }) {
   const { patientId } = usePatient();
+  const [states, setStates] = useState(null);
+
 
   const [payload, setPayload] = useState({});
 
@@ -23,7 +26,34 @@ function EmergencyContact({ setSelectedTab }) {
 
   useEffect(() => {
     getContact();
+    fetchStates();
   }, []);
+
+  const fetchStates = async () => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      notification({ message: 'Token not found in session storage', type: "error" });
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
+    try {
+      let res = await axios.get(`https://edogoverp.com/clinicapi/api/profile/state/list/1/100`, options);
+      let tempDoc = res?.data?.resultList.map((doc) => {
+        return { name: doc?.name, value: doc?.name };
+      });
+
+      tempDoc?.unshift({ name: "Select State", value: "" });
+      setStates(tempDoc);
+    } catch (error) {
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -46,13 +76,19 @@ function EmergencyContact({ setSelectedTab }) {
     contactAddress: "Contact Address",
     stateOfResidence: "State Of Residence",
     lga: "LGA",
-    city: "City"
+    city: "City",
+    altPhone: "Alternative Phone Number"
   };
 
   const checkMissingFields = (payload) => {
     const missingFields = Object.keys(requiredFields).filter(field => !payload[field]);
     return missingFields;
   };
+
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
 
   const submitPayload = async () => {
 
@@ -63,10 +99,22 @@ function EmergencyContact({ setSelectedTab }) {
       notification({ message: `Missing required fields: ${missingFieldLabels.join(", ")}`, type: "error" });
       return;
     }
+    
     if (!payload.phone || payload.phone.length !== 11 || isNaN(payload.phone)) {
       notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
       return;
     }
+    
+    if (!payload.altPhone || payload.altPhone.length !== 11 || isNaN(payload.altPhone)) {
+      notification({ message: 'Please make sure alt phone number is 11 digits', type: "error" });
+      return;
+    }
+  
+    if (!isValidEmail(payload.email)) {
+      notification({ message: 'Please enter a valid email address', type: "error" });
+      return;
+    }
+
 
     try {
       let res = await post("/patients/emergencyContact", { ...payload, patientId: Number(patientId) });
@@ -102,7 +150,7 @@ function EmergencyContact({ setSelectedTab }) {
       <TagInputs onChange={handleChange} value={payload?.phoneNumber || payload?.phone || ''} name="phone" label="Phone Number" />
       <TagInputs onChange={handleChange} value={payload?.email || ''} name="email" label="Email" />
       <TagInputs onChange={handleChange} value={payload?.contactAddress || ''} name="contactAddress" label="Contact Address" />
-      <TagInputs onChange={handleChange} value={payload?.stateOfResidence || ''} name="stateOfResidence" label="State Of Residence" />
+      <TagInputs onChange={handleChange} type = {'select'} options={states} value={payload?.stateOfResidence || ''} name="stateOfResidence" label="State Of Residence" />
       <TagInputs onChange={handleChange} value={payload?.lga || ''} name="lga" label="LGA" />
       <TagInputs onChange={handleChange} value={payload?.city || ''} name="city" label="City" />
       <TagInputs onChange={handleChange} value={payload?.altPhone || ''} name="altPhone" label="Alternative Phone Number" />

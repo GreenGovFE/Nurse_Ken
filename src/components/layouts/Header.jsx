@@ -26,9 +26,10 @@ const Header = ({ history, details = {}, navList = [] }) => {
       <div className="content header-content space-between flex-v-center">
         <div className="header-left">
           {/* <HeaderSearch placeholder="Search transactions or invoices" /> */}
+          <span>Nurse</span>
         </div>
         <div className="header-right flex flex-v-center">
-          <div className="right-item notification flex p-r">
+          {/* <div className="right-item notification flex p-r">
             <MdNotifications />
             <span className="indicator" />
           </div>
@@ -36,7 +37,7 @@ const Header = ({ history, details = {}, navList = [] }) => {
             <ul className="nav-menu">
               {navList && navList.map((item) => <li key={item}>{item}</li>)}
             </ul>
-          </div>
+          </div> */}
           <div className="right-item">
             <div
               role="presentation"

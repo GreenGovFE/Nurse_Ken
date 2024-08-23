@@ -5,7 +5,7 @@ import { usePatient } from "../../contexts";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../UI/Spinner";
 
-function InsuranceTable({ data }) {
+function InsuranceTable({ data, }) {
   const [allPatients, setAllPatients] = useState([]);
   const [dataFetched, setDataFetched] = useState(false);
   const [loading, setLoading] = useState(false); // Add loading state
@@ -18,6 +18,8 @@ function InsuranceTable({ data }) {
       setCurrentPage(newPage);
     }
   };
+
+  const itemsPerPage = 10
 
   const generatePageNumbers = () => {
     let pages = [];
@@ -51,7 +53,7 @@ function InsuranceTable({ data }) {
   const getAllPatientsHmo = async () => {
     setLoading(true); // Set loading to true before fetching data
     try {
-      const res = await get(`/HMO/all-patient-hmo/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30`);
+      const res = await get(`/HMO/all-patient-hmo/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=10`);
       console.log(res);
       setAllPatients(res.data);
       setTotalPages(res.pageCount);
@@ -84,7 +86,7 @@ function InsuranceTable({ data }) {
 
   useEffect(() => {
     getAllPatientsHmo();
-  }, []);
+  }, [currentPage]);
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -125,8 +127,13 @@ function InsuranceTable({ data }) {
               <tbody className="white-bg view-det-pane">
                 {Array.isArray(allPatients) && allPatients?.map((row, index) => (
                   <tr className="hovers pointer" onClick={selectRecord(row)} key={row.id}>
-                    <td>{index + 1}</td>
-                    <td>{row.patientFullName}</td>
+                    <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                    <td>
+                      <div>
+                        {row.patientFullName}
+                        {row.isReferred ? <span className="add-note">Referred</span> : ''}
+                      </div>
+                    </td>
                     <td>{row.hmoProviderName ? 'HMO' : 'Self'}</td>
                     <td>{row ? row?.hmoProviderName : ''}</td>
                     <td>{row ? row?.hmoPackageName : ''}</td>
@@ -135,7 +142,7 @@ function InsuranceTable({ data }) {
                 ))}
               </tbody>
             </table>
-            <div className="pagination flex space-between float-right col-3 m-t-20">
+            <div className="pagination flex space-between float-right col-4 m-t-20">
               <div className="flex gap-8">
                 <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
               </div>

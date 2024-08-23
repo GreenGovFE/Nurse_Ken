@@ -3,14 +3,17 @@ import TagInputs from "../../layouts/TagInputs";
 import notification from "../../../utility/notification";
 import { get, post } from "../../../utility/fetch";
 import { usePatient } from "../../../contexts";
+import axios from "axios";
 
 function ContactDetails({ setSelectedTab, hide }) {
   const { patientId } = usePatient();
+  const [states, setStates] = useState(null);
 
   const [payload, setPayload] = useState({});
 
   useEffect(() => {
     getContact();
+    fetchStates();
   }, []);
 
   const handleChange = (event) => {
@@ -31,8 +34,40 @@ function ContactDetails({ setSelectedTab, hide }) {
     city: "City",
     homeAddress: "Home Address",
     phone: "Phone Number",
-    email: "Email Address"
+    email: "Email Address",
+    altPhone: "Alt Phone Number"
   };
+
+  const fetchStates = async () => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      notification({ message: 'Token not found in session storage', type: "error" });
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
+    try {
+      let res = await axios.get(`https://edogoverp.com/clinicapi/api/profile/state/list/1/100`, options);
+      let tempDoc = res?.data?.resultList.map((doc) => {
+        return { name: doc?.name, value: doc?.name };
+      });
+
+      tempDoc?.unshift({ name: "Select State", value: "" });
+      setStates(tempDoc);
+    } catch (error) {
+    }
+  };
+
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
 
   const checkMissingFields = (payload) => {
     const missingFields = Object.keys(requiredFields).filter(field => !payload[field]);
@@ -53,6 +88,17 @@ function ContactDetails({ setSelectedTab, hide }) {
       notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
       return;
     }
+
+    if (!payload.altPhone || payload.altPhone.length !== 11 || isNaN(payload.altPhone)) {
+      notification({ message: 'Please make sure alt phone number is 11 digits', type: "error" });
+      return;
+    }
+
+    if (!isValidEmail(payload.email)) {
+      notification({ message: 'Please enter a valid email address', type: "error" });
+      return;
+    }
+
     try {
       let res = await post("/patients/updateContact", { ...payload, patientId: Number(patientId) });
       if (res) {
@@ -80,7 +126,7 @@ function ContactDetails({ setSelectedTab, hide }) {
     <div>
       <div className="w-50">
         <div className="m-t-40"></div>
-        <TagInputs onChange={handleChange} disabled={!hide} value={payload?.stateOfResidence || ''} name="stateOfResidence" label="State Of Residence" />
+        <TagInputs type={'select'} onChange={handleChange} disabled={!hide} options = {states} value={payload?.stateOfResidence || ''} name="stateOfResidence" label="State Of Residence" />
         <TagInputs onChange={handleChange} disabled={!hide} value={payload?.lgaResidence || ''} name="lgaResidence" label="LGA" />
         <TagInputs onChange={handleChange} disabled={!hide} value={payload?.city || ''} name="city" label="City" />
         <TagInputs onChange={handleChange} disabled={!hide} value={payload?.homeAddress || ''} name="homeAddress" label="Home Address" />

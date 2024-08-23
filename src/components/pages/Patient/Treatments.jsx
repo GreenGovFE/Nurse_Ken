@@ -10,6 +10,7 @@ function Treatments() {
   const [treatment, setTreatment] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  
 
 
 
@@ -38,12 +39,13 @@ function Treatments() {
     return pages;
   };
 
+ 
 
 
 
   useEffect(() => {
     getTreatment()
-  }, [])
+  }, [currentPage])
 
   const getTreatment = async () => {
     try {

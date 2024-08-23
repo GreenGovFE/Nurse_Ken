@@ -68,6 +68,10 @@ function checkHttpStatus(response) {
     return response;
   }
 
+  if (response && response.status === 422) {
+    return response;
+  }
+
   if (response && response.status === 409) {
     return response;
   }

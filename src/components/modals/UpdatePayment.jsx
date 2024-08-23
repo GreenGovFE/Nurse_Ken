@@ -88,14 +88,14 @@ function UpdatePaymentModal({ closeModal, data, paymentId }) {
 
 
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        return () => clearInterval(intervalId);
-    }, []);
+    //     // Cleanup function to clear the interval when the component unmounts
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
 
 
@@ -117,9 +117,9 @@ function UpdatePaymentModal({ closeModal, data, paymentId }) {
                     <div className="flex space-between flex-v-center m-t-20 col-3">
                         <p>Update Payment</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
+                    {/* <div className="flex space-between flex-v-center m-t-20 col-4">
                         <p>Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="w-100 ">
                     <div className="w-100 none-flex-item m-t-40">

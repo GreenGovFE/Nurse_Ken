@@ -11,14 +11,14 @@ function ViewImunizationNotes({ closeModal, visit, next }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        return () => clearInterval(intervalId);
-    }, []);
+    //     // Cleanup function to clear the interval when the component unmounts
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
 
 
@@ -40,9 +40,9 @@ function ViewImunizationNotes({ closeModal, visit, next }) {
                     <div className="flex space-between flex-v-center m-t-20  m-l-30 col-4">
                         <p>Immunization Record</p>
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
+                    {/* <div className="flex space-between flex-v-center m-t-20 col-4">
                         <p>Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="p-40">
 

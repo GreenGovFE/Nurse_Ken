@@ -90,14 +90,14 @@ function ViewVisit({ closeModal, visit, next }) {
         return doctor ? doctor?.username : "None Assigned";
     };
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        return () => clearInterval(intervalId);
-    }, []);
+    //     // Cleanup function to clear the interval when the component unmounts
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
 
 
@@ -119,9 +119,9 @@ function ViewVisit({ closeModal, visit, next }) {
                     <div className="flex space-between flex-v-center m-t-20 m-l-20 col-3">
                         <p>Visit Record</p>
                     </div>
-                    <div className="flex m-l-240 flex-v-center m-t-20 col-4">
+                    {/* <div className="flex m-l-240 flex-v-center m-t-20 col-4">
                         <p>Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="p-20">
 

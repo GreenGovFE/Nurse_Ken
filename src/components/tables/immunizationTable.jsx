@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ViewImunizationNotes from "../modals/Immunization";
 
-function ImmunizationTable({ data }) {
+function ImmunizationTable({ data,  }) {
   const [viewing, setViewing] = useState({})
   const [isModalOpen, setIsModalOpen] = useState(false);
 

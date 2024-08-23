@@ -9,7 +9,19 @@ import { usePatient } from "../../../contexts";
 function Visits({ setSelectedTab }) {
   const { patientId } = usePatient();
 
-  const [payload, setPayload] = useState({});
+  const [payload, setPayload] = useState({
+    dateOfVisit: "",
+    temperature: "",
+    bloodPressure: "",
+    heartPulse: "",
+    respiratory: "",
+    height: "",
+    weight: "",
+    careType: 0,
+    doctorEmployeeId: 0,
+    nurseEmployeeId: 0,
+    notes: "",
+  });
   const [nurses, setNurses] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -68,7 +80,7 @@ function Visits({ setSelectedTab }) {
       selectedDate.setHours(0, 0, 0, 0);
       currentDate.setHours(0, 0, 0, 0);
 
-      if (selectedDate >= currentDate) {
+      if (selectedDate > currentDate) {
         console.log("Invalid input");
         notification({ message: 'Date selected cannot be a future date', type: "error" });
 
@@ -92,33 +104,39 @@ function Visits({ setSelectedTab }) {
     try {
       let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
       console.log(res);
-      let tempNurses = res?.data?.map((nurse) => {
-        return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
-      });
-
+      let tempNurses = res?.data
+        ?.filter((nurse) => nurse?.username) 
+        .map((nurse) => {
+          return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
+        });
+  
       tempNurses?.unshift({ name: "Select Nurse", value: "" });
       setNurses(tempNurses);
     } catch (error) {
       console.error("Error fetching nurses:", error);
     }
   };
+  
 
   const getDoctors = async () => {
     try {
       let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
       console.log(res);
-      let tempDoc = res?.data?.map((doc) => {
-        return { name: doc?.username, value: parseFloat(doc?.employeeId) };
-      });
-
+      let tempDoc = res?.data
+        ?.filter((doc) => doc?.username) 
+        .map((doc) => {
+          return { name: doc?.username, value: parseFloat(doc?.employeeId) };
+        });
+  
       tempDoc?.unshift({ name: "Select Doctor", value: "" });
       setDoctors(tempDoc);
     } catch (error) {
       console.error("Error fetching doctors:", error);
     }
   };
+  
 
-  const getVisitationDetails = async () => {
+  const getVisitationDetails = async (currentPage) => {
     try {
       let res = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
       console.log(res);
@@ -160,22 +178,44 @@ function Visits({ setSelectedTab }) {
       return;
     }
 
+    const currentDate = new Date();
+    const hours = currentDate.getHours().toString().padStart(2, "0");
+    const minutes = currentDate.getMinutes().toString().padStart(2, "0");
+    const timeString = `${hours}:${minutes}`;
+
+    const dateTimeOfVisit = `${payload.dateOfVisit} ${timeString}`;
+
+
     try {
       let res = await post("/patients/AddVisitationRecords", {
         ...payload,
+        dateOfVisit: dateTimeOfVisit,
         clinicId: Number(sessionStorage.getItem("clinicId")),
         PatientId: parseFloat(patientId),
       });
 
-      if (typeof res === "number") {
-        notification({ message: res?.messages, type: "success" });
-        getVisitationDetails();
+      if (res.message ===  "The Visit record was added successfully") {
+        notification({ message: 'Visit record was added successfully', type: "success" });
+        setPayload({
+          dateOfVisit: "",
+          temperature: "",
+          bloodPressure: "",
+          heartPulse: "",
+          respiratory: "",
+          height: "",
+          weight: "",
+          careType: 0,
+          doctorEmployeeId: 0,
+          nurseEmployeeId: 0,
+          notes: "",
+        })
+        getVisitationDetails(currentPage);
       } else if (res.StatusCode === 401) {
         notification({ message: "Unauthorized Session", type: "error" });
       } else if (res.StatusCode === 500) {
         notification({ message: "Internal Server Error", type: "error" });
       } else {
-        let errorMessage = "An error occurred";
+        let errorMessage = "Failed to add visit record";
 
         if (res && res.errors) {
           const errors = res.errors;
@@ -207,7 +247,7 @@ function Visits({ setSelectedTab }) {
         notification({ message: errorMessage, type: "error" });
       }
     } catch (error) {
-      notification({ message: error?.detail, type: "error" });
+      notification({ message: "Failed to add visit record", type: "error" });
     }
   };
 
@@ -221,6 +261,10 @@ function Visits({ setSelectedTab }) {
     getVisitationDetails();
   }, []);
 
+  useEffect(() => {
+    getVisitationDetails(currentPage);
+  }, [currentPage]);
+
   return (
     <div className="">
       <div className="w-100 flex">
@@ -230,40 +274,40 @@ function Visits({ setSelectedTab }) {
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} name="temperature" label="Temperature" />
+              <TagInputs onChange={handleChange} value={payload?.temperature} variation={true} name="temperature" label="Temperature" />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} name="bloodPressure" label="Blood Pressure" />
+              <TagInputs onChange={handleChange} value={payload?.bloodPressure}  name="bloodPressure" label="Blood Pressure" />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} name="heartPulse" label="Heart Pulse" />
+              <TagInputs onChange={handleChange} value={payload?.heartPulse} variation={true} name="heartPulse" label="Heart Pulse" />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} name="respiratory" label="Respiratory" />
+              <TagInputs onChange={handleChange} value={payload?.respiratory}  name="respiratory" label="Respiratory" />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} name="height" label="Height" />
+              <TagInputs onChange={handleChange} value={payload?.height} variation={true} name="height" label="Height" />
             </div>
           </div>
           <div className="w-100">
-            <TagInputs onChange={handleChange} name="weight" label="Weight" />
+            <TagInputs onChange={handleChange} value={payload?.weight} variation={true} name="weight" label="Weight" />
           </div>
           <div>
-            <TagInputs onChange={handleChange} type="select" options={careTypes} name="careType" label="Care Type" />
+            <TagInputs onChange={handleChange} value={payload?.careType}  type="select" options={careTypes} name="careType" label="Care Type" />
           </div>
           <div>
-            <TagInputs onChange={handleChange} options={doctors} name="doctorEmployeeId" label="Assign Doctor" type="select" />
+            <TagInputs onChange={handleChange} value={payload?.doctorEmployeeId} options={doctors} name="doctorEmployeeId" label="Assign Doctor" type="select" />
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="nurseEmployeeId" label="Assign Nurse" options={nurses} type="select" />
+            <TagInputs onChange={handleChange} value={payload?.nurseEmployeeId} name="nurseEmployeeId" label="Assign Nurse" options={nurses} type="select" />
           </div>
           <div>
             <TextArea
@@ -271,6 +315,7 @@ function Visits({ setSelectedTab }) {
               type="text"
               placeholder="Write your notes here..."
               onChange={handleChange}
+              value={payload?.notes}
               name="notes"
             />
           </div>

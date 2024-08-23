@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "../../contexts";
 
-function FinanceTable({ data }) {
+function FinanceTable({ data, currentPage, itemsPerPage }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewing, setViewing] = useState({});
   const { setPatientId, setPatientName, setPatientPage, setHmoId } = usePatient();
@@ -16,8 +16,8 @@ function FinanceTable({ data }) {
 
   const selectRecord = (record) => () => {
     setIsModalOpen(true);
-    setPatientId(record.patientId);
-    setPatientName(`${record.firstName} ${record.lastName}`);
+    setPatientId(record?.patient?.id);
+    setPatientName(`${record?.patient?.firstName} ${record?.patient?.lastName}`);
     setPatientPage("financeHmo");
     setHmoId(record.paymentBreakdowns[0]?.hmoId);
 
@@ -42,12 +42,17 @@ function FinanceTable({ data }) {
           <tbody className="white-bg view-det-pane">
             {Array.isArray(data) && data?.map((row, index) => (
               <tr className="hovers pointer" onClick={selectRecord(row)} key={row.id}>
-                <td>{index + 1}</td>
-                <td>{row.firstName}</td>
-                <td>{row.lastName}</td>
+                <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                <td>
+                  <div>
+                    {row.patient.firstName}
+                    {row.patient.isReferred ? <span className="add-note m-l-10">Referred</span> : ''}
+                  </div>
+                </td>
+                <td>{row.patient.lastName}</td>
                 <td>{row.totalCost}</td>
                 <td>{row.patientBalance}</td>
-                <td>{new Date(row.modifiedOn).toLocaleDateString()}</td>
+                <td>{row.modifiedBy.firstName} {row.modifiedBy.lastName}</td>
                 <td>{new Date(row.createdOn).toLocaleDateString()}</td>
               </tr>
             ))}

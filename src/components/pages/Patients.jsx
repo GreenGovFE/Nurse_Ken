@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import PatientsTable from "../tables/PatientsTable";
-import { PatientData, stats } from "./mockdata/PatientData";
-import StatCard from "../UI/StatCard";
 import { RiCalendar2Fill } from "react-icons/ri";
-import SearchInput from "../../Input/SearchInput";
-import SelectInput from "../../Input/SelectInput";
-import HeaderSearch from "../../Input/HeaderSearch";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { get } from "../../utility/fetch";
@@ -20,18 +15,15 @@ function Patients() {
   const [allPatients, setAllPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [payload, setPayload] = useState('');
-  const [filterSelected, setFilterSelected] = useState("");
+  const [filterSelected, setFilterSelected] = useState("firstName");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewing, setViewing] = useState({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const itemsPerPage = 10;
+
   const { setPatientId, setPatientInfo, setHmoDetails } = usePatient();
-
-
-
-
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -103,21 +95,21 @@ function Patients() {
   );
 
   const getAllPatients = async () => {
-    setLoading(true); // Set loading to true before fetch
+    setLoading(true); 
     try {
-      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=30`);
+      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
       console.log(res);
       setAllPatients(res.data);
       setTotalPages(res.pageCount);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
-      setLoading(false); // Set loading to false after fetch
+      setLoading(false); 
     }
   };
 
   const searchPatients = async (searchParam) => {
-    setLoading(true); // Set loading to true before search
+    setLoading(true); 
     try {
       let url = '/patients/filter?';
       if (filterSelected) {
@@ -130,7 +122,7 @@ function Patients() {
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
-      setLoading(false); // Set loading to false after search
+      setLoading(false); 
     }
   };
 
@@ -144,7 +136,7 @@ function Patients() {
   };
 
   useEffect(() => {
-    if (filterSelected && payload) {
+    if (payload) {
       searchPatients(payload);
     } else {
       getAllPatients();
@@ -152,7 +144,6 @@ function Patients() {
   }, [filterSelected, payload]);
 
   const filterOptions = [
-    { value: "", name: "Select Filter" },
     { value: "firstName", name: "First Name" },
     { value: "lastName", name: "Last Name" },
     { value: "email", name: "Email" },
@@ -190,9 +181,9 @@ function Patients() {
           <Spinner />
         ) : (
           <div>
-            <PatientsTable data={allPatients} />
+            <PatientsTable data={allPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
 
-            <div className="pagination flex space-between float-right col-3 m-t-20">
+            <div className="pagination flex space-between float-right col-4 m-t-20">
               <div className="flex gap-8">
                 <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
               </div>

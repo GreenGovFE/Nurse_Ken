@@ -11,9 +11,11 @@ export const PatientProvider = ({ children }) => {
   const [patientInfo, setPatientInfo] = useState('');
   const [hmoId, setHmoId] = useState('');
   const [hmoDetails, setHmoDetails] = useState({});
+  const [states, setStates] = useState(null);
+
 
   return (
-    <PatientContext.Provider value={{ patientId, setPatientId, patientName, setPatientName, patientPage, setPatientPage, hmoId, setHmoId, patientInfo, setPatientInfo, hmoDetails, setHmoDetails }}>
+    <PatientContext.Provider value={{states, setStates, patientId, setPatientId, patientName, setPatientName, patientPage, setPatientPage, hmoId, setHmoId, patientInfo, setPatientInfo, hmoDetails, setHmoDetails }}>
       {children}
     </PatientContext.Provider>
   );

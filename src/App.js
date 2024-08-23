@@ -13,20 +13,59 @@ import { Toaster } from 'react-hot-toast';
 const App = () => {
   const navigate = useNavigate();
   const [warningDisplayed, setWarningDisplayed] = useState(false);
+  const [inactivityWarning, setInactivityWarning] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
   const [minutesLeft, setMinutesLeft] = useState(null);
+  const [inactivityMinutesLeft, setInactivityMinutesLeft] = useState(5); // 5 minutes countdown
 
   useEffect(() => {
+    let activityTimeoutId;
+    let inactivityTimeoutId;
+    let checkSessionTimeoutId;
+
+    const resetInactivityTimer = () => {
+      if (activityTimeoutId) {
+        clearTimeout(activityTimeoutId);
+      }
+      if (inactivityTimeoutId) {
+        clearTimeout(inactivityTimeoutId);
+        setInactivityWarning(false);
+        setInactivityMinutesLeft(5); // Reset countdown
+      }
+
+      activityTimeoutId = setTimeout(() => {
+        inactivityTimeoutId = setInterval(() => {
+          setInactivityMinutesLeft((prev) => {
+            if (prev === 1) {
+              setSessionExpired(true);
+              setInactivityWarning(false);
+              setWarningDisplayed(false);
+              navigate('/');
+              localStorage.removeItem('LOGIN_TIME');
+              
+              clearInterval(inactivityTimeoutId);
+              setTimeout(() => {
+                setSessionExpired(false);
+              }, 5000);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 60000);
+        setInactivityWarning(true);
+      }, 1500000); // 25 minutes in milliseconds
+    };
+
     const checkAndSetTimeout = () => {
       const loginTime = localStorage.getItem('LOGIN_TIME');
 
       if (loginTime) {
         const currentTime = new Date().getTime();
         const timeElapsed = currentTime - loginTime;
-        const sessionDuration = 3600000; // 1 hour in milliseconds
+        const sessionDuration = 21600000; // 6 hours in milliseconds
         const timeRemaining = sessionDuration - timeElapsed;
 
-        if (timeRemaining <= 600000 && timeRemaining > 0) { // 10 minutes warning
+        if (timeRemaining <= 600000 && timeRemaining > 0) {
           const minutesLeft = Math.ceil(timeRemaining / 60000);
           setMinutesLeft(minutesLeft);
           if (!warningDisplayed) {
@@ -34,29 +73,27 @@ const App = () => {
             setSessionExpired(false);
           }
         }
-
-        if (timeRemaining <= 0 && !sessionExpired) {
-          setSessionExpired(true);
-          setWarningDisplayed(false);
-          navigate('/');
-          localStorage.removeItem('LOGIN_TIME');
-
-          // Hide the expired session notification after 5 seconds
-          setTimeout(() => {
-            setSessionExpired(false);
-          }, 5000);
-        }
       }
     };
 
-    // Initial check when component mounts
+    window.addEventListener('mousemove', resetInactivityTimer);
+    window.addEventListener('keypress', resetInactivityTimer);
+    window.addEventListener('click', resetInactivityTimer);
+
     checkAndSetTimeout();
 
-    // Set interval to check every minute (60000 milliseconds)
-    const intervalId = setInterval(checkAndSetTimeout, 60000);
+    checkSessionTimeoutId = setInterval(checkAndSetTimeout, 60000);
 
-    // Clear interval on unmount
-    return () => clearInterval(intervalId);
+    resetInactivityTimer();
+
+    return () => {
+      clearInterval(checkSessionTimeoutId);
+      clearTimeout(activityTimeoutId);
+      clearTimeout(inactivityTimeoutId);
+      window.removeEventListener('mousemove', resetInactivityTimer);
+      window.removeEventListener('keypress', resetInactivityTimer);
+      window.removeEventListener('click', resetInactivityTimer);
+    };
   }, [navigate, warningDisplayed, sessionExpired]);
 
   return (
@@ -76,6 +113,12 @@ const App = () => {
           <div style={toastStyle}>
             <span role="img" aria-label="error">❌</span>
             {` Session has timed out. Please login again.`}
+          </div>
+        )}
+        {inactivityWarning && (
+          <div style={toastStyle}>
+            <span role="img" aria-label="warning">⚠️</span>
+            {`You will be logged out in ${inactivityMinutesLeft} minutes due to inactivity.`}
           </div>
         )}
       </div>

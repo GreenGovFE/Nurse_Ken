@@ -89,10 +89,24 @@ function Dashboard() {
   };
 
   const getHmoPatients = async () => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+
     try {
-      let res = await axios.get("https://edogoverp.com/healthfinanceapi/api/dashboard/patients-with-hmo");
+      let res = await get("/dashboard/hmo-patient");
       console.log(res);
-      setHmoPatients(res.data);
+      setHmoPatients(res);
     } catch (error) {
       console.error('Error fetching HMO patients:', error);
       // Handle the error here, such as displaying an error message to the user
@@ -100,9 +114,9 @@ function Dashboard() {
   };
   const getTotalPatients = async () => {
     try {
-      let res = await axios.get("https://edogoverp.com/healthfinanceapi/api/dashboard/total-patients");
+      let res = await get("/dashboard/AllPatientCount");
       console.log(res);
-      setTotalPatients(res.data);
+      setTotalPatients(res);
     } catch (error) {
       console.error('Error fetching HMO patients:', error);
       // Handle the error here, such as displaying an error message to the user
@@ -122,30 +136,30 @@ function Dashboard() {
 
   }, []);
   return (
-    <div className="w-100 m-t-80">
+    <div className="w-100 m-t-40">
       <div className="m-t-20">
         <div className="m-b-40">
           <span>Good Day</span>
           <h3>{userInfo?.firstName} {userInfo?.lastName}</h3>
           <span>{userInfo?.role}</span>
         </div>
-        <div className="flex space-between">
+        <div style={{display: 'flex', flexWrap: 'wrap',  justifyContent: 'space-between'}}>
 
-          <div className="m-r-20">
+          <div className="">
             <StatCard data={{
               number: admittedpatients,
               title: "Admitted Patients",
             }} icon={<RiHotelBedFill className="icon" size={32} />}
             />
           </div>
-          <div className="m-r-20">
+          <div className="">
             <StatCard data={{
               number: availableStaff,
               title: "Available Staff",
             }} icon={<RiAccountCircleFill className="icon" size={32} />}
             />
           </div>
-          <div className="m-r-20">
+          <div className="">
             <StatCard data={{
               number: hmopatients,
               title: "Patients with HMO",

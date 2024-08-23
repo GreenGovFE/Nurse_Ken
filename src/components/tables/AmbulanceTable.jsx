@@ -22,6 +22,7 @@ function AmbulanceTable({ data }) {
         setIsModalOpen(false);
     };
 
+    const itemsPerPage = 10
     const getAmbulance = async (page) => {
         const token = sessionStorage.getItem('token');
 
@@ -87,7 +88,7 @@ function AmbulanceTable({ data }) {
                                     onMouseEnter={() => handleMouseEnter(row)}
                                     onMouseLeave={handleMouseLeave}
                                 >
-                                    <td>{index + 1}</td>
+                                    <td>{index + 1 + (TablePage - 1) * itemsPerPage}</td>
                                     <td style={{ maxWidth: '100px', whiteSpace: 'wrap', textAlign: 'left', paddingLeft: '12px' }}>{row.details}</td>
                                     <td >{row.quantity}</td>
                                     <td >{new Date(row.createdAt).toLocaleDateString()}</td>

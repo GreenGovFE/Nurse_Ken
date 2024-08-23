@@ -29,7 +29,7 @@ function AllergyTable({ data }) {
               <th className="center-text">Illness</th>
               <th className="center-text">Record type</th>
               <th className="center-text">Details</th>
-              <th>Prescribed Medication</th>
+              {/* <th>Prescribed Medication</th> */}
             </tr>
           </thead>
 
@@ -40,7 +40,7 @@ function AllergyTable({ data }) {
                 <td>{row?.name}</td>
                 <td>{recordTypeMapping[row?.medicalRecordType]}</td>
                 <td>{row?.comment}</td>
-                <td>{row?.prescribedMedication}</td>
+                {/* <td>{row?.prescribedMedication}</td> */}
               </tr>
             ))}
           </tbody>

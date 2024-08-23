@@ -8,7 +8,7 @@ import notification from "../../utility/notification";
 import DeleteConfirmationModal from "../modals/DeleteConfirmation";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 
-function AmbulanceTableAssigned({ data }) {
+function AmbulanceTableAssigned({ data, }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewing, setViewing] = useState({});
     const { setPatientId, setPatientName, setPatientPage, setHmoId } = usePatient();
@@ -20,6 +20,7 @@ function AmbulanceTableAssigned({ data }) {
     const [recordToDelete, setRecordToDelete] = useState(null);
 
 
+    const itemsPerPage = 10
 
 
     const handleDeleteConfirmation = (recordId) => {
@@ -121,7 +122,7 @@ function AmbulanceTableAssigned({ data }) {
                     <tbody className="white-bg view-det-pane">
                         {Array.isArray(ambulances) && ambulances?.map((row, index) => (
                             <tr className="" key={row.id}>
-                                <td>{index + 1}</td>
+                                <td>{index + 1 + (TablePage - 1) * itemsPerPage}</td>
                                 <td>{row.patient.firstName} {row.patient.lastName}</td>
                                 <td >{row.driver.firstName} {row.driver.lastName}</td>
                                 <td>{row.destination}</td>

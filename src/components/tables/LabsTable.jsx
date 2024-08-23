@@ -2,7 +2,7 @@ import { useState } from "react";
 import { RiFolderTransferFill } from "react-icons/ri";
 import LabrequestModal from "../modals/labRequestModal";
 
-function LabsTable({ data }) {
+function LabsTable({ data, currentPage, itemsPerPage }) {
   const [viewing, setViewing] = useState({})
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -42,7 +42,7 @@ function LabsTable({ data }) {
             <tbody className="white-bg view-det-pane">
               {Array.isArray(data) && data?.map((row, index) => (
                 <tr key={row?.id}>
-                  <td>{index + 1}</td>
+                  <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
                   <td>{row?.patientFullName}</td>
                   <td>{row?.age}</td>
                   <td>{row?.diagnosis}</td>

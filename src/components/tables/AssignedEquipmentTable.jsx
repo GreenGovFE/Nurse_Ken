@@ -20,7 +20,7 @@ function EquipmentTableAssigned({ data }) {
 
 
 
-
+ const itemsPerPage = 10
     const handleDeleteConfirmation = (recordId) => {
         setRecordToDelete(recordId);
         setIsModalOpenDel(true);
@@ -124,7 +124,7 @@ function EquipmentTableAssigned({ data }) {
                     <tbody className="white-bg view-det-pane">
                         {Array.isArray(equipments) && equipments?.map((row, index) => (
                             <tr key={row.id}>
-                                <td>{index + 1}</td>
+                                <td>{index + 1 + (TablePage - 1) * itemsPerPage}</td>
                                 <td>{row.patient.firstName} {row.patient.lastName}</td>
                                 <td >{row.equipment.name}</td>
                                 <td>{row.assignedBy.firstName} {row.assignedBy.lastName}</td>

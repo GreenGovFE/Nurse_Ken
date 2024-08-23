@@ -18,6 +18,7 @@ function MedicalRecord() {
   const [medTableData, setMedTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
 
 
 
@@ -49,7 +50,7 @@ function MedicalRecord() {
 
   useEffect(() => {
     getMedRecords();
-  }, []);
+  }, [currentPage]);
 
   const handleInputChange = (index, key, value) => {
     switch (selectedTab) {
@@ -147,6 +148,7 @@ function MedicalRecord() {
         }
         notification({ message: errorMessage, type: "error" });
       }
+      setLoading(false)
     } catch (error) {
       console.log(error);
     }
@@ -181,6 +183,7 @@ function MedicalRecord() {
   };
 
   const handleContinue = () => {
+    setLoading(true)
     let currentTabData = {};
     switch (selectedTab) {
       case 1:
@@ -372,7 +375,7 @@ function MedicalRecord() {
             </div>
           )}
 
-          <button className="submit-btn w-100 m-t-20" onClick={handleContinue}>
+          <button disabled={loading} className="submit-btn w-100 m-t-20" onClick={handleContinue}>
             Add
           </button>
         </div>

@@ -17,9 +17,10 @@ function AssignedBed({ data, fetchBedList, }) {
     const [isModalOpenDel, setIsModalOpenDel] = useState(false);
     const closeModalDel = () => { setIsModalOpenDel(false); }
     const [recordToDelete, setRecordToDelete] = useState(null);
+    
 
 
-
+ const itemsPerPage = 10
 
     const handleDeleteConfirmation = (recordId) => {
         setRecordToDelete(recordId);
@@ -119,22 +120,22 @@ function AssignedBed({ data, fetchBedList, }) {
                             <th className="center-text">Room</th>
                             <th className="center-text">Assigned By</th>
                             <th className="center-text">Date Assigned</th>
-                            {/* <th></th> */}
+                            <th>Unassign</th>
                         </tr>
                     </thead>
 
                     <tbody className="white-bg view-det-pane">
                         {Array.isArray(beds) && beds?.map((row, index) => (
-                            <tr className=""  key={row.id}>
-                                <td>{index + 1}</td>
-                                <td>{row.patient.firstName} {row.patient.lastName}</td>
-                                <td >{row.bed.name}</td>
-                                <td>{row.bed.roomId}</td>
-                                <td>{row.assignedBy.firstName} {row.assignedBy.lastName}</td>
-                                <td>{new Date(row.bedAssignDate).toLocaleDateString()}</td>
-                                {/* <td>
-                                    <RiDeleteBin2Fill size={20} onClick={() => handleDeleteConfirmation(row.bed.id)} style={{ color: 'red', cursor: 'pointer' }} />
-                                </td> */}
+                            <tr className=""  key={row?.id}>
+                                <td>{index + 1 + (bedsTablePage - 1) * itemsPerPage}</td>
+                                <td>{row?.patient.firstName} {row?.patient.lastName}</td>
+                                <td >{row?.bed.name}</td>
+                                <td>{row?.bed?.room?.name}</td>
+                                <td>{row?.assignedBy.firstName} {row?.assignedBy.lastName}</td>
+                                <td>{new Date(row?.bedAssignDate).toLocaleDateString()}</td>
+                                <td>
+                                    <RiDeleteBin2Fill size={20} onClick={() => handleDeleteConfirmation(row?.id)} style={{ color: 'red', cursor: 'pointer' }} />
+                                </td>
                             </tr>
                         ))}
                     </tbody>

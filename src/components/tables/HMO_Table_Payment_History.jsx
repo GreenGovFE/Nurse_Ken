@@ -82,8 +82,11 @@ function HMOTableHistory({ data }) {
               <th className="center-text">Date</th>
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Payment Breakdown</th>
-              <th className="center-text">Deposit (₦)</th>
-              <th className="center-text">Balance (₦)</th>
+              <th className="center-text">HMO Cover (₦)</th>
+              <th className="center-text">HMO Deposit (₦)</th>
+              <th className="center-text">HMO Balance (₦)</th>
+              <th className="center-text">Patient's Deposit (₦)</th>
+              <th className="center-text">Patient's Balance (₦)</th>
             </tr>
           </thead>
 
@@ -104,8 +107,11 @@ function HMOTableHistory({ data }) {
                     <span>{row?.totalCost}</span>
                   </div>
                 </td>
-                <td>{row?.hmoDeposit}</td>
-                <td>{row?.patientBalance}</td>
+                <td style={{width: '80px'}}>{row?.totalHMOCover}</td>
+                <td style={{width: '80px'}}>{row?.hmoDeposit}</td>
+                <td style={{width: '80px'}}>{row?.hmoBalance}</td>
+                <td style={{width: '80px'}}>{row?.patientDeposit}</td>
+                <td style={{width: '80px'}}>{row?.patientBalance}</td>
               </tr>
             ))}
           </tbody>

@@ -9,7 +9,9 @@ function TreatmentTable({ data }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewing, setViewing] = useState({});
   const [notes, setNotes] = useState('');
-  const [add, setAdd] = useState(false); // Add loading state
+  const [add, setAdd] = useState(false); // Add loading state'
+  const [nurses, setNurses] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -30,6 +32,42 @@ function TreatmentTable({ data }) {
       console.log(e);
     }
   };
+
+  const getNurses = async () => {
+    try {
+      let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
+      console.log(res);
+      let tempNurses = res?.data?.map((nurse) => {
+        return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
+      });
+
+      tempNurses?.unshift({ name: "Select Nurse", value: "" });
+      setNurses(tempNurses);
+    } catch (error) {
+      console.error("Error fetching nurses:", error);
+    }
+  };
+
+  const getDoctors = async () => {
+    try {
+      let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
+      console.log(res);
+      let tempDoc = res?.data?.map((doc) => {
+        return { name: doc?.username, value: parseFloat(doc?.employeeId) };
+      });
+
+      tempDoc?.unshift({ name: "Select Doctor", value: "" });
+      setDoctors(tempDoc);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
+
+  useEffect(() => {
+    getNurses();
+    getDoctors();
+  }, [])
+
 
   useEffect(() => {
     fetchData();
@@ -109,6 +147,8 @@ function TreatmentTable({ data }) {
           notes={notes}
           add={add}
           closeModal={closeModal}
+          doctors={doctors}
+          nurses={nurses}
         />
       )}
 

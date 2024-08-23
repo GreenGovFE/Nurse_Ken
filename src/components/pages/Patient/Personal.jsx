@@ -9,7 +9,21 @@ import axios from "axios";
 
 function Personal({ setSelectedTab, hide }) {
   const { patientId, patientInfo, setPatientId, setPatientInfo } = usePatient();
-  const [payload, setPayload] = useState({});
+  const [payload, setPayload] = useState({
+      firstName: null,
+      lastName: null,
+      gender: null,
+      dateOfBirth: "2024-06-28",
+      email: "user@example.com",
+      phoneNumber: null,
+      stateOfOrigin: null,
+      lga: null,
+      placeOfBirth: null,
+      maritalStatus: null,
+      nationality: 19,
+      clinicId: 0,
+      pictureUrl: null    
+  });
   const [pictureUrl, setPictureUrl] = useState('');
   const [fileName, setFilename] = useState('');
   const [states, setStates] = useState([]);
@@ -33,7 +47,19 @@ function Personal({ setSelectedTab, hide }) {
   ];
 
   useEffect(() => {
-    setPayload(patientInfo || {});
+    setPayload(patientInfo || {firstName: null,
+      lastName: null,
+      gender: null,
+      dateOfBirth: null,
+      email: null,
+      phoneNumber: null,
+      stateOfOrigin: null,
+      lga: null,
+      placeOfBirth: null,
+      maritalStatus: null,
+      nationality: "Nigerian",
+      clinicId: Number(sessionStorage.getItem("clinicId")),
+      pictureUrl: null    });
     fetchNationality();
     fetchStates();
   }, [patientInfo]);
@@ -66,6 +92,7 @@ function Personal({ setSelectedTab, hide }) {
     firstName: "First Name",
     nationality: "Nationality",
     phoneNumber: "Phone Number",
+    dateOfBirth: 'Date Of Birth',
     maritalStatus: "Marital Status"
   };
 
@@ -87,12 +114,23 @@ function Personal({ setSelectedTab, hide }) {
       return;
     }
 
+    if (!payload.phoneNumber || payload.phoneNumber.length !== 11 || isNaN(payload.phoneNumber)) {
+      notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
+      return;
+    }
+
+    if (!isValidEmail(payload.email)) {
+      notification({ message: 'Please enter valid email', type: "error" });
+      return;
+    }
+
     try {
       let res = await post("/patients/AddPatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl });
       if (res.patientId) {
         notification({ message: res?.messages || 'Patient added successfully', type: "success" });
         setSelectedTab("contactDetails");
         setPatientId(res.patientId);
+        setPatientInfo(payload)
       }
     } catch (error) {
       console.log(error);
@@ -121,7 +159,7 @@ function Personal({ setSelectedTab, hide }) {
     }
 
     const options = {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -139,6 +177,11 @@ function Personal({ setSelectedTab, hide }) {
     }
   };
 
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   const fetchNationality = async () => {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -147,7 +190,7 @@ function Personal({ setSelectedTab, hide }) {
     }
 
     const options = {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -174,11 +217,22 @@ function Personal({ setSelectedTab, hide }) {
       return;
     }
 
+    if (!payload.phoneNumber || payload.phoneNumber.length !== 11 || isNaN(payload.phoneNumber)) {
+      notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
+      return;
+    }
+
+    if (!isValidEmail(payload.email)) {
+      notification({ message: 'Please enter valid email', type: "error" });
+      return;
+    }
+
     try {
       let res = await put("/patients/UpdatePatient", { ...payload, pictureUrl });
       if (res.patientId) {
         notification({ message: res?.messages || 'Patient updated successfully', type: "success" });
         setPatientId(res.patientId);
+        setPatientInfo(payload)
         fetchPatientById(res.patientId);
       }
     } catch (error) {

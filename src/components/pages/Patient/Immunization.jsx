@@ -12,7 +12,17 @@ function Immunization({ setSelectedTab }) {
   const { patientId } = usePatient();
 
   const [documentArray, setDocumentArray] = useState([]);
-  const [payload, setPayload] = useState({});
+  const [payload, setPayload] = useState({
+    vaccine: null,
+    vaccineBrand:null,
+    batchId: null,
+    quantity: null,
+    age: null,
+    weight: null,
+    temperature: null,
+    dateGiven: null,
+    notes: null,
+  });
   const [immunizationData, setImmunizationData] = useState([]);
   const [errors, setErrors] = useState({});
   const [docNames, setDocNames] = useState([]);
@@ -183,7 +193,17 @@ function Immunization({ setSelectedTab }) {
       if (typeof res === "object") {
         notification({ message: res?.message, type: "success" });
         getImmunization();
-        setPayload({});
+        setPayload({
+          vaccine: null,
+          vaccineBrand:null,
+          batchId: null,
+          quantity: null,
+          age: null,
+          weight: null,
+          temperature: null,
+          dateGiven: null,
+          notes: null,
+        });
       } else if (res.StatusCode === 401) {
         notification({ message: "Unauthorized Session", type: "error" });
       } else if (res.StatusCode === 500) {
@@ -223,49 +243,50 @@ function Immunization({ setSelectedTab }) {
 
   useEffect(() => {
     getImmunization();
-  }, []);
+  }, [currentPage]);
 
   return (
     <div className="">
       <div className="w-100 flex ">
         <div className="col-3-3">
           <div>
-            <TagInputs onChange={handleChange} name="vaccine" label="Vaccine" error={errors.vaccine} />
+            <TagInputs onChange={handleChange} value={payload?.vaccine || ''} name="vaccine" label="Vaccine" error={errors.vaccine} />
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="vaccineBrand" label="Vaccine Brand" error={errors.vaccineBrand} />
+            <TagInputs onChange={handleChange} value={payload?.vaccineBrand || ''} name="vaccineBrand" label="Vaccine Brand" error={errors.vaccineBrand} />
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="batchId" label="Batch #ID" error={errors.batchId} />
+            <TagInputs onChange={handleChange} value={payload?.batchId || ''} name="batchId" label="Batch #ID" error={errors.batchId} />
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="quantity" label="Quantity" error={errors.quantity} />
+              <TagInputs onChange={handleChange} value={payload?.quantity || ''} variation={true} name="quantity" label="Quantity" error={errors.quantity} />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="age" label="Age" error={errors.age} />
+              <TagInputs onChange={handleChange} value={payload?.age || ''} variation={true} name="age" label="Age" error={errors.age} />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="weight" label="Weight" error={errors.weight} />
+              <TagInputs onChange={handleChange} value={payload?.weight || ''} variation={true} name="weight" label="Weight" error={errors.weight} />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} variation={true} name="temperature" label="Temperature" error={errors.temperature} />
+              <TagInputs onChange={handleChange} value={payload?.temperature || ''} variation={true} name="temperature" label="Temperature" error={errors.temperature} />
             </div>
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven} label="Date Given" type="date" error={errors.dateGiven} />
+            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''} label="Date Given" type="date" error={errors.dateGiven} />
           </div>
           <div>
             <TextArea
               label="Notes"
               name="notes"
               type="text"
+              value={payload?.notes || ''}
               placeholder="Write your notes here..."
               onChange={handleChange}
             />

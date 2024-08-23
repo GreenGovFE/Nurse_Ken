@@ -1,83 +1,146 @@
 import React, { useEffect, useState } from 'react';
 import { RiCloseFill } from 'react-icons/ri';
-import InputField from '../UI/InputField';
-import TextArea from '../UI/TextArea';
+
 import { formatDate } from "../../utility/general";
 import TagInputs from '../layouts/TagInputs';
 import { get, post } from '../../utility/fetch';
+import notification from '../../utility/notification';
 
-function NurseNoteTreatment({ closeModal, visit, notes, add }) {
+function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses }) {
 
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
-    const [payload, setPayload] = useState('');
+    const [payload, setPayload] = useState({});
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        // Cleanup function to clear the interval when the component unmounts
-        return () => clearInterval(intervalId);
-    }, []);
+    //     // Cleanup function to clear the interval when the component unmounts
+    //     return () => clearInterval(intervalId);
+    // }, []);
+
+    const requiredFields = {
+        doctorId: "Assigned Doctor",
+        nurseId: "Administering Nurse",
+        additionalNoteOnTreatment: "Additional Notes",
+    };
+
+    const checkMissingFields = (payload) => {
+        const missingFields = Object.keys(requiredFields).filter(field => !payload[field]);
+        return missingFields;
+    };
 
     const addNotes = () => {
+        console.log(payload)
         const data = {
-            doctorId: visit.doctorId,
-            nurseId: visit.nurseId,
+            doctorId: payload?.doctorId,
+            nurseId: payload?.nurseId,
             treatmentId: visit.id,
-            additionalNoteOnTreatment: payload
+            additionalNoteOnTreatment: payload?.additionalNoteOnTreatment
+        }
+        const missingFields = checkMissingFields(payload);
+        if (missingFields.length > 0) {
+            const missingFieldLabels = missingFields.map(field => requiredFields[field]);
+            notification({ message: `Missing required fields: ${missingFieldLabels.join(", ")}`, type: "error" });
+            return;
         }
         post(`/patients/${visit.patientId}/addpatientnote`, data)
             .then(res => {
                 console.log(res)
+                notification({ message: 'Added notes successfully', type: "success" });
             })
             .catch(err => {
+                notification({ message: 'Failed to add notes', type: "error" });
                 console.log(err)
             })
     }
 
+    const handleChange = (event) => {
+        const { name, value } = event.target;
 
-    console.log(notes)
+        if (name === "doctorId" || name === "nurseId") {
+            setPayload(prevPayload => ({ ...prevPayload, [name]: Number(value) }));
+        } else {
+            setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
+        }
+    };
 
     const formattedDate = currentDateTime.toLocaleDateString();
     const formattedTime = currentDateTime.toLocaleTimeString();
-
-    const formatDate = (timestamp) => {
-        const dateObject = new Date(timestamp);
-        const formattedDate = dateObject.toISOString().split("T")[0];
-        return formattedDate;
-    };
 
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
             <div className="modal-contents">
                 <div className="flex space-between">
-                    <div className="flex space-between flex-v-center m-t-20  m-l-30 col-4">
-                        <p>Treatment Record</p>
+                    <div className="flex space-between flex-v-center m-t-20  m-l-30 col-6">
+                        {add !== true ?
+                            <p>Nurse Notes</p>
+                            :
+                            <p>Nurse Notes/Observations</p>
+                        }
                     </div>
-                    <div className="flex space-between flex-v-center m-t-20 col-4">
+                    {/* <div className="flex space-between flex-v-center m-t-20 col-4">
                         <p>Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
-                <div className="p-40">
-
+                <div className="p-20">
                     <div>
                         {add === true &&
                             <div>
-                                <TagInputs label="Additional Notes" name="additonalNoteOnTreatment" onChange={(e) => { setPayload(e.target.value) }} type='textArea' />
-
+                                <div className="">
+                                    <table className="bordered-table-2">
+                                        <thead className="border-top-none">
+                                            <tr className="border-top-none">
+                                                <th className="w-20">Date</th>
+                                                <th>Age</th>
+                                                <th>Weight</th>
+                                                <th>Temp</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="white-bg view-det-pane">
+                                            <tr >
+                                                <td>{new Date(visit.dateOfVisit).toLocaleDateString()}</td>
+                                                <td>{visit.age}</td>
+                                                <td>{visit.weight}</td>
+                                                <td>{visit.temperature}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <TagInputs type='select' label="Administering Nurse" onChange={handleChange} options={nurses} name="nurseId" />
+                                    <TagInputs type='select' label="Assigned Doctor" onChange={handleChange} options={doctors} name="doctorId" />
+                                </div>
+                                <TagInputs label="Additional Notes" name="additionalNoteOnTreatment" onChange={handleChange} type='textArea' />
                                 <button className="submit-btn m-t-20 w-100" onClick={addNotes}>Add Notes</button>
                             </div>
                         }
                     </div>
                     {add !== true &&
                         <div>
-                            <TagInputs label="Nurse Notes" name="additonalNoteOnTreatment" value={notes.map((note)=>(note))} readOnly={true} type='textArea' />
+                            <table className="bordered-table-2">
+                                <thead className="border-top-none">
+                                    <tr className="border-top-none">
+                                        <th className="w-20">Date</th>
+                                        <th>Age</th>
+                                        <th>Weight</th>
+                                        <th>Temp</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="white-bg view-det-pane">
+                                    <tr >
+                                        <td>{new Date(visit.dateOfVisit).toLocaleDateString()}</td>
+                                        <td>{visit.age}</td>
+                                        <td>{visit.weight}</td>
+                                        <td>{visit.temperature}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <TagInputs label="Nurse Notes" name="additionalNoteOnTreatment" value={Array.isArray(notes) ? notes?.map((note) => (note)) : ''} readOnly={true} type='textArea' />
                             <div className='m-t-20'>
                                 {visit?.immunizationDocuments?.map((item, index) => (
                                     <div key={index} className="m-t-10 flex">
-                                        <a href={item.docPath} target="_blank" className="m-r-10">
+                                        <a href={item.docPath} target="_blank" className="m-r-10" rel="noopener noreferrer">
                                             {item.docName}
                                         </a>
                                     </div>
@@ -85,7 +148,6 @@ function NurseNoteTreatment({ closeModal, visit, notes, add }) {
                             </div>
                         </div>
                     }
-
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@ import { RiDeleteBin2Fill, RiEdit2Fill } from "react-icons/ri";
 import EquipmentModal from "../modals/EquipmentModal";
 import notification from "../../utility/notification";
 
-function EquipmentTable({ data }) {
+function EquipmentTable({ data, }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewing, setViewing] = useState({});
     const { setPatientId, setPatientName, setPatientPage, setHmoId } = usePatient();
@@ -21,6 +21,8 @@ function EquipmentTable({ data }) {
     const closeModal = () => {
         setIsModalOpen(false);
     };
+
+    const itemsPerPage = 10
 
     const getEquipment = async (page) => {
         const token = sessionStorage.getItem('token');
@@ -89,7 +91,7 @@ function EquipmentTable({ data }) {
                                     onMouseEnter={() => handleMouseEnter(row)}
                                     onMouseLeave={handleMouseLeave}
                                 >
-                                    <td>{index + 1}</td>
+                                    <td>{index + 1 + (TablePage - 1) * itemsPerPage}</td>
                                     <td style={{maxWidth: '160px'}}>{row.name}</td>
                                     <td >{row.quantity}</td>
                                     <td>{row.quantity}</td>

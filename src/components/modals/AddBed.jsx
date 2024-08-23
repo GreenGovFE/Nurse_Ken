@@ -5,7 +5,7 @@ import { get } from '../../utility/fetch';
 import axios from 'axios';
 import notification from '../../utility/notification';
 
-function AddBed({ closeModal, bedId, fetchBedList }) {
+function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
     const [patients, setPatients] = useState([]);
@@ -24,13 +24,13 @@ function AddBed({ closeModal, bedId, fetchBedList }) {
         }
     };
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCurrentDateTime(new Date());
-        }, 1000);
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
+    //         setCurrentDateTime(new Date());
+    //     }, 1000);
 
-        return () => clearInterval(intervalId);
-    }, []);
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
     const validatePayload = () => {
         const requiredFields = {
@@ -74,6 +74,7 @@ function AddBed({ closeModal, bedId, fetchBedList }) {
 
         try {
             let res = await axios.post(url, Payload, options);
+            console.log(res)
             notification({ message: 'Assigned Successfully', type: 'success' });
             fetchBedList();
             closeModal();
@@ -84,7 +85,6 @@ function AddBed({ closeModal, bedId, fetchBedList }) {
     };
 
     const UnAssigneBed = async () => {
-        if (!validatePayload()) return;
 
         const token = sessionStorage.getItem('token');
 
@@ -103,6 +103,7 @@ function AddBed({ closeModal, bedId, fetchBedList }) {
 
         try {
             let res = await axios.put(url, null, options);
+            console.log(res)
             notification({ message: 'Unassigned Successfully', type: 'success' });
             fetchBedList();
             closeModal();
@@ -145,11 +146,19 @@ function AddBed({ closeModal, bedId, fetchBedList }) {
         }
     };
 
-    const actions = [
-        { label: 'Select Action', value: '' },
-        { label: 'Assign', value: 'assign' },
-        { label: 'Unassign', value: 'unassign' },
-    ];
+    let actions
+    if (assigned === 'Occupied') {
+        actions = [
+            { label: 'Select Action', value: '' },
+            { label: 'Unassign', value: 'unassign' },
+        ];
+
+    }else{
+        actions = [
+            { label: 'Select Action', value: '' },
+            { label: 'Assign', value: 'assign' },
+        ];
+    }
 
     useEffect(() => {
         getAllPatients();
@@ -164,9 +173,9 @@ function AddBed({ closeModal, bedId, fetchBedList }) {
                     <div className='flex  flex-v-center m-t-20 col-7'>
                         <p className='m-l-10 '>Assign Bed To Patient</p>
                     </div>
-                    <div className='flex  flex-v-center m-t-20 m-l-80 col-5'>
+                    {/* <div className='flex  flex-v-center m-t-20 m-l-80 col-5'>
                         <p>Time: {formattedTime}</p>
-                    </div>
+                    </div> */}
                 </div>
                 <div className='p-10'>
                     <TagInputs label='Select Action' onChange={value => handleChange('action', value)} options={actions} name='action' type='R-select' />

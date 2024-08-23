@@ -55,11 +55,11 @@ const useNavigationItems = () => {
             href: '/insurance',
             icon: <img src={insurance} className="icon" alt="Insurance Icon" />
         },
-        {
-            title: 'Customer Engagement',
-            href: '/customer-engagement',
-            icon: <img src={customer} className="icon" alt="Customer Engagement Icon" />
-        },
+        // {
+        //     title: 'Customer Engagement',
+        //     href: '/customer-engagement',
+        //     icon: <img src={customer} className="icon" alt="Customer Engagement Icon" />
+        // },
     ];
 };
 
