@@ -11,24 +11,30 @@ import Labs from "./Patient/Labs";
 import Finance_HMO from "./Patient/Finance_HMO";
 import { AiOutlinePlus } from "react-icons/ai";
 import ReferralModal from "../modals/RefferalModal";
+import Appointment from "../modals/Appointment";
 
 function PatientDetails() {
   const [selectedTab, setSelectedTab] = useState("personal");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewing, setViewing] = useState({});
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [appointment, setAppointment] = useState(false);
 
- 
+  const patient = sessionStorage.getItem("personalInfo")
+
+
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setAppointment(false);
+    sessionStorage.setItem("personalInfo", JSON.stringify({}))
+    sessionStorage.setItem("patientId", '')
   };
 
   const selectRecord = () => () => {
     setIsModalOpen(true);
   };
 
-  
+
   const renderTabContent = (selectedTab) => {
     switch (selectedTab) {
       case "personal":
@@ -65,14 +71,17 @@ function PatientDetails() {
   return (
     <div className="w-100">
       <div className="m-t-80">
-      <div className="m-b-10 float-right col-2">
-            <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn">
-              <div className="flex flex-h-center flex-v-center">
-                <AiOutlinePlus size={24} color="white" />
-                <p className="m-l-10 m-r-10">Refer Patient</p>
-              </div>
-            </button>
-          </div>
+        <div className="m-b-10 flex flex-h-center flex-v-center space-between float-right col-4">
+          <button onClick={() => { setIsModalOpen(true); sessionStorage.setItem("personalInfo", JSON.stringify({})); sessionStorage.setItem("patientId", '') }} className="submit-btn">
+            <div className="flex flex-h-center flex-v-center">
+              <AiOutlinePlus size={24} color="white" />
+              <p className="m-l-10 m-r-10">Refer Patient</p>
+            </div>
+          </button>
+          {/* <button onClick={() => { setAppointment(true); }} className="save-drafts m-l-10">
+            Book an Appointment
+          </button> */}
+        </div>
       </div>
 
       <div className=" tabs m-t-20 bold-text">
@@ -118,7 +127,7 @@ function PatientDetails() {
           className={`tab-item ${selectedTab === "visits" ? "active" : ""}`}
           onClick={() => setSelectedTab("visits")}
         >
-          Visits
+          Vitals
         </div>
         <div
           className={`tab-item ${selectedTab === "treatment" ? "active" : ""}`}
@@ -159,7 +168,7 @@ function PatientDetails() {
             selectedTab === "contactDetails" ?
               <ContactDetails hide={true} setSelectedTab={setSelectedTab} /> :
               selectedTab === "emergencyContact" ?
-                <EmergencyContact  setSelectedTab={setSelectedTab} /> :
+                <EmergencyContact setSelectedTab={setSelectedTab} /> :
                 selectedTab === "medicalRecord" ?
                   <MedicalRecord setSelectedTab={setSelectedTab} /> :
                   selectedTab === "immunization" ?
@@ -178,6 +187,12 @@ function PatientDetails() {
 
       {isModalOpen &&
         <ReferralModal
+          closeModal={closeModal}
+        />
+      }
+      {appointment &&
+        <Appointment
+          patient={patient }
           closeModal={closeModal}
         />
       }

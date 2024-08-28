@@ -270,7 +270,7 @@ function Visits({ setSelectedTab }) {
       <div className="w-100 flex">
         <div className="col-3-3">
           <div>
-            <TagInputs onChange={handleChange} name="dateOfVisit" value={payload?.dateOfVisit} label="Visit Date" type="date" />
+            <TagInputs onChange={handleChange} name="dateOfVisit" value={payload?.dateOfVisit} label="Date" type="date" />
           </div>
           <div className="flex">
             <div className="w-100">

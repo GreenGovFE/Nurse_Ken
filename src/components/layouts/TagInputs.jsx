@@ -50,14 +50,14 @@ export default function TagInputs(props) {
                                 border: "1px solid #3c7e2d73", borderRadius: "0px 4px 4px 0px"
                             })
                         }}>
-                            {props.type === "date" ? (
+                            {props.type === "date" || props.type === "time" ? (
                                 <input
                                     onChange={props.onChange}
                                     name={props.name}
                                     disabled={props.disabled}
                                     readOnly={props.readOnly}
                                     value={props.value}
-                                    type="date"
+                                    type={props.type}
                                     className="w-100"
                                     style={{
                                         borderRadius: props.type !== "textArea" ? "0px 4px 4px 0px" : "0px"

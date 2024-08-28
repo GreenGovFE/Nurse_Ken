@@ -12,6 +12,8 @@ const Header = ({ history, details = {}, navList = [] }) => {
   const [userPix, setUserPix] = useState("");
   const [imgHasError, setImgHasError] = useState(false);
 
+  const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
+
   // useEffect(() => {
   //   !imgHasError && setUserPix(formatFileUrl(details.userProfilePicture));
   // }, [imgHasError, details]);
@@ -46,10 +48,10 @@ const Header = ({ history, details = {}, navList = [] }) => {
             >
               <div className="m-r-5 right-text" style={{ paddingTop: "3px" }}>
                 <p className="name">
-                  {localStorage.getItem("name") || "Osagie Osaigbovo"}
+                  {userInfo?.firstName} {userInfo?.lastName}
                 </p>
                 <p className="role">
-                  {localStorage.getItem("role") || "Officer 1"}
+                  {localStorage.getItem("role") || "nurse"}
                 </p>
               </div>
               <div className="flex">

@@ -117,7 +117,7 @@ function ViewVisit({ closeModal, visit, next }) {
             <div className="modal-contents">
                 <div className="flex ">
                     <div className="flex space-between flex-v-center m-t-20 m-l-20 col-3">
-                        <p>Visit Record</p>
+                        <p>Vitals Details</p>
                     </div>
                     {/* <div className="flex m-l-240 flex-v-center m-t-20 col-4">
                         <p>Time: {formattedTime}</p>

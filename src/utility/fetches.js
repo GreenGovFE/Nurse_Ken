@@ -11,7 +11,7 @@ export const FileUpload = async (data, callbackfunction) => {
   let fileProgress;
   let Access_token = localStorage.getItem('token');
   const response = axios.post(
-    'https://edogoverp.com/services/api/documents/onboardingapi',
+    'https://edogoverp.com/services/api/documents/medicals',
     data,
     {
       headers: {
