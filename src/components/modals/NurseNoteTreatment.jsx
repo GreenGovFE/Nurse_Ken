@@ -6,19 +6,11 @@ import TagInputs from '../layouts/TagInputs';
 import { get, post } from '../../utility/fetch';
 import notification from '../../utility/notification';
 
-function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses }) {
+function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses, fetch, currentPage }) {
 
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
 
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         setCurrentDateTime(new Date());
-    //     }, 1000);
-
-    //     // Cleanup function to clear the interval when the component unmounts
-    //     return () => clearInterval(intervalId);
-    // }, []);
 
     const requiredFields = {
         doctorId: "Assigned Doctor",
@@ -32,7 +24,6 @@ function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses }) 
     };
 
     const addNotes = () => {
-        console.log(payload)
         const data = {
             doctorId: payload?.doctorId,
             nurseId: payload?.nurseId,
@@ -66,9 +57,15 @@ function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses }) 
         }
     };
 
-    const formattedDate = currentDateTime.toLocaleDateString();
-    const formattedTime = currentDateTime.toLocaleTimeString();
-
+    
+    
+    
+    const getDoctorName = (doctorId) => {
+        const doctor = doctors?.find((doctor) => doctor?.value === Number(doctorId));
+        return doctor ? doctor?.name : "Doctor Not Found";
+    };
+    
+    const doctorname = getDoctorName(visit?.doctorId)
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
@@ -136,6 +133,8 @@ function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses }) 
                                     </tr>
                                 </tbody>
                             </table>
+                            <TagInputs label="Administering Nurse" value={visit?.nurseName} onChange={handleChange} options={nurses} disabled={true} name="nurseId" />
+                            <TagInputs label="Assigned Doctor" value={doctorname} onChange={handleChange} options={doctors} name="doctorId" />
                             <TagInputs label="Nurse Notes" name="additionalNoteOnTreatment" value={Array.isArray(notes) ? notes?.map((note) => (note)) : ''} readOnly={true} type='textArea' />
                             <div className='m-t-20'>
                                 {visit?.immunizationDocuments?.map((item, index) => (

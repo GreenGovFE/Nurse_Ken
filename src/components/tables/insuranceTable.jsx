@@ -4,6 +4,7 @@ import axios from "axios";
 import { usePatient } from "../../contexts";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../UI/Spinner";
+import Paginate from "../UI/paginate";
 
 function InsuranceTable({ data, }) {
   const [allPatients, setAllPatients] = useState([]);
@@ -13,31 +14,10 @@ function InsuranceTable({ data, }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
+ 
   const itemsPerPage = 10
 
-  const generatePageNumbers = () => {
-    let pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages = [1, 2, 3, 4, totalPages];
-      } else if (currentPage >= totalPages - 2) {
-        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-      } else {
-        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
-      }
-    }
-    return pages;
-  };
+  
 
 
   let navigate = useNavigate();
@@ -142,38 +122,7 @@ function InsuranceTable({ data, }) {
                 ))}
               </tbody>
             </table>
-            <div className="pagination flex space-between float-right col-4 m-t-20">
-              <div className="flex gap-8">
-                <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
-              </div>
-              <div className="flex gap-8">
-                <button
-                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  {"Previous"}
-                </button>
-
-                {generatePageNumbers().map((page, index) => (
-                  <button
-                    key={`page-${index}`}
-                    className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  {"Next"}
-                </button>
-              </div>
-            </div>
+            <div className="m-t-20"><Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages}/></div>
           </div>
 
         )}

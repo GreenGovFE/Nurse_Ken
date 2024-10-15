@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "../../contexts";
+import FinanceDetails from "../pages/Patient/FinanceDetails";
 
 function FinanceTable({ data, currentPage, itemsPerPage }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,9 +20,7 @@ function FinanceTable({ data, currentPage, itemsPerPage }) {
     setPatientId(record?.patient?.id);
     setPatientName(`${record?.patient?.firstName} ${record?.patient?.lastName}`);
     setPatientPage("financeHmo");
-    setHmoId(record.paymentBreakdowns[0]?.hmoId);
-
-    navigate("/finance-details");
+    setHmoId(record?.paymentBreakdowns[0]?.hmoId);
   };
   return (
     <div className="w-100 ">
@@ -32,16 +31,15 @@ function FinanceTable({ data, currentPage, itemsPerPage }) {
               <th className="center-text">S/N</th>
               <th className="center-text">First Name</th>
               <th className="center-text">Last Name</th>
-              <th className="center-text">Bill</th>
-              <th className="center-text">Outstanding Payment</th>
-              <th className="center-text">Last Updated by</th>
-              <th className="center-text">Date Created</th>
+              {/* <th className="center-text">Payment Status</th> */}
+              <th className="center-text">Visit Started On</th>
+              <th className="center-text">Visit Ended ON</th>
             </tr>
           </thead>
 
           <tbody className="white-bg view-det-pane">
             {Array.isArray(data) && data?.map((row, index) => (
-              <tr className="hovers pointer" onClick={selectRecord(row)} key={row.id}>
+              <tr className="hovers pointer" onClick={selectRecord(row)}>
                 <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
                 <td>
                   <div>
@@ -50,15 +48,29 @@ function FinanceTable({ data, currentPage, itemsPerPage }) {
                   </div>
                 </td>
                 <td>{row.patient.lastName}</td>
-                <td>{row.totalCost}</td>
-                <td>{row.patientBalance}</td>
-                <td>{row.modifiedBy.firstName} {row.modifiedBy.lastName}</td>
-                <td>{new Date(row.createdOn).toLocaleDateString()}</td>
+                {/* <td>{row.status}</td> */}
+                <td>{row?.visitStartedOn ?
+                  (() => {
+                    const [day, month, year] = row.visitStartedOn?.split('-');
+                    const formattedDate = new Date(`${year}-${month}-${day}`);
+                    return formattedDate.toLocaleDateString();
+                  })()
+                  : ''}</td>
+                <td>{row?.visitEndedOn ?
+                  (() => {
+                    const [day, month, year] = row.visitEndedOn?.split('-');
+                    const formattedDate = new Date(`${year}-${month}-${day}`);
+                    return formattedDate.toLocaleDateString();
+                  })()
+                  : ''}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      { isModalOpen &&
+        <FinanceDetails closeModal={closeModal}/>
+      }
     </div>
   );
 }

@@ -55,7 +55,7 @@ function ReferralTable({ data, fetch, currentPage, itemsPerPage }) {
                 <td>{row?.acceptanceStatus}</td>
                 <td>{new Date(row?.dateCreated).toLocaleDateString()}</td>
                 <td>
-                  {(row?.acceptanceStatus !== 'Accepted' && row?.acceptanceStatus !== 'Rejected') && (
+                  {(row?.acceptanceStatus !== 'Accepted' && row?.acceptanceStatus !== 'Rejected' && row?.acceptanceStatus !== 'Cancelled') && (
                     <div>
                       <span style={{ color: '#3C7E2D' }} className="flex flex-h-center">
                         <RiAddBoxFill

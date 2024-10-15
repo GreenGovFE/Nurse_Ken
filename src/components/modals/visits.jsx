@@ -21,7 +21,6 @@ function ViewVisit({ closeModal, visit, next }) {
     useEffect(() => {
         getNurses();
         getDoctors();
-        getNotes();
     }, []);
 
     const handleChange = (event) => {
@@ -159,8 +158,8 @@ function ViewVisit({ closeModal, visit, next }) {
                         </tbody>
                     </table>
 
-                    <TagInputs label="Assigned Nurse" name="assignedNurse" value={visit?.nurseName} readOnly={true} />
-                    <TagInputs label="Assigned Doctor" name="assignedDoctor" value={visit?.doctorName} readOnly={true} />
+                    <TagInputs label="Assigned Nurse" name="assignedNurse" value={visit?.vitalNurseName} readOnly={true} />
+                    {/* <TagInputs label="Assigned Doctor" name="assignedDoctor" value={visit?.doctorName} readOnly={true} /> */}
                     {
                         visit?.notes &&
 

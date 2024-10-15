@@ -1,7 +1,7 @@
 .show { display: block!important; }
 
 .portal {
-  padding-left: 260px;
+  padding-left: 180px;
   width: 100%;
   height: 100%;
   min-height: 100vh;
@@ -12,11 +12,12 @@
   font-family: sans-serif!important;
 }
 
+
 /* HEADER STYLING */
 header {
   background-color: #1C811C;
   color: #fff;
-  width: calc(100% - 260px);
+  width: calc(100% - 180px);
   z-index: 100;
   height: 62px;
   position: fixed;
@@ -54,6 +55,9 @@ header .notification span.indicator {
 }
 .header-right .right-item {
   border-right: 1px solid #C6C6D68D;
+  padding: 5px 10px;
+}
+.header-left {
   padding: 5px 10px;
 }
 .header-right .right-item:last-child {
@@ -431,4 +435,106 @@ button:focus {
 
 .text-caption{
   font-size: 11px;
+}
+
+/* Media query for screens of 800px and below */
+@media only screen and (max-width: 800px) {
+  .portal {
+    padding-left: 0px;
+  }
+
+  header {
+    width: 100%;
+  }
+  
+  .header-content {
+    padding: 10px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+  
+  .header-right .right-item {
+    padding: 5px;
+  }
+
+  .header-left  {
+    margin-left: 28px;
+  }
+
+  .user-avater-details img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .user-avater-details p, 
+  .user-avater-details .name,
+  .user-avater-details .role {
+    font-size: 0.6rem;
+  }
+
+  .main-content {
+    padding-top: 70px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .table-view .table-row .th:first-child {
+    width: 100%;
+  }
+
+  .btn {
+    padding: 5px 10px;
+  }
+
+  .btn-large {
+    padding: 10px;
+  }
+
+  .tab-btns button {
+    padding: 5px;
+  }
+
+  .user-full-details .left {
+    width: 100%;
+  }
+
+  .user-full-details .right {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .profile-brief img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-brief .brief {
+    padding: 10px;
+  }
+
+  .profile-brief .brief p {
+    font-size: 0.7rem;
+  }
+  
+  .text-caption {
+    font-size: 9px;
+  }
+  
+  .form-group input, 
+  .form-group textarea, 
+  .form-group select {
+    height: 35px;
+  }
+
+  .btn svg {
+    font-size: 0.8rem;
+  }
+
+  button.add-button svg {
+    font-size: 1.2rem;
+  }
 }

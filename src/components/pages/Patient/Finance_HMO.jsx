@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from "react";
-import HMOTable from "../../tables/HMOTable";
-import { PatientData } from "../mockdata/PatientData";
-import HeaderSearch from "../../../Input/HeaderSearch";
-import SelectInput from "../../../Input/SelectInput";
-import { AiOutlinePlus } from "react-icons/ai";
-import { Navigate } from "react-router";
-import TagInputs from "../../layouts/TagInputs";
 import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 import axios from "axios";
-import HMOTableHistory from "../../tables/HMO_Table_Payment_History";
 import { usePatient } from "../../../contexts";
 import MembershipCover from "./MembershipCover";
 import IdentityDetails from "./IdentityDetails";

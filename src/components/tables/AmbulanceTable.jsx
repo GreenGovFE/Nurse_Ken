@@ -105,8 +105,8 @@ function AmbulanceTable({ data }) {
                         currentPage={TablePage}
                     />
                 </div>
-                {image?.image &&
-                    <div className="card-Image m-t-40 m-l-40">
+                {
+                    <div className="card-Image col-6 m-t-40 m-l-40">
                         {image && <img src={image?.image} style={{ width: '198px', height: '198px' }} alt="ambulance" />}
                         <span  style={{ maxWidth: '240px', marginTop: '20px' }}>{image?.details}</span>
                     </div>

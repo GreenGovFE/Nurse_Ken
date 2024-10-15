@@ -28,7 +28,7 @@ const Header = ({ history, details = {}, navList = [] }) => {
       <div className="content header-content space-between flex-v-center">
         <div className="header-left">
           {/* <HeaderSearch placeholder="Search transactions or invoices" /> */}
-          <span>Nurse</span>
+          <span>{userInfo?.role}</span>
         </div>
         <div className="header-right flex flex-v-center">
           {/* <div className="right-item notification flex p-r">
@@ -51,7 +51,7 @@ const Header = ({ history, details = {}, navList = [] }) => {
                   {userInfo?.firstName} {userInfo?.lastName}
                 </p>
                 <p className="role">
-                  {localStorage.getItem("role") || "nurse"}
+                  {userInfo?.role || "nurse"}
                 </p>
               </div>
               <div className="flex">

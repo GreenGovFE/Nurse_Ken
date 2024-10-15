@@ -208,8 +208,7 @@ function Facility() {
 
   return (
     <div className="w-100">
-      <div className="m-t-20">...</div>
-      <div className="m-t-20 bold-text">Facility | Bed Management</div>
+      <div  className="m-t-40 bold-text">Facility | Bed Management</div>
 
       <div className="tabs m-t-20 bold-text">
         <div

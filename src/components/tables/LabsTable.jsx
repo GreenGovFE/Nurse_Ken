@@ -42,7 +42,7 @@ function LabsTable({ data, currentPage, itemsPerPage }) {
             <tbody className="white-bg view-det-pane">
               {Array.isArray(data) && data?.map((row, index) => (
                 <tr key={row?.id}>
-                  <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                  <td>{index + 1}</td>
                   <td>{row?.patientFullName}</td>
                   <td>{row?.age}</td>
                   <td>{row?.diagnosis}</td>

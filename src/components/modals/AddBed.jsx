@@ -4,12 +4,18 @@ import TagInputs from '../layouts/TagInputs';
 import { get } from '../../utility/fetch';
 import axios from 'axios';
 import notification from '../../utility/notification';
+import { usePatient } from '../../contexts';
+import { useBeds } from '../../contexts/bedContext';
 
 function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
     const [patients, setPatients] = useState([]);
     const [action, setAction] = useState('');
+    const { beds, setBeds, bedsTablePages, setBedTablePages, bedsTablePage, setBedTablePage } = useBeds();
+
+    
+
 
     const handleChange = (field, event) => {
         const value = event;
@@ -24,18 +30,37 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         }
     };
 
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         setCurrentDateTime(new Date());
-    //     }, 1000);
+    const getAssignedBeds = async (page) => {
+        const token = sessionStorage.getItem('token');
 
-    //     return () => clearInterval(intervalId);
-    // }, []);
+        if (!token) {
+            console.error('Token not found in session storage');
+            return;
+        }
 
+        const options = {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        };
+
+        try {
+            let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
+            console.log(res);
+            setBeds(res?.data?.resultList || []);
+            setBedTablePages(res?.data?.totalPages)
+        } catch (error) {
+            console.error('Error fetching equipment:', error);
+        }
+    };
+
+   
     const validatePayload = () => {
         const requiredFields = {
             patientAssignedId: 'Patient',
             assignNote: 'Additional Notes',
+
         };
 
         const missingFields = Object.keys(requiredFields).filter(field => !payload[field]);
@@ -51,6 +76,11 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
 
     const AssigneBed = async () => {
         if (!validatePayload()) return;
+        // if (!payload?.patientAssignedId?.hmoId) {
+        //     notification({ message: 'Patient', type: 'error' });
+        // }
+        // else {
+        // }
 
         const token = sessionStorage.getItem('token');
 
@@ -69,7 +99,10 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         const Payload = {
             ...payload,
             bedId: bedId,
-            patientAssignedId: Number(payload?.patientAssignedId),
+            patientAssignedId: Number(payload?.patientAssignedId?.patientId),
+            hmoId: payload?.patientAssignedId?.hmoId || 0,
+            hmoPackageId: payload?.patientAssignedId?.hmoPackageId || 0,
+
         };
 
         try {
@@ -77,6 +110,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
             console.log(res)
             notification({ message: 'Assigned Successfully', type: 'success' });
             fetchBedList();
+            getAssignedBeds(bedsTablePage);
             closeModal();
         } catch (error) {
             notification({ message: error?.response?.data?.errorData[0] || error?.message, type: 'error' });
@@ -133,7 +167,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
             let res = await get(`/patients/AllPatient/${sessionStorage?.getItem('clinicId')}?pageIndex=1&pageSize=3000`);
             let tempPatients = res?.data?.map(patient => ({
                 label: `${patient?.firstName} ${patient?.lastName}`,
-                value: parseFloat(patient?.patientId),
+                value: patient,
             }));
 
             tempPatients?.unshift({
@@ -153,7 +187,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
             { label: 'Unassign', value: 'unassign' },
         ];
 
-    }else{
+    } else {
         actions = [
             { label: 'Select Action', value: '' },
             { label: 'Assign', value: 'assign' },
@@ -182,6 +216,8 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
                     {action === 'assign' &&
                         <TagInputs label='Patient' onChange={value => handleChange('patientAssignedId', value)} options={patients} name='patientAssignedName' type='R-select' />
                     }
+                    <TagInputs label='Date of Vital' name='dateOfVital' onChange={value => handleChange('dateOfVital', value)} type='date' dateRestriction={'past'} />
+                    <TagInputs label='Diagnosis' name='diagnosis' onChange={value => handleChange('diagnosis', value)} type='textArea' />
                     <TagInputs label='Additional Notes' name='assignNote' onChange={value => handleChange('assignNote', value)} type='textArea' />
 
                     <button onClick={handleAction} className='submit-btn m-t-20 w-100'>

@@ -10,6 +10,8 @@ import menuList from '../config/sideBarMenu';
 function UserPortal(props) {
     const { history } = props;
 
+    
+
     return (
         <div className="container">
             <Sidebar history={history} menuList={menuList} />

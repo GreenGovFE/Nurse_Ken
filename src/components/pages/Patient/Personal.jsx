@@ -10,19 +10,19 @@ import axios from "axios";
 function Personal({ setSelectedTab, hide }) {
   const { patientId, patientInfo, setPatientId, setPatientInfo } = usePatient();
   const [payload, setPayload] = useState({
-      firstName: null,
-      lastName: null,
-      gender: null,
-      dateOfBirth: "2024-06-28",
-      email: "user@example.com",
-      phoneNumber: null,
-      stateOfOrigin: null,
-      lga: null,
-      placeOfBirth: null,
-      maritalStatus: null,
-      nationality: 19,
+      firstName: patientInfo?.firstName || null,
+      lastName: patientInfo?.lastName || null,
+      gender: patientInfo?.gender || null,
+      dateOfBirth:patientInfo?.dateOfBirth || "",
+      email: patientInfo?.email ||  "user@example.com",
+      phoneNumber: patientInfo?.phoneNumber || null,
+      stateOfOrigin: patientInfo?.stateOfOrigin || null,
+      lga: patientInfo?.lga || null,
+      placeOfBirth: patientInfo?.placeOfBirth || null,
+      maritalStatus: patientInfo?.maritalStatus || null,
+      nationality: 'Nigerian',
       clinicId: 0,
-      pictureUrl: null    
+      pictureUrl: patientInfo?.pictureUrl || null    
   });
   const [pictureUrl, setPictureUrl] = useState('');
   const [fileName, setFilename] = useState('');
@@ -47,19 +47,6 @@ function Personal({ setSelectedTab, hide }) {
   ];
 
   useEffect(() => {
-    setPayload(patientInfo || {firstName: null,
-      lastName: null,
-      gender: null,
-      dateOfBirth: null,
-      email: null,
-      phoneNumber: null,
-      stateOfOrigin: null,
-      lga: null,
-      placeOfBirth: null,
-      maritalStatus: null,
-      nationality: "Nigerian",
-      clinicId: Number(sessionStorage.getItem("clinicId")),
-      pictureUrl: null    });
     fetchNationality();
     fetchStates();
   }, [patientInfo]);
@@ -228,7 +215,7 @@ function Personal({ setSelectedTab, hide }) {
     }
 
     try {
-      let res = await put("/patients/UpdatePatient", { ...payload, pictureUrl });
+      let res = await post("/patients/UpdatePatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl });
       if (res.patientId) {
         notification({ message: res?.messages || 'Patient updated successfully', type: "success" });
         setPatientId(res.patientId);
@@ -262,7 +249,7 @@ function Personal({ setSelectedTab, hide }) {
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.firstName || ''} name="firstName" label="First Name*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.lastName || ''} name="lastName" label="Last Name*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.gender || ''} name="gender" type="select" label="Gender*" options={gender} />
-          <TagInputs onChange={handleChange} disabled={!hide} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth" type="date" label="Date Of Birth*" />
+          <TagInputs onChange={handleChange} disabled={!hide} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth"  dateRestriction = {'past'} type="date" label="Date Of Birth*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.email || ''} name="email" label="Email*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.nationality || ''} name="nationality" type="select" label="Nationality*" options={nationality} />

@@ -1,423 +1,207 @@
 import React, { useEffect, useState } from "react";
-import TagInputs from "../../layouts/TagInputs";
-import notification from "../../../utility/notification";
-import AllergyTable from "../../tables/AlllergyTable";
+import InputField from "../../UI/InputField";
+import TextArea from "../../UI/TextArea";
+import { RiToggleFill } from "react-icons/ri";
 import { get, post } from "../../../utility/fetch";
+import AddMedicalRecord from "../../modals/AddMedicalRecord";
+import MedicalRecordTable from "../../tables/MedicalRecordTable";
+import toast from "react-hot-toast";
 import { usePatient } from "../../../contexts";
+import Spinner from "../../UI/Spinner";
 
-function MedicalRecord() {
-  const { patientId } = usePatient();
-
+function MedicalRecord({ data, next, fetchData }) {
   const [selectedTab, setSelectedTab] = useState(1);
-  const [allergies, setAllergies] = useState([{ name: "", comment: "" }]);
-  const [pastIllnesses, setPastIllnesses] = useState([{ name: "", comment: "" }]);
-  const [chronicConditions, setChronicConditions] = useState([{ name: "", comment: "" }]);
-  const [surgicalHistory, setSurgicalHistory] = useState([{ name: "", comment: "" }]);
-  const [familyHistory, setFamilyHistory] = useState([{ name: "", comment: "" }]);
-  const [payload, setPayload] = useState({});
-  const [medTableData, setMedTableData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [medicalRecords, setMedicalRecords] = useState({});
+  const [medicalTypes, setMedicalTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(false);
+  const [typeName, setTypeName] = useState("");
+  const [typeComment, setTypeComment] = useState("");
+  const [newData, setNewData] = useState(false);
+  const { patientId, patientInfo, setPatientId, setPatientInfo } = usePatient();
 
 
 
+  const getNewData = async () => {
 
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
-  const generatePageNumbers = () => {
-    let pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages = [1, 2, 3, 4, totalPages];
-      } else if (currentPage >= totalPages - 2) {
-        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-      } else {
-        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
-      }
-    }
-    return pages;
-  };
-
-
-  useEffect(() => {
-    getMedRecords();
-  }, [currentPage]);
-
-  const handleInputChange = (index, key, value) => {
-    switch (selectedTab) {
-      case 1:
-        const updatedAllergies = [...allergies];
-        updatedAllergies[index][key] = value;
-        setAllergies(updatedAllergies);
-        break;
-      case 2:
-        const updatedPastIllnesses = [...pastIllnesses];
-        updatedPastIllnesses[index][key] = value;
-        setPastIllnesses(updatedPastIllnesses);
-        break;
-      case 3:
-        const updatedChronicConditions = [...chronicConditions];
-        updatedChronicConditions[index][key] = value;
-        setChronicConditions(updatedChronicConditions);
-        break;
-      case 4:
-        const updatedSurgicalHistory = [...surgicalHistory];
-        updatedSurgicalHistory[index][key] = value;
-        setSurgicalHistory(updatedSurgicalHistory);
-        break;
-      case 5:
-        const updatedFamilyHistory = [...familyHistory];
-        updatedFamilyHistory[index][key] = value;
-        setFamilyHistory(updatedFamilyHistory);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleAddField = () => {
-    switch (selectedTab) {
-      case 1:
-        setAllergies([...allergies, { name: "", comment: "" }]);
-        break;
-      case 2:
-        setPastIllnesses([...pastIllnesses, { name: "", comment: "" }]);
-        break;
-      case 3:
-        setChronicConditions([...chronicConditions, { name: "", comment: "" }]);
-        break;
-      case 4:
-        setSurgicalHistory([...surgicalHistory, { name: "", comment: "" }]);
-        break;
-      case 5:
-        setFamilyHistory([...familyHistory, { name: "", comment: "" }]);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const resetFields = () => {
-    setAllergies([{ name: "", comment: "" }]);
-    setPastIllnesses([{ name: "", comment: "" }]);
-    setChronicConditions([{ name: "", comment: "" }]);
-    setSurgicalHistory([{ name: "", comment: "" }]);
-    setFamilyHistory([{ name: "", comment: "" }]);
-  };
-
-  const submitPayload = async (payload) => {
+    setLoading(true);
     try {
-      if (!patientId) {
-        notification({ message: "No Patient found please create one and try again", type: "error" });
-        throw new Error("Patient ID not found");
-      }
+      const res = await get(`/Patients/${patientId}/medicalrecord`);
+      setNewData(res);
 
-      const res = await post("/patients/AddMedicalRecord", { ...payload, PatientId: patientId });
-      console.log(res);
-
-      if (res.recordId) {
-        notification({ message: res?.message, type: "success" });
-        resetFields();
-        getMedRecords()
-      } else if (res.StatusCode === 401) {
-        notification({ message: 'Unauthorized Session', type: "error" });
-      } else if (res.StatusCode === 500) {
-        notification({ message: 'Internal Server Error', type: "error" });
-      } else {
-        console.log(res);
-
-        let errorMessage = "An error occurred";
-
-        if (res && res.errors) {
-          if (res.errors.Name && res.errors.Comment) {
-            errorMessage = "Both Name and Comment are required";
-          } else if (res.errors.Comment) {
-            errorMessage = res.errors.Comment[0];
-          } else if (res.errors.Name) {
-            errorMessage = res.errors.Name[0];
-          }
-        }
-        notification({ message: errorMessage, type: "error" });
-      }
-      setLoading(false)
     } catch (error) {
       console.log(error);
     }
+    setLoading(false);
   };
 
-  const getMedRecords = async () => {
+
+
+  const getMedicalTypes = async () => {
+    setLoading(true);
     try {
-      let res = await get(`/patients/GetAllMedicalRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
-      if (res) {
-        setMedTableData(res.data);
-        setTotalPages(res.pageCount)
-      }
+      const res = await get("/Patients/getAllMedicalTypes");
+      setMedicalTypes(res);
+
     } catch (error) {
-      console.error('Error fetching medical records:', error);
+      console.log(error);
     }
+    setLoading(false);
   };
 
-  const validateFields = (data) => {
-    for (let item of data) {
-      if (!item.name || !item.comment) {
-        if (!item.name && !item.comment) {
-          notification({ message: "Both Name and Comment are required", type: "error" });
-        } else if (!item.name) {
-          notification({ message: "Name is required", type: "error" });
-        } else if (!item.comment) {
-          notification({ message: "Comment is required", type: "error" });
+  const toggleModal = () => {
+    setModal(!modal);
+  }
+
+  const addMedicalRecord = async () => {
+    if (typeComment === "" || typeName === "") {
+      toast("Please fill in fields")
+      return
+    }
+    setLoading(true);
+    const payload = {
+      medicalRecordType: selectedTab,
+      name: typeName,
+      comment: typeComment,
+      patientId: patientId
+    };
+    console.log(payload);
+    try {
+      await post(`/patients/addmedicalrecord`, payload);
+      toast.success('Medical record added successfully');
+      await fetchData();
+
+    } catch (error) {
+      toast.error('Error adding medical record');
+      console.log(error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getNewData();
+    getMedicalTypes();
+
+  }, []);
+
+  useEffect(() => {
+    if (medicalTypes && medicalTypes?.length > 0) {
+      setSelectedTab(medicalTypes[0]?.index);
+      initializeMedicalRecords();
+    }
+  }, [medicalTypes]);
+
+  const initializeMedicalRecords = () => {
+    const initialRecords = {};
+    if (selectedTab !== "") {
+      const selectedType = medicalTypes?.find(type => type?.index === selectedTab);
+      if (selectedType) {
+        const recordsOfType = data?.filter(record => record?.medicalRecordType === selectedType?.index);
+        if (recordsOfType?.length === 0) {
+          // Add an empty record if no records are found
+          initialRecords[selectedType?.index] = [{ name: "", comment: "" }];
+        } else {
+          initialRecords[selectedType?.index] = recordsOfType?.map(record => ({
+            name: record.name || "",
+            comment: record?.comment || "",
+            actionTaken: record?.actionTaken || "",
+            createdAt: record?.createdAt || ""
+          }));
         }
-        return false;
       }
     }
-    return true;
+    setMedicalRecords(initialRecords);
   };
 
-  const handleContinue = () => {
-    setLoading(true)
-    let currentTabData = {};
-    switch (selectedTab) {
-      case 1:
-        currentTabData = allergies;
-        break;
-      case 2:
-        currentTabData = pastIllnesses;
-        break;
-      case 3:
-        currentTabData = chronicConditions;
-        break;
-      case 4:
-        currentTabData = surgicalHistory;
-        break;
-      case 5:
-        currentTabData = familyHistory;
-        break;
-      default:
-        break;
-    }
 
 
-    if (validateFields(currentTabData)) {
-      const payload = {
-        medicalRecordType: selectedTab,
-        name: currentTabData[0]?.name,
-        comment: currentTabData[0]?.comment,
-      };
-      submitPayload(payload);
+
+
+
+
+
+  useEffect(() => {
+    if (selectedTab) {
+      initializeMedicalRecords();
     }
-  };
+  }, [selectedTab]);
 
   return (
     <div>
-      <div className="flex">
-        <div className="m-r-80">
-          <div
-            className={`pointer m-t-20 ${selectedTab === 1 ? "pilled bold-text" : ""}`}
-            onClick={() => setSelectedTab(1)}
-          >
-            1. Allergies
-          </div>
-          <div
-            className={`pointer m-t-20 ${selectedTab === 2 ? "pilled bold-text" : ""}`}
-            onClick={() => setSelectedTab(2)}
-          >
-            2. Past Illnesses
-          </div>
-          <div
-            className={`pointer m-t-20 ${selectedTab === 3 ? "pilled bold-text" : ""}`}
-            onClick={() => setSelectedTab(3)}
-          >
-            3. Chronic Conditions
-          </div>
-          <div
-            className={`pointer m-t-20 ${selectedTab === 4 ? "pilled bold-text" : ""}`}
-            onClick={() => setSelectedTab(4)}
-          >
-            4. Surgical History
-          </div>
-          <div
-            className={`pointer m-t-20 ${selectedTab === 5 ? "pilled bold-text" : ""}`}
-            onClick={() => setSelectedTab(5)}
-          >
-            5. Family Medical History
-
-          </div>
-        </div>
-
-        <div>
-          {selectedTab === 1 && (
+      {
+        loading ? <Spinner/> : (
+          <div>
+            <div className="m-t-40 bold-text">Medical Records</div>
             <div>
-              <div className="w-100 flex flex-h-end flex-v-center gap-4">
-              </div>
-              {allergies.map((allergy, index) => (
-                <div key={index}>
-                  <TagInputs
-                    label="Allergy Name"
-                    type="text"
-                    placeholder="Allergy Name"
-                    value={allergy.name}
-                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                  />
-                  <TagInputs
-                    label="Comment"
-                    type="textArea"
-                    placeholder="Comment"
-                    value={allergy.comment}
-                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
-                  />
+              {/* <div className="flex m-t-30">
+                <div className="m-r-80">
+                  {medicalTypes &&
+                    medicalTypes.map((type) => (
+                      <div
+                        key={type.index}
+                        className={`pointer m-t-30 font-sm ${selectedTab === type.index ? "pilled bold-text " : ""
+                          }`}
+                        onClick={() => setSelectedTab(type.index)}
+                      >
+                        {type.value}
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
-          )}
-          {selectedTab === 2 && (
-            <div>
-              <div className="w-100 flex flex-h-end flex-v-center gap-4">
-              </div>
-              {pastIllnesses.map((Illness, index) => (
-                <div key={index}>
-                  <TagInputs
-                    label="Illness Name"
-                    type="text"
-                    placeholder="Illness Name"
-                    value={Illness.name}
-                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                  />
-                  <TagInputs
-                    label="Comment"
-                    type="textArea"
-                    placeholder="Comment"
-                    value={Illness.comment}
-                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-          {selectedTab === 3 && (
-            <div>
-              <div className="w-100 flex flex-h-end flex-v-center gap-4">
-              </div>
-              {chronicConditions.map((condition, index) => (
-                <div key={index}>
-                  <TagInputs
-                    label="Condition Name"
-                    type="text"
-                    placeholder="Condition Name"
-                    value={condition.name}
-                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                  />
-                  <TagInputs
-                    label="Comment"
-                    type="textArea"
-                    placeholder="Comment"
-                    value={condition.comment}
-                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-          {selectedTab === 4 && (
-            <div>
-              <div className="w-100 flex flex-h-end flex-v-center gap-4">
-              </div>
-              {surgicalHistory.map((surgery, index) => (
-                <div key={index}>
-                  <TagInputs
-                    label="Surgery Name"
-                    type="text"
-                    placeholder="Surgery Name"
-                    value={surgery.name}
-                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                  />
-                  <TagInputs
-                    label="Comment"
-                    type="textArea"
-                    placeholder="Comment"
-                    value={surgery.comment}
-                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-          {selectedTab === 5 && (
-            <div>
-              <div className="w-100 flex flex-h-end flex-v-center gap-4">
-              </div>
-              {familyHistory.map((familyMember, index) => (
-                <div key={index}>
-                  <TagInputs
-                    label="Name"
-                    type="text"
-                    placeholder="Family Member Name"
-                    value={familyMember.name}
-                    onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                  />
-                  <TagInputs
-                    label="Comment"
-                    type="textArea"
-                    placeholder="Comment"
-                    value={familyMember.comment}
-                    onChange={(e) => handleInputChange(index, "comment", e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
 
-          <button disabled={loading} className="submit-btn w-100 m-t-20" onClick={handleContinue}>
-            Add
-          </button>
-        </div>
-      </div>
-      <h3 className="m-t-20">Medical History</h3>
-      <div>
-        <div>
-          <AllergyTable data={medTableData} />
-          <div className="pagination flex space-between float-right col-3 m-t-20">
-            <div className="flex gap-8">
-              <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
-            </div>
-            <div className="flex gap-8">
-              <button
-                className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                {"Previous"}
-              </button>
+                <div>
+                  {(selectedTab && medicalTypes) &&
 
-              {generatePageNumbers().map((page, index) => (
-                <button
-                  key={`page-${index}`}
-                  className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </button>
-              ))}
+                    <div>
+                      <InputField
+                        label={`${medicalTypes[selectedTab - 1]?.value}`}
+                        type="text"
+                        placeholder={`${medicalTypes[selectedTab - 1]?.value}`}
+                        value={typeName}
+                        onChange={(e) => setTypeName(e.target.value)}
+                      />
+                      <TextArea
+                        label="Comment"
+                        type="text"
+                        placeholder="Comment"
+                        value={typeComment}
+                        onChange={(e) => setTypeComment(e.target.value)}
+                      />
+                    </div>
+                  }
+                  <div className="w-100 flex flex-h-end">
+                    <button
+                      className="rounded-btn m-t-20"
+                      onClick={() => addMedicalRecord()}
+                    >
+                      Add {medicalTypes[selectedTab - 1]?.value}
+                    </button>
+                  </div>
+                  <button className="btn w-100 m-t-20" onClick={() => next()}>
+                    Continue
+                  </button>
+                </div>
+              </div> */}
 
-              <button
-                className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                {"Next"}
-              </button>
+              <div className="w-100">
+                {/* <div className="flex flex-h-end">
+                  <div className="rounded-btn" onClick={() => toggleModal()}>+ Add Record</div>
+                </div> */}
+                <MedicalRecordTable data={newData || []} />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        )
+      }
+
+      {
+        modal && <AddMedicalRecord
+          closeModal={toggleModal}
+          patientId={patientId}
+          fetchData={getNewData}
+          medicalRecordType={selectedTab}
+        />
+      }
+
     </div>
   );
 }

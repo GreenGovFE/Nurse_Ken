@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from "react";
-import HMOTable from "../../tables/HMOTable";
-import { PatientData } from "../mockdata/PatientData";
-import HeaderSearch from "../../../Input/HeaderSearch";
-import SelectInput from "../../../Input/SelectInput";
-import { AiOutlinePlus } from "react-icons/ai";
-import { Navigate } from "react-router";
 import TagInputs from "../../layouts/TagInputs";
-import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 import axios from "axios";
-import HMOTableHistory from "../../tables/HMO_Table_Payment_History";
 import { usePatient } from "../../../contexts";
+import { RiCloseFill } from "react-icons/ri";
+import Spinner from "../../UI/Spinner";
+import PaymentHistory from "../../tables/Patient_Payment_History";
+import Paginate from "../../UI/paginate";
 
-function FinanceDetails() {
+function FinanceDetails({ closeModal }) {
   const [paymentHistory, setPaymentHistory] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
   const [hmo, setHmo] = useState([]);
   const { patientId, patientName, patientPage, hmoId } = usePatient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -47,14 +43,16 @@ function FinanceDetails() {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
-
-    getPaymentHistory();
     getHmo();
-
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    getPaymentHistory()
+  },[currentPage])
+
   const getPaymentHistory = async () => {
+    setLoading(true)
     const token = sessionStorage.getItem('token');
 
     if (!token) {
@@ -74,8 +72,10 @@ function FinanceDetails() {
       console.log(response);
       setPaymentHistory(response?.data?.resultList);
       setTotalPages(response?.data?.totalPages);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching payment history:", error);
+      setLoading(false)
     }
   };
 
@@ -103,15 +103,8 @@ function FinanceDetails() {
     }
   };
 
-  const containerStyle = {
-    padding: "20px",
-    width: "100%",
-    marginTop: "40px",
-  };
-
   const headerStyle = {
     marginTop: "20px",
-    marginBottom: "40px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -139,68 +132,42 @@ function FinanceDetails() {
     flexWrap: isMobile ? "wrap" : "nowrap",
   };
 
-  const hmoItemStyle = {
-    flex: isMobile ? "1 1 100%" : "1 1 45%",
-    margin: "10px 0",
-  };
-
-  const historicalPaymentsStyle = {
-    marginTop: "20px",
-  };
-
   return (
-    <div style={containerStyle}>
-      <div style={headerStyle}>
-        <div style={patientInfoStyle}>
-          <h2 style={patientDetailsStyle}>{patientName}</h2>
-        </div>
+    <div className="overlay" >
+      <RiCloseFill className='close-btn pointer' onClick={() => closeModal(false)} />
+      <div className="modal-contents p-20">
+        <>
+          {loading ? <Spinner /> :
+            <>
+              <div style={headerStyle}>
+                <div style={patientInfoStyle}>
+                  <h2 style={patientDetailsStyle}>{patientName}</h2>
+                </div>
 
-      </div>
-      <h3>Payment Breakdown</h3>
-      <div style={hmoDetailsStyle}>
-        <div className="col-5">
-          <TagInputs
-            className="no-wrap"
-            value={`${hmo?.vendorName || ''}  |  ${hmo?.taxIdentityNumber || ''}`}
-            disabled
-            label="HMO Service Provider"
-          />
-        </div>
-      </div>
-      <div>
-        <HMOTableHistory data={paymentHistory} />
-        <div className="pagination flex space-between float-right col-3 m-t-20">
-          <div className="flex gap-8">
-            <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
-          </div>
-          <div className="flex gap-8">
-            <button
-              className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              {"Previous"}
-            </button>
+              </div>
+              <div style={hmoDetailsStyle}>
+                <>
+                  {hmo?.vendorName &&
+                    <div className="col-5">
+                      <TagInputs
+                        className="no-wrap"
+                        value={`${hmo?.vendorName || ''}  |  ${hmo?.taxIdentityNumber || ''}`}
+                        disabled
+                        label="HMO Provider"
+                      />
+                    </div>
+                  }
+                </>
+              </div>
+              <h3 className="m-b-10">Payment History</h3>
+              <div>
+                <PaymentHistory data={paymentHistory} />
+                <div className="m-t-20"><Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages}/></div>
+              </div>
 
-            {generatePageNumbers().map((page, index) => (
-              <button
-                key={`page-${index}`}
-                className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
-                onClick={() => handlePageChange(page)}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              {"Next"}
-            </button>
-          </div>
-        </div>
+            </>
+          }
+        </>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "../../contexts";
 
-function PatientsTable({ data, currentPage, itemsPerPage }) {
+function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
   const { setPatientId, setPatientName, setPatientPage, setHmoId, setPatientInfo } = usePatient();
 
   let navigate = useNavigate();

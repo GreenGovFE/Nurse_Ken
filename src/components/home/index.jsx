@@ -37,6 +37,7 @@ const Home = (props) => {
         sessionStorage.setItem('token', data?.jwt?.token);
         sessionStorage.setItem('clinicId', data?.clinicId);
         sessionStorage.setItem('userId', data?.employeeId);
+        sessionStorage.setItem('nurseRole', data?.role);
         localStorage.setItem('USER_INFO', JSON.stringify(data));
         sessionStorage.setItem('isAdmin', data?.isAdmin)
 
@@ -66,8 +67,8 @@ const Home = (props) => {
     <div className="w-100">
       <div className="banner">
         <div className="log flex-h-center w-100">
-          <div>
-            <div className='flex-h-center'>
+          <div className='flex flex-col'>
+            <div className=''>
               <div className='m-l-20'><img src={icon} alt='' width={26} height={26} /></div>
               <div> <img src={greenz} alt='' width={100} height={26} /></div>
             </div>

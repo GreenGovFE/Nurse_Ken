@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import SelectInput from '../../Input/SelectInput';
 import Select from 'react-select';
 
 export default function TagInputs(props) {
+    // Get the current date in 'YYYY-MM-DD' format
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    // Determine the date restrictions based on the `dateRestriction` prop
+    let minDate, maxDate;
+    if (props?.type === 'time') {
+        minDate = props?.min || '';
+    } else {
+        if (props.dateRestriction === 'current') {
+            minDate = currentDate;
+            maxDate = currentDate;
+        } else if (props.dateRestriction === 'past') {
+            maxDate = currentDate;
+        } else if (props.dateRestriction === 'future') {
+            minDate = currentDate;
+        }
+    }
+
     return (
         <div className='m-t-10'>
             <div className='flex'>
@@ -22,7 +40,7 @@ export default function TagInputs(props) {
                             border: "1px solid #3c7e2d73",
                             width: "100%",
                             borderRadius: "0px 4px 4px 0px",
-                            paddingRight: "20px" 
+                            paddingRight: "20px"
                         }}
                     />
 
@@ -58,6 +76,8 @@ export default function TagInputs(props) {
                                     readOnly={props.readOnly}
                                     value={props.value}
                                     type={props.type}
+                                    min={minDate}
+                                    max={maxDate}
                                     className="w-100"
                                     style={{
                                         borderRadius: props.type !== "textArea" ? "0px 4px 4px 0px" : "0px"
@@ -84,7 +104,7 @@ export default function TagInputs(props) {
                                     type={props.type === "password" ? "password" : (props?.variation ? "number" : "text")}
                                     className="w-100"
                                     style={{
-                                        borderRadius: props.type !== "textArea" ? "0px 4px 4px 0px" : "0px"
+                                        ...props?.style, borderRadius: props.type !== "textArea" ? "0px 4px 4px 0px" : "0px"
                                     }}
                                 />
                             )}

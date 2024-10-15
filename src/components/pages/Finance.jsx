@@ -125,7 +125,7 @@ function PatientsFinance() {
 
   return (
     <div className="w-100 m-t-80">
-      <h3>Patients Finance</h3>
+      <h3 >Patients Finance</h3>
 
       <div className="flex w-100 space-between">
         <div className="flex flex-v-center w-100 m-t-20">
@@ -153,9 +153,9 @@ function PatientsFinance() {
         </div>
       )}
 
-      <div className="pagination flex space-between float-right col-3 m-t-20">
+      <div className="pagination flex space-between flex-v-cener  col-3 m-t-20">
         <div className="flex gap-8">
-          <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+          <div className="bold-text">Page</div> <div className="m-r-10">{currentPage}/{totalPages}</div>
         </div>
         <div className="flex gap-8">
           <button

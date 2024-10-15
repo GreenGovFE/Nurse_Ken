@@ -9,7 +9,7 @@ import axios from 'axios';
 import notification from '../../utility/notification';
 import { usePatient } from '../../contexts';
 
-function ReferralModal({ closeModal, bedId, next, fetchBedList }) {
+function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
     const [Patient, setPatient] = useState([]);
@@ -47,7 +47,7 @@ function ReferralModal({ closeModal, bedId, next, fetchBedList }) {
     //     return () => clearInterval(intervalId);
     // }, []);
 
-    console.log(patientId)
+    console.log(patientId, AppointmentId)
     const ReferPatient = async () => {
         const Payload = {
             ...payload,
@@ -55,14 +55,13 @@ function ReferralModal({ closeModal, bedId, next, fetchBedList }) {
             referredClinicId: payload?.referredClinicId || 0,
             patientId: patientId ? patientId : 0,
             referralNotes: payload?.referralNotes ? payload?.referralNotes : '',
-            treatmentId: payload?.treatmentId || 0,
+            appointmentId: AppointmentId || 0,
         };
 
         const customFieldNames = {
             referredClinicId: "Clinic/Hospital",
             patientId: "Patient",
             referralNotes: "Additional Notes",
-            treatmentId: "Treatment",
         };
 
         const validatePayload = (payload) => {
@@ -90,6 +89,7 @@ function ReferralModal({ closeModal, bedId, next, fetchBedList }) {
             console.log(res);
             if (res?.message === "Referral note added successfully") {
                 notification({ message: 'Referred Successfully', type: "success" });
+                fetchData(currentPage);
                 closeModal();
             } else {
                 notification({ message: res?.message, type: "error" });
@@ -164,7 +164,7 @@ function ReferralModal({ closeModal, bedId, next, fetchBedList }) {
     useEffect(() => {
         getAllPatients();
         getAllHospitals();
-        getTreatment();
+        // getTreatment();
     }, [patientId]);
 
     return (
@@ -182,7 +182,7 @@ function ReferralModal({ closeModal, bedId, next, fetchBedList }) {
                 <div className="p-10">
                     {/* <TagInputs label="Select Patient" onChange={(value) => handleChange("patientId", value)} options={Patient} name="patientId" type='R-select' /> */}
                     <TagInputs label="Select Clinic/Hospital" onChange={(value) => handleChange("referredClinicId", value)} options={hospitals} name="referredClinicId" type='R-select' />
-                    <TagInputs label="Select Treatment" onChange={(value) => handleChange("treatmentId", value)} options={treatment} name="treatmentId" type='R-select' />
+                    {/* <TagInputs label="Select Treatment" onChange={(value) => handleChange("treatmentId", value)} options={treatment} name="treatmentId" type='R-select' /> */}
                     <TagInputs label="Additional Notes" name="referralNotes" onChange={(value) => handleChange("referralNotes", value)} type='textArea' />
 
                     <button onClick={ReferPatient} className="submit-btn m-t-20 w-100" >Refer Patient</button>

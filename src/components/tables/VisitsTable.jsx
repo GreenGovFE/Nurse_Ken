@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { get } from "../../utility/fetch";
-import Visits from "../pages/Patient/Visits";
+import Visits from "../pages/Patient/Vitals";
 import ViewVisit from "../modals/visits";
 
 function VisitsTable({ data }) {
@@ -40,7 +40,7 @@ function VisitsTable({ data }) {
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
   const getDoctors = async () => {
     try {
       let res = await get(
@@ -54,17 +54,13 @@ function VisitsTable({ data }) {
       // Handle the error here, such as displaying an error message to the user
     }
   };
-  
+
 
   const getNurseName = (nurseId) => {
     const nurse = nurses?.find((nurse) => nurse?.nurseEmployeeId === nurseId);
     return nurse ? nurse?.username : "Nurse Not Found";
   };
 
-  const getDoctorName = (doctorId) => {
-    const doctor = doctors?.find((doctor) => doctor?.doctorEmployeeId === doctorId);
-    return doctor ? doctor?.username : "Doctor Not Found";
-  };
 
   const formatDate = (timestamp) => {
     if (!timestamp) {
@@ -84,28 +80,26 @@ function VisitsTable({ data }) {
               <th className="center-text">Date</th>
               <th className="center-text">Blood Pressure (mmHg)</th>
               <th className="center-text">Weight (Kg)</th>
-              <th className="center-text">Temp  (°C)</th>
-              <th className="center-text">Height (cm)</th>
-              <th className="center-text">Heart (bpm)</th>
-              <th className="center-text">Respiration (bpm)</th>
+              <th  className="center-text">Temp</th>
+              <th  className="center-text">Height</th>
+              <th  className="center-text">Heart</th>
+              <th  className="center-text">Resp</th>
               <th className="center-text">Admin Nurse</th>
-              <th className="center-text">Assigned Doctor</th>
               <th className="center-text"></th>
             </tr>
           </thead>
 
           <tbody className="white-bg view-det-pane">
-            {Array.isArray(data) && data?.map((row) => (  
+            {Array.isArray(data) && data?.map((row) => (
               <tr key={row.id}>
-                <td style={{minWidth: '100px'}}>{formatDate(row.dateOfVisit)}</td>
+                <td style={{ minWidth: '100px' }}>{formatDate(row.dateOfVisit)}</td>
                 <td>{row.bloodPressure}</td>
                 <td>{row.weight}</td>
                 <td>{row.temperature}</td>
                 <td>{row.height}</td>
                 <td>{row.heartPulse}</td>
                 <td>{row.respiratory}</td>
-                <td>{(row.nurseName)}</td>
-                <td>{(row.doctorName)}</td>
+                <td>{(row.vitalNurseName)}</td>
                 <td onClick={selectRecord(row)}><img className="hovers pointer" src="/details.png" /></td>
               </tr>
 

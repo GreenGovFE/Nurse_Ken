@@ -51,8 +51,8 @@ function Treatments() {
     try {
       let res = await get(`/patients/${patientId}/treatmentrecord?pageNumber=${currentPage}&pageSize=10`);
       console.log(res);
-      setTreatment(res.data);
-      setTotalPages(res.pageCount)
+      setTreatment(res?.data);
+      setTotalPages(res?.pageCount)
     } catch (error) {
       console.error('Error fetching treatment records:', error);
       // Handle the error here, such as displaying an error message to the user

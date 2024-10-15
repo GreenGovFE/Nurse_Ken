@@ -136,37 +136,37 @@ function Dashboard() {
 
   }, []);
   return (
-    <div className="w-100 m-t-40">
-      <div className="m-t-20">
+    <div className="w-100 m-t-60">
+      <div className="m-t-40">
         <div className="m-b-40">
           <span>Good Day</span>
           <h3>{userInfo?.firstName} {userInfo?.lastName}</h3>
           <span>{userInfo?.role}</span>
         </div>
-        <div style={{display: 'flex', flexWrap: 'wrap',  justifyContent: 'space-between'}}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
 
-          <div className="">
+          <div className="col-3">
             <StatCard data={{
               number: admittedpatients,
               title: "Admitted Patients",
             }} icon={<RiHotelBedFill className="icon" size={32} />}
             />
           </div>
-          <div className="">
+          <div className="col-3">
             <StatCard data={{
               number: availableStaff,
               title: "Available Staff",
             }} icon={<RiAccountCircleFill className="icon" size={32} />}
             />
           </div>
-          <div className="">
+          <div className="col-3">
             <StatCard data={{
               number: hmopatients,
               title: "Patients with HMO",
             }} icon={<RiGroup2Fill className="icon" size={32} />}
             />
           </div>
-          <div className="m-r-20">
+          <div className=" col-3">
             <StatCard data={{
               number: totalpatients,
               title: "Total Patients",
@@ -175,29 +175,28 @@ function Dashboard() {
           </div>
 
         </div>
-        <div className="w-100 gap-16 flex">
-          <div className="col-8  m-t-40">
-            <OutAndInpatientGraph
-              InPatients={inPatients}
-              OutPatients={outPatients}
-            />
-            <div className="flex m-t-20 w-100">
-              <div className="m-r-20 w-50">
-                <PatientAdmission
-                  PatientAdmission={patientAdmission}
-                />
-              </div>
-              {/* <div className="w-50">
-                <PatientsBreakdown />
-              </div> */}
+        <div className="w-100 gap-16 ">
+          <div className="flex wrap space-between m-t-40">
+            <div className="col-8">
+              <OutAndInpatientGraph
+                InPatients={inPatients}
+                OutPatients={outPatients}
+              />
+            </div>
+            <div className="col-4 ">
+              <GenderDistribution
+                malePatientPercentage={malePercentage}
+                femalePatientPercentage={femalePercentage}
+
+              />
             </div>
           </div>
-          <div className="col-4 m-t-40 ">
-            <GenderDistribution
-              malePatientPercentage={malePercentage}
-              femalePatientPercentage={femalePercentage}
-
-            />
+          <div className=" m-t-20 w-100">
+            <div className="col-8">
+              <PatientAdmission
+                PatientAdmission={patientAdmission}
+              />
+            </div>
           </div>
         </div>
       </div>

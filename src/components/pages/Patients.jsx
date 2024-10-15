@@ -10,9 +10,12 @@ import TagInputs from "../layouts/TagInputs";
 import ReferralModal from "../modals/RefferalModal";
 import Spinner from "../UI/Spinner";
 import { usePatient } from "../../contexts";
+import Pagination from "../layouts/Pagination";
+import VitalPatientsTable from "../tables/VitalPatientTable";
 
 function Patients() {
   const [allPatients, setAllPatients] = useState([]);
+  const [vitalPatients, setVitalPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [payload, setPayload] = useState('');
   const [filterSelected, setFilterSelected] = useState("firstName");
@@ -20,10 +23,13 @@ function Patients() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalPagesVital, setTotalPagesVital] = useState(1);
+
 
   const itemsPerPage = 10;
 
-  const { setPatientId, setPatientInfo, setHmoDetails } = usePatient();
+  const { setNurseTypes, nurseTypes, setHmoDetails } = usePatient();
+
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -31,7 +37,7 @@ function Patients() {
     }
   };
 
-  const generatePageNumbers = () => {
+  const generatePageNumbers = (currentPage, totalPages) => {
     let pages = [];
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
@@ -49,9 +55,8 @@ function Patients() {
     return pages;
   };
 
-  useEffect(() => {
-    getAllPatients();
-  }, [currentPage]);
+
+
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -95,7 +100,7 @@ function Patients() {
   );
 
   const getAllPatients = async () => {
-    setLoading(true); 
+    setLoading(true);
     try {
       let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
       console.log(res);
@@ -104,12 +109,26 @@ function Patients() {
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
-      setLoading(false); 
+      setLoading(false);
+    }
+  };
+
+  const getPatientsAwaitingVital = async () => {
+    setLoading(true);
+    try {
+      let res = await get(`/patients/patient-awaiting-vital?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
+      console.log(res);
+      setVitalPatients(res.data);
+      setTotalPagesVital(res.pageCount);
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const searchPatients = async (searchParam) => {
-    setLoading(true); 
+    setLoading(true);
     try {
       let url = '/patients/filter?';
       if (filterSelected) {
@@ -122,7 +141,7 @@ function Patients() {
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -134,6 +153,15 @@ function Patients() {
       setPayload(value);
     }
   };
+
+  useEffect(() => {
+    if (nurseTypes !== "vital") {
+      console.log(nurseTypes)
+      getAllPatients();
+    } else {
+      getPatientsAwaitingVital()
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     if (payload) {
@@ -150,72 +178,94 @@ function Patients() {
     { value: "phoneNumber", name: "Phone Number" }
   ];
 
+
+
   return (
     <div className="w-100 m-t-40">
-      <div className="flex flex-v-center flex-h-center space-between  m-t-20">
-        <h3 className="float-left col-4">Patients Management</h3>
-        <div className="flex flex-v-center flex-h-center ">
-          <div className="col-4">
-            <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
-          </div>
-          <div className="col-3 ">
-            <TagInputs
-              onChange={handleChange}
-              name="filter"
-              type="select"
-              options={filterOptions}
-            />
-          </div>
-          <div className="m-b-10 col-4">
-            <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null)  }} className="submit-btn">
-              <div className="flex flex-h-center flex-v-center">
-                <AiOutlinePlus size={24} color="white" />
-                <p className="m-l-10 m-r-10">Onboard a Patient</p>
+      <>
+        {
+          nurseTypes !== 'vital' ? (
+            <div className="flex flex-v-center  space-between  m-t-20">
+              <h3 className="float-left col-4">Patients Management</h3>
+              <div className="flex flex-v-center flex-h-center col-6 ">
+                <div className="col-4">
+                  <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
+                </div>
+                <div className="col-3 ">
+                  <TagInputs
+                    onChange={handleChange}
+                    name="filter"
+                    type="select"
+                    options={filterOptions}
+                  />
+                </div>
+                <div className=" m-b-10 col-4">
+                  {nurseTypes === 'checkin' &&
+                    <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex flex-h-center flex-v-center">
+                      <>
+                        <AiOutlinePlus size={24} color="white" />
+                        <p className="m-l-10 m-r-10">Onboard a Patient</p>
+                      </>
+                    </button>
+                  }
+                </div>
               </div>
-            </button>
-          </div>
-        </div>
-      </div>
+            </div>
+          ) : (
+            <h3 className="m-t-20 float-left col-4">Patients Awaiting Vital</h3>
+          )
+        }
+      </>
       <div>
+        <div className=" tabs m-t-20 bold-text">
+          <>
+            {nurseTypes === "admin" &&
+              <div
+                className={`tab-item ${nurseTypes === "admin" ? "active" : ""
+                  }`}
+                onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
+              >
+                Admin Nurse
+              </div>
+            }
+          </>
+
+          <>
+            {nurseTypes === "vital" &&
+              <div
+                className={`tab-item ${nurseTypes === "vital" ? "active" : ""
+                  }`}
+                onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
+              >
+                Vital Nurse
+              </div>
+            }
+          </>
+        </div>
         {loading ? (
           <Spinner />
         ) : (
-          <div>
-            <PatientsTable data={allPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
-
-            <div className="pagination flex space-between float-right col-4 m-t-20">
-              <div className="flex gap-8">
-                <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
-              </div>
-              <div className="flex gap-8">
-                <button
-                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  {"Previous"}
-                </button>
-
-                {generatePageNumbers().map((page, index) => (
-                  <button
-                    key={`page-${index}`}
-                    className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  {"Next"}
-                </button>
-              </div>
-            </div>
-          </div>
+          <>
+            {nurseTypes !== "vital" ? (
+              <><PatientsTable data={allPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                />
+              </>
+            ) : (
+              <> <VitalPatientsTable data={vitalPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPagesVital}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                />
+              </>
+            )}
+          </>
         )}
       </div>
       {isModalOpen &&

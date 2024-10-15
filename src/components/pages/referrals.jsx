@@ -148,13 +148,13 @@ function ReferredPatients() {
 
   return (
     <div className="w-100 m-t-40">
-      <div className="flex flex-v-center flex-h-center space-between m-t-20">
-        <h3 className="float-left col-4">Referred Patients</h3>
-        <div className="flex flex-v-center flex-h-center">
-          <div className="col-10">
+      <div className="flex flex-v-center flex-h-center space-between m-t-40">
+        <h3  className="float-left col-4">Referred Patients</h3>
+        <div  className="flex flex-v-center flex-h-center">
+          <div className="col-7">
             <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
           </div>
-          <div className="col-6">
+          <div className="col-5">
             <TagInputs
               onChange={handleChange}
               name="filter"

@@ -6,14 +6,13 @@ import Paginate from "../UI/paginate";
 import notification from "../../utility/notification";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import DeleteConfirmationModal from "../modals/DeleteConfirmation";
+import { useBeds } from "../../contexts/bedContext";
 
 function AssignedBed({ data, fetchBedList, }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewing, setViewing] = useState({});
-    const { setPatientId, setPatientName, setPatientPage, setHmoId } = usePatient();
-    const [bedsTablePages, setBedTablePages] = useState(1);
-    const [bedsTablePage, setBedTablePage] = useState(1);
-    const [beds, setBeds] = useState([]);
+    const { setPatientId, setPatientName, setPatientPage, setHmoId,} = usePatient();
+    const { beds, setBeds, bedsTablePages, setBedTablePages, bedsTablePage, setBedTablePage } = useBeds();
     const [isModalOpenDel, setIsModalOpenDel] = useState(false);
     const closeModalDel = () => { setIsModalOpenDel(false); }
     const [recordToDelete, setRecordToDelete] = useState(null);
@@ -56,6 +55,7 @@ function AssignedBed({ data, fetchBedList, }) {
             let res = await axios.put(url, null, options);
             notification({ message: 'Unassigned Successfully', type: 'success' });
             fetchBedList();
+            getAssignedBeds(bedsTablePage)
             closeModal();
         } catch (error) {
             notification({ message: error?.response?.data?.errorData[0] || error?.message, type: 'error' });

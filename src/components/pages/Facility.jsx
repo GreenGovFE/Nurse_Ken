@@ -177,7 +177,7 @@ function Facility() {
     switch (selectedTab) {
       case "beds":
         return (
-          <div>
+          <div >
             <div style={{ display: 'flex', flexDirection: 'horizontal', justifyContent: 'space-between', flexWrap: 'wrap'}}>
               <div className="col-8">
                 <div className="m-t-20 m-b-20 bold-text">
@@ -331,8 +331,7 @@ function Facility() {
 
   return (
     <div className="w-100">
-      <div className="m-t-20">...</div>
-      <div className="m-t-20 bold-text">Facility | Bed Management</div>
+      <div  className="m-t-80 bold-text">Facility | Bed Management</div>
       <div className="tabs m-t-20 bold-text">
         <div
           className={`tab-item ${selectedTab === "beds" ? "active" : ""}`}

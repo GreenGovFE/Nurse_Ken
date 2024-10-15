@@ -9,7 +9,7 @@ function PatientsInsurance() {
 
   return (
     <div className="w-100 m-t-80">
-      <h3>HMO/Insurance Management</h3>
+      <h3 >HMO/Insurance Management</h3>
 
       
 

@@ -238,7 +238,7 @@ function Immunization({ setSelectedTab }) {
   };
 
   const next = () => {
-    setSelectedTab("visits");
+    setSelectedTab("vitals");
   };
 
   useEffect(() => {
@@ -247,7 +247,7 @@ function Immunization({ setSelectedTab }) {
 
   return (
     <div className="">
-      <div className="w-100 flex ">
+      <div className="w-100  wrap flex ">
         <div className="col-3-3">
           <div>
             <TagInputs onChange={handleChange} value={payload?.vaccine || ''} name="vaccine" label="Vaccine" error={errors.vaccine} />
@@ -279,7 +279,7 @@ function Immunization({ setSelectedTab }) {
             </div>
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''} label="Date Given" type="date" error={errors.dateGiven} />
+            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''}  dateRestriction = {'past'} label="Date Given" type="date" error={errors.dateGiven} />
           </div>
           <div>
             <TextArea

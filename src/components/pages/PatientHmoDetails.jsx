@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProfilePix from "../../assets/images/profile-pix.jpg";
 import axios from "axios";
-import HMOTableHistory from "../../components/tables/HMO_Table_Payment_History";
 import { usePatient } from "../../contexts/index";
 import { get } from "../../utility/fetch";
 import TagInputs from "../layouts/TagInputs";

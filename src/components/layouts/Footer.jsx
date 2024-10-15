@@ -1,16 +1,26 @@
 import React from "react";
-import EdsgLogo from "../../assets/images/SidebarLogo.png";
 
 
 const Footer = () => (
-  <footer>
-    <div className=" space-between flex-v-center">
-      <div className="footer-inner-left flex flex-v-center">
-        <img src={EdsgLogo} alt="Edsg Logo" className="brand" style={{width: '150px', height: '46px', marginLeft: '20px'}} />
-        <p>2024 Greenzone Technologies Limited</p>
-      </div>
+
+  <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px' }}>
+    <div className="footer-inner-left flex flex-v-center space-around" style={{ display: 'flex', alignItems: 'center' }}>
+      <p style={{ margin: '0' }}>
+        <a href="https://dms.greenwayhealth.com/my-health-record/tos/terms-of-service.htm" style={{ marginLeft: '10px' }}>Terms of Service</a>  |
+        <a href="https://dms.greenwayhealth.com/my-health-record/pp/privacy-policy.htm" style={{ marginLeft: '10px' }}>Privacy Policy</a>
+         &nbsp; Copyright 2024 &copy; Greenzone Technologies Limited. All rights reserved.
+      </p>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <span>Powered By:</span>
+      <img
+        src={'greenzone.png'}
+        alt="Edsg Logo"
+        style={{ width: '140px', marginLeft: '40px', marginRight: '10px', }}
+      />
     </div>
   </footer>
+
 );
 
 export default Footer;

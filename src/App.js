@@ -9,6 +9,7 @@ import Homepage from './components/home';
 import { PatientProvider } from './contexts';
 import PageLayout from './components/layouts/PageLayout';
 import { Toaster } from 'react-hot-toast';
+import { BedProvider } from './contexts/bedContext';
 
 const App = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const App = () => {
               setWarningDisplayed(false);
               navigate('/');
               localStorage.removeItem('LOGIN_TIME');
-              
+
               clearInterval(inactivityTimeoutId);
               setTimeout(() => {
                 setSessionExpired(false);
@@ -53,7 +54,7 @@ const App = () => {
           });
         }, 60000);
         setInactivityWarning(true);
-      }, 1500000); // 25 minutes in milliseconds
+      }, 1500000);
     };
 
     const checkAndSetTimeout = () => {
@@ -62,7 +63,7 @@ const App = () => {
       if (loginTime) {
         const currentTime = new Date().getTime();
         const timeElapsed = currentTime - loginTime;
-        const sessionDuration = 21600000; // 6 hours in milliseconds
+        const sessionDuration = 21600000;
         const timeRemaining = sessionDuration - timeElapsed;
 
         if (timeRemaining <= 600000 && timeRemaining > 0) {
@@ -98,30 +99,32 @@ const App = () => {
 
   return (
     <PatientProvider>
-      <div>
-        <Routes>
-          <Route path="/" element={<Homepage />} />
-          <Route path="*" element={<PageLayout />} />
-        </Routes>
-        {warningDisplayed && (
-          <div style={toastStyle}>
-            <span role="img" aria-label="warning">⚠️</span>
-            {` Session will time out in ${minutesLeft} minutes`}
-          </div>
-        )}
-        {sessionExpired && (
-          <div style={toastStyle}>
-            <span role="img" aria-label="error">❌</span>
-            {` Session has timed out. Please login again.`}
-          </div>
-        )}
-        {inactivityWarning && (
-          <div style={toastStyle}>
-            <span role="img" aria-label="warning">⚠️</span>
-            {`You will be logged out in ${inactivityMinutesLeft} minutes due to inactivity.`}
-          </div>
-        )}
-      </div>
+      <BedProvider>
+        <div>
+          <Routes>
+            <Route path="/" element={<Homepage />} />
+            <Route path="*" element={<PageLayout />} />
+          </Routes>
+          {warningDisplayed && (
+            <div style={toastStyle}>
+              <span role="img" aria-label="warning">⚠️</span>
+              {` Session will time out in ${minutesLeft} minutes`}
+            </div>
+          )}
+          {sessionExpired && (
+            <div style={toastStyle}>
+              <span role="img" aria-label="error">❌</span>
+              {` Session has timed out. Please login again.`}
+            </div>
+          )}
+          {inactivityWarning && (
+            <div style={toastStyle}>
+              <span role="img" aria-label="warning">⚠️</span>
+              {`You will be logged out in ${inactivityMinutesLeft} minutes due to inactivity.`}
+            </div>
+          )}
+        </div>
+      </BedProvider>
     </PatientProvider>
   );
 };

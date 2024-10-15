@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { get } from "../../utility/fetch";
 import NurseNoteTreatment from "../modals/NurseNoteTreatment";
 import { usePatient } from "../../contexts";
+import DetailedNotes from "../modals/detailedNotes";
+import DetailedNurseNotes from "../modals/DetailedNurseNotes";
 
 function TreatmentTable({ data }) {
   const { patientId } = usePatient();
@@ -12,24 +14,38 @@ function TreatmentTable({ data }) {
   const [add, setAdd] = useState(false); // Add loading state'
   const [nurses, setNurses] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [nurse, setNurse] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [nurseNotes, setNurseNotes] = useState(false);
+  const [NotesModal, setNotesModal] = useState(false)
+  const [vital, setVital] = useState([])
+
+
 
   const fetchData = async () => {
     try {
-      const response = await get(`/patients/GetAllVisitationRecordByPatientId?patientId=${patientId}`);
-      const combined = data.map(treatment => {
-        const correspondingVisit = response.data.find(visit => visit.visitId === treatment.visitId);
+      const response = await get(`/patients/vital-by-patientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=1000`);
+      setVital(response.data);
+      const combined = data?.map(treatment => {
+        const correspondingVital = response?.data?.find(vital => vital?.vitalId === treatment?.vitalId);
         return {
           ...treatment,
-          nurseName: correspondingVisit ? correspondingVisit.nurseName : 'No Nurse Assigned',
-          nurseNotes: correspondingVisit ? correspondingVisit.notes : 'No Notes',
-          nurseId: correspondingVisit ? correspondingVisit.nurseId : 0
+          nurseName: correspondingVital ? correspondingVital.vitalNurseName : 'No Nurse Assigned',
+          nurseNotes: correspondingVital ? correspondingVital.notes : 'No Notes',
+          nurseId: correspondingVital ? correspondingVital.vitalNurseId : 0,
+          bloodPressure: correspondingVital ? correspondingVital?.bloodPressure : '',
+          heartPulse: correspondingVital? correspondingVital?.heartPulse : '',
+          respiratory: correspondingVital? correspondingVital?.respiratory : '',
+          height: correspondingVital? correspondingVital?.height : '',
+          weight: correspondingVital? correspondingVital?.weight : '',
         };
       });
       console.log(combined);
-
       setCombinedData(combined);
     } catch (e) {
       console.log(e);
+      setCombinedData(data)
     }
   };
 
@@ -37,10 +53,12 @@ function TreatmentTable({ data }) {
     try {
       let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
       console.log(res);
-      let tempNurses = res?.data?.map((nurse) => {
-        return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
-      });
-
+      let tempNurses = res?.data
+        ?.filter((nurse) => nurse?.username) 
+        .map((nurse) => {
+          return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
+        });
+  
       tempNurses?.unshift({ name: "Select Nurse", value: "" });
       setNurses(tempNurses);
     } catch (error) {
@@ -76,22 +94,30 @@ function TreatmentTable({ data }) {
   const closeModal = () => {
     setIsModalOpen(false);
     setAdd(false)
+    setNurseNotes(false)
+    setNotesModal(false)
   };
 
   const selectRecord = (record) => () => {
     setViewing(record);
     setNotes(record.nurseNotes);
-    setIsModalOpen(true);
+    setNotesModal(true);
   };
 
-  const addNotes = (record) => () => {
-    setViewing(record);
-    setNotes(record.nurseNotes);
-    setIsModalOpen(true);
-    setAdd(true)
+  const addNotes = (record, type) => () => {
+    if (type === 'view meds') {
+      setViewing(record);
+      setNotes(record.nurseNotes);
+      setIsModalOpen(true);
+      setAdd(true)
+    } else if (type === 'nurse notes') {
+      setViewing(record);
+      setNotes(record.nurseNotes);
+      setNurseNotes(true)
+    }
   };
 
-  console.log(combinedData)
+  console.log(combinedData, data)
 
   return (
     <div className="w-100">
@@ -104,7 +130,7 @@ function TreatmentTable({ data }) {
               <th className="center-text">Weight (Kg)</th>
               <th className="center-text">Temperature (°C)</th>
               <th className="center-text">Admin Nurse</th>
-              <th className="center-text">Nurse Note</th>
+              <th className="center-text">Admin Note</th>
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Medication/Prescription</th>
             </tr>
@@ -132,9 +158,15 @@ function TreatmentTable({ data }) {
                       </div>
                     </div>
                   ))}
-                  <span className="m-t-10 m-b-10 add-note" onClick={addNotes(row)}>
-                    Add to patient's note
-                  </span>
+                  <div className="flex flex col-8">
+                    <span className="m-t-10 m-b-10 add-note" onClick={addNotes(row, 'view meds')}>
+                      View Medications/Prescription Details
+                    </span>
+                    <span className="m-t-10 m-b-10 m-l-20 add-note" onClick={addNotes(row, 'nurse notes')}>
+                      View Nurse Notes
+                    </span>
+                  </div>
+
                 </td>
               </tr>
             ))}
@@ -142,6 +174,16 @@ function TreatmentTable({ data }) {
         </table>
       </div>
       {isModalOpen && (
+        <DetailedNotes
+          treatment={viewing}
+          notes={notes}
+          add={add}
+          closeModal={closeModal}
+          doctors={doctors}
+          nurses={nurses}
+        />
+      )}
+      {NotesModal && (
         <NurseNoteTreatment
           visit={viewing}
           notes={notes}
@@ -151,6 +193,20 @@ function TreatmentTable({ data }) {
           nurses={nurses}
         />
       )}
+
+      {nurseNotes && (
+        <DetailedNurseNotes
+          treatment={viewing}
+          notes={notes}
+          add={add}
+          closeModal={closeModal}
+          doctors={doctors}
+          nurses={nurses}
+          vital={vital}
+
+        />
+      )}
+
 
 
     </div>
