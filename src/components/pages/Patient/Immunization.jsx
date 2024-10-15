@@ -238,7 +238,7 @@ function Immunization({ setSelectedTab }) {
   };
 
   const next = () => {
-    setSelectedTab("vitals");
+    setSelectedTab("treatment");
   };
 
   useEffect(() => {

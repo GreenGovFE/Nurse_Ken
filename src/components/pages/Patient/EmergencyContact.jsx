@@ -120,7 +120,7 @@ function EmergencyContact({ setSelectedTab }) {
       let res = await post("/patients/emergencyContact", { ...payload, patientId: Number(patientId) });
       if (res.patientId) {
         notification({ message: res?.messages, type: "success" });
-        setSelectedTab("medicalRecord");
+        setSelectedTab("financeHmo");
         sessionStorage.setItem("patientId", res?.patientId);
       } else {
         notification({ message: res?.messages, type: "error" });
