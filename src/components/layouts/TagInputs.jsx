@@ -54,11 +54,22 @@ export default function TagInputs(props) {
                             onBlur={props.onBlur}
                             isDisabled={props.disabled}
                             options={props.options}
-                            style={{
-                                height: "40px",
-                                border: "1px solid #3c7e2d73",
-                                width: "100% !important",
-                                borderRadius: "0px 4px 4px 0px"
+                            menuShouldScrollIntoView={false} // Prevent automatic scrolling to dropdown
+                            styles={{
+                                container: (provided) => ({
+                                    ...provided,
+                                    width: '100%',
+                                }),
+                                control: (provided) => ({
+                                    ...provided,
+                                    height: '40px',
+                                    border: '1px solid #3c7e2d73',
+                                    borderRadius: '0px 4px 4px 0px',
+                                }),
+                                menu: (provided) => ({
+                                    ...provided,
+                                    maxHeight: '2000px', // Set max height for scrollability
+                                }),
                             }}
                         />
 
@@ -102,6 +113,7 @@ export default function TagInputs(props) {
                                     readOnly={props.readOnly}
                                     value={props.value}
                                     type={props.type === "password" ? "password" : (props?.variation ? "number" : "text")}
+                                    step={props.variation ? "any" : undefined}
                                     className="w-100"
                                     style={{
                                         ...props?.style, borderRadius: props.type !== "textArea" ? "0px 4px 4px 0px" : "0px"

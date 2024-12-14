@@ -11,9 +11,8 @@ import IdentityDetails from "./Patient/IdentityDetails";
 import Spinner from "../UI/Spinner";
 
 function PatientHMOetails() {
-  const { patientId, patientName, hmoId, patientInfo, hmoDetails } = usePatient();
+  const { patientId, patientInfo, hmoDetails, setHmoDetails } = usePatient();
 
-  const [pictureUrl, setPictureUrl] = useState('');
   const [paymentHistory, setPaymentHistory] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hmo, setHmo] = useState([]);
@@ -38,19 +37,18 @@ function PatientHMOetails() {
 
   useEffect(() => {
     fetchPatientById();
+    getHmobyId()
   }, []);
 
-  const getPaymentHistory = async () => {
-    try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${patientId}/${pageNumber}/10/patient-payment-history`);
-      console.log(response);
-      setPaymentHistory(response?.data?.resultList);
-    } catch (error) {
-      console.error('Error fetching payment history:', error);
-    }
-  };
-
-  console.log(hmoDetails)
+  const getHmobyId = async () => {
+    await get(`/HMO/get-patient-hmo/${patientId}`)
+      .then(res => {
+        setHmoDetails(res?.data);
+      })
+      .catch(err => {
+        console.error('Error fetching HMO details:', err);
+      });
+  }
 
   const fetchHmoById = async (hmoId) => {
     try {
@@ -62,28 +60,24 @@ function PatientHMOetails() {
     }
   };
 
+
   const fetchPatientById = async () => {
-    setLoading(true); // Set loading to true before fetch
+    setLoading(true);
     try {
       const res = await get(`/patients/AllPatientById?patientId=${patientId}`);
       const data = res;
       const hmo = await fetchHmoById(res?.hmoId);
-      console.log("HMO details for ID", res?.hmoId, ":", hmo);
       setPatientInfomation({ data, hmo });
     } catch (error) {
       console.error('Error fetching patient details:', error);
     } finally {
-      setLoading(false); // Set loading to false after fetch
+      setLoading(false);
     }
-  };
-
-  const addDefaultSrc = (ev) => {
-    ev.target.src = ProfilePix;
   };
 
   return (
     <div style={{ width: '100%', height: '100%', padding: '20px' }}>
-      {loading ? ( // Conditionally render loader
+      {loading ? (
         <div className="m-t-80"><Spinner /></div>
       ) : (
         <div style={{ marginTop: '40px' }}>
@@ -147,9 +141,9 @@ function PatientHMOetails() {
                 selectedTab === "contactDetails" ?
                   <ContactDetails hide={false} setSelectedTab={setSelectedTab} /> :
                   selectedTab === "identityDetails" ?
-                  <IdentityDetails hide={true} setSelectedTab={setSelectedTab} /> : 
-                  selectedTab === "membershipCover" ?
-                    <MembershipCover hide={true} setSelectedTab={setSelectedTab} /> : null
+                    <IdentityDetails hide={true} setSelectedTab={setSelectedTab} /> :
+                    selectedTab === "membershipCover" ?
+                      <MembershipCover hide={true} setSelectedTab={setSelectedTab} /> : null
             }
           </div>
         </div>

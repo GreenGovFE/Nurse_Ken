@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { get, post } from "../../utility/fetch";
-import axios from "axios";
 import notification from "../../utility/notification";
-import UpdatePaymentModal from "./UpdatePayment";
 import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill } from "react-icons/ri";
 import { usePatient } from "../../contexts";
 
 function Discharge({ closeModal, appointment, fetch, currentPage }) {
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
     const { patientId, patientName } = usePatient();
     const [Loading, setLoading] = useState(false);
@@ -22,13 +19,11 @@ function Discharge({ closeModal, appointment, fetch, currentPage }) {
         return missingFields;
     };
 
-
     const discharge = () => {
         setLoading(true);
-        console.log(payload)
         const data = {
             appointId: appointment?.id,
-            dischargeNote: payload?.note
+            dischargeNote: payload?.dischargeNote
         }
         const missingFields = checkMissingFields(payload);
         if (missingFields.length > 0) {
@@ -39,7 +34,6 @@ function Discharge({ closeModal, appointment, fetch, currentPage }) {
         }
         post(`/patients/discharge-patient`, data)
             .then(res => {
-                console.log(res)
                 if (res.message === "The patient has dis-charged") {
                     notification({ message: 'Discharged successfully', type: "success" });
                     fetch(currentPage)
@@ -52,17 +46,12 @@ function Discharge({ closeModal, appointment, fetch, currentPage }) {
             .catch(err => {
                 notification({ message: 'Failed to discharge patient', type: "error" });
                 setLoading(false)
-                console.log(err)
             })
     }
-
-
-
 
     const handleChange = (event, name) => {
         setPayload(prevPayload => ({ ...prevPayload, [name]: event?.target?.value }));
     };
-
 
     return (
         <div className='overlay'>

@@ -20,7 +20,6 @@ function AddTreatment({ closeModal, visit, id, fetchData }) {
             const response = await get('/patients/get-all-categories');
             setTreatmentCategories(response);
         } catch (error) {
-            console.log(error);
         }
     }
 
@@ -54,7 +53,6 @@ function AddTreatment({ closeModal, visit, id, fetchData }) {
             closeModal();
         } catch (error) {
             toast.error('Error adding treatment');
-            console.log(error);
         }
         setLoading(false);
     };

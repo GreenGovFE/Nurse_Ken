@@ -1,22 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { usePatient } from "../../contexts";
 import axios from "axios";
 import Paginate from "../UI/paginate";
 import { RiEdit2Fill } from "react-icons/ri";
 import AmbulanceModal from "../modals/AmbulanceModal";
 
-
 function AmbulanceTable({ data }) {
-    const [hoveredRow, setHoveredRow] = useState(null);
-    const { setPatientId, setPatientName, setPatientPage, setHmoId } = usePatient();
     const [TablePages, setTablePages] = useState(1);
     const [TablePage, setTablePage] = useState(1);
     const [ambulances, setAmbulances] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewing, setViewing] = useState({});
     const [image, setImage] = useState(null);
-
 
     const closeModal = () => {
         setIsModalOpen(false);
@@ -40,7 +34,6 @@ function AmbulanceTable({ data }) {
 
         try {
             let res = await axios.get(`https://edogoverp.com/clinicapi/api/equipment/ambulance/list/${page}/10`, options);
-            console.log(res);
             setAmbulances(res?.data?.resultList || []);
             setTablePages(res?.data?.totalPages) // Adjusted to access data property
         } catch (error) {
@@ -61,7 +54,6 @@ function AmbulanceTable({ data }) {
     };
 
     const continueUpdate = (data) => {
-        console.log(data);
         setViewing(data)
         setIsModalOpen(true);
     };
@@ -106,7 +98,7 @@ function AmbulanceTable({ data }) {
                     />
                 </div>
                 {
-                    <div className="card-Image col-6 m-t-40 m-l-40">
+                    <div className="card-Image m-t-40 m-l-40">
                         {image && <img src={image?.image} style={{ width: '198px', height: '198px' }} alt="ambulance" />}
                         <span  style={{ maxWidth: '240px', marginTop: '20px' }}>{image?.details}</span>
                     </div>

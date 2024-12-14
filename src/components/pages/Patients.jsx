@@ -12,6 +12,7 @@ import Spinner from "../UI/Spinner";
 import { usePatient } from "../../contexts";
 import Pagination from "../layouts/Pagination";
 import VitalPatientsTable from "../tables/VitalPatientTable";
+import AdmitCheck from "./Patient/AdmitCheck";
 
 function Patients() {
   const [allPatients, setAllPatients] = useState([]);
@@ -24,11 +25,13 @@ function Patients() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalPagesVital, setTotalPagesVital] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [admittedPatients, setAdmittedPatients] = useState([])
 
 
   const itemsPerPage = 10;
 
-  const { setNurseTypes, nurseTypes, setHmoDetails } = usePatient();
+  const { setNurseTypes, nurseTypes, setHmoDetails, patientId } = usePatient();
 
 
   const handlePageChange = (newPage) => {
@@ -72,10 +75,12 @@ function Patients() {
 
   let navigate = useNavigate();
 
-  const formatDate = (date) => {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
+
     return `${day}-${month}-${year}`;
   };
 
@@ -99,13 +104,12 @@ function Patients() {
     </button>
   );
 
-  const getAllPatients = async () => {
+  const getAllAdmittedPatients = async (currentPage) => {
     setLoading(true);
     try {
-      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
-      console.log(res);
-      setAllPatients(res.data);
-      setTotalPages(res.pageCount);
+      let res = await get(`/patients/admitted-patients?pageNumber=${currentPage}&pageSize=10`);
+      setAdmittedPatients(res?.data);
+      setTotalPages(res?.pageCount);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
@@ -113,13 +117,32 @@ function Patients() {
     }
   };
 
-  const getPatientsAwaitingVital = async () => {
+  const getAllPatients = async () => {
     setLoading(true);
     try {
-      let res = await get(`/patients/patient-awaiting-vital?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
-      console.log(res);
-      setVitalPatients(res.data);
-      setTotalPagesVital(res.pageCount);
+      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
+      setAllPatients(res?.data);
+      setTotalPages(res?.pageCount);
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPatientsAwaitingVital = async (searchParam) => {
+    setLoading(true);
+    try {
+      let url = '/patients/patient-awaiting-vital?'
+      if (searchParam) {
+        url += `pageIndex=${currentPage}&pageSize=${itemsPerPage}&AppointmentDate=${searchParam}`
+      } else {
+        url += `pageIndex=${currentPage}&pageSize=${itemsPerPage}`;
+      }
+
+      let res = await get(url);
+      setVitalPatients(res?.data);
+      setTotalPagesVital(res?.pageCount);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
@@ -136,8 +159,7 @@ function Patients() {
       }
       url += `pageIndex=1&pageSize=100`;
       let res = await get(url);
-      console.log(res);
-      setAllPatients(res.data);
+      setAllPatients(res?.data);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     } finally {
@@ -149,19 +171,23 @@ function Patients() {
     const { name, value } = event.target;
     if (name === "filter") {
       setFilterSelected(value);
+    } else if (name === 'searchDate') {
+      const formattedDate = formatDate(value);
+      setSearchTerm(value)
     } else {
       setPayload(value);
     }
   };
 
   useEffect(() => {
-    if (nurseTypes !== "vital") {
-      console.log(nurseTypes)
-      getAllPatients();
+    if (nurseTypes === "admit") {
+      getAllAdmittedPatients(currentPage);
+    } else if (nurseTypes === 'vital') {
+      getPatientsAwaitingVital(searchTerm)
     } else {
-      getPatientsAwaitingVital()
+      getAllPatients(currentPage)
     }
-  }, [currentPage]);
+  }, [currentPage, searchTerm, nurseTypes]);
 
   useEffect(() => {
     if (payload) {
@@ -175,23 +201,22 @@ function Patients() {
     { value: "firstName", name: "First Name" },
     { value: "lastName", name: "Last Name" },
     { value: "email", name: "Email" },
-    { value: "phoneNumber", name: "Phone Number" }
+    { value: "phoneNumber", name: "Phone Number" },
+    { value: "patientRef", name: "Patient Id" },
   ];
-
-
 
   return (
     <div className="w-100 m-t-40">
       <>
         {
           nurseTypes !== 'vital' ? (
-            <div className="flex flex-v-center  space-between  m-t-20">
-              <h3 className="float-left col-4">Patients Management</h3>
-              <div className="flex flex-v-center flex-h-center col-6 ">
-                <div className="col-4">
+            <div className="flex flex-v-center space-between wrap  m-t-20">
+              <h3 className="float-left">Patients Management</h3>
+              <div className="flex flex-v-center gap-6">
+                <div className="">
                   <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
                 </div>
-                <div className="col-3 ">
+                <div className=" ">
                   <TagInputs
                     onChange={handleChange}
                     name="filter"
@@ -199,64 +224,99 @@ function Patients() {
                     options={filterOptions}
                   />
                 </div>
-                <div className=" m-b-10 col-4">
-                  {nurseTypes === 'checkin' &&
-                    <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex flex-h-center flex-v-center">
+                {nurseTypes === 'checkin' &&
+                  <div className=" m-t-10 ">
+                    <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex gap-16 flex-h-center flex-v-center">
                       <>
                         <AiOutlinePlus size={24} color="white" />
                         <p className="m-l-10 m-r-10">Onboard a Patient</p>
                       </>
                     </button>
-                  }
-                </div>
+                  </div>
+                }
               </div>
             </div>
           ) : (
-            <h3 className="m-t-20 float-left col-4">Patients Awaiting Vital</h3>
+            <div className="flex flex-v-center space-between" >
+              <h3 className="m-t-20 float-left col-4">Patients Awaiting Vital</h3>
+              <div className="col-3  m-t-20 ">
+                <TagInputs
+                  label="Search By Date"
+                  onChange={handleChange}
+                  name="searchDate"
+                  type="date"
+                />
+              </div>
+            </div>
           )
         }
       </>
       <div>
         <div className=" tabs m-t-20 bold-text">
-          <>
-            {nurseTypes === "admin" &&
+          <>{nurseTypes !== 'checkin' ?
+            <>
               <div
                 className={`tab-item ${nurseTypes === "admin" ? "active" : ""
                   }`}
                 onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
               >
-                Admin Nurse
+                Patients
               </div>
-            }
-          </>
-
-          <>
-            {nurseTypes === "vital" &&
               <div
                 className={`tab-item ${nurseTypes === "vital" ? "active" : ""
                   }`}
                 onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
               >
-                Vital Nurse
+                Patients Awaiting Vital
               </div>
-            }
+              <div
+                className={`tab-item ${nurseTypes === "admit" ? "active" : ""
+                  }`}
+                onClick={() => { setNurseTypes("admit"); setCurrentPage(1) }}
+              >
+                Patients For Admission
+              </div>
+            </>
+            :
+            <>
+              <div
+                className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
+              >
+                Patients
+              </div>
+
+            </>
+          }
+
+
+            {/* {(nurseTypes === "vital") &&
+              <>
+                <div
+                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""
+                    }`}
+                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
+                >
+                  Patients
+                </div>
+                <div
+                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""
+                    }`}
+                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
+                >
+                  Patients Awaiting Vital
+                </div>
+              </>
+            } */}
           </>
+
         </div>
         {loading ? (
           <Spinner />
         ) : (
           <>
-            {nurseTypes !== "vital" ? (
-              <><PatientsTable data={allPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  handlePageChange={handlePageChange}
-                  generatePageNumbers={generatePageNumbers}
-                />
-              </>
-            ) : (
-              <> <VitalPatientsTable data={vitalPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
+            {nurseTypes === "vital" ? (
+              <>
+                <VitalPatientsTable data={vitalPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPagesVital}
@@ -264,8 +324,21 @@ function Patients() {
                   generatePageNumbers={generatePageNumbers}
                 />
               </>
+            ) : nurseTypes === "admit" ? (
+              <AdmitCheck data={admittedPatients} setCurrent={setCurrentPage} currentPage={currentPage} totalPages={totalPages} />
+            ) : (
+              <>
+                <PatientsTable data={allPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                />
+              </>
             )}
           </>
+
         )}
       </div>
       {isModalOpen &&

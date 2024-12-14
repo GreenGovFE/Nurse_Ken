@@ -16,30 +16,6 @@ function FinanceDetails({ closeModal }) {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
-  const generatePageNumbers = () => {
-    let pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages = [1, 2, 3, 4, totalPages];
-      } else if (currentPage >= totalPages - 2) {
-        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-      } else {
-        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
-      }
-    }
-    return pages;
-  };
-
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
@@ -49,7 +25,7 @@ function FinanceDetails({ closeModal }) {
 
   useEffect(() => {
     getPaymentHistory()
-  },[currentPage])
+  }, [currentPage])
 
   const getPaymentHistory = async () => {
     setLoading(true)
@@ -69,7 +45,6 @@ function FinanceDetails({ closeModal }) {
 
     try {
       const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${patientId}/${currentPage}/10/patient-payment-history`, options);
-      console.log(response);
       setPaymentHistory(response?.data?.resultList);
       setTotalPages(response?.data?.totalPages);
       setLoading(false);
@@ -96,7 +71,6 @@ function FinanceDetails({ closeModal }) {
 
     try {
       const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${hmoId}`, options);
-      console.log(response);
       setHmo(response?.data);
     } catch (error) {
       console.error("Error fetching HMO:", error);
@@ -135,7 +109,7 @@ function FinanceDetails({ closeModal }) {
   return (
     <div className="overlay" >
       <RiCloseFill className='close-btn pointer' onClick={() => closeModal(false)} />
-      <div className="modal-contents p-20">
+      <div className="modal-content p-20">
         <>
           {loading ? <Spinner /> :
             <>
@@ -162,7 +136,9 @@ function FinanceDetails({ closeModal }) {
               <h3 className="m-b-10">Payment History</h3>
               <div>
                 <PaymentHistory data={paymentHistory} />
-                <div className="m-t-20"><Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages}/></div>
+                <div className="m-t-20">
+                  <Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+                </div>
               </div>
 
             </>

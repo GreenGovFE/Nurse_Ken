@@ -1,22 +1,13 @@
 import React, { useState } from "react";
-// import { Link } from 'react-router-dom';
-import { MdNotifications } from "react-icons/md";
 import { TiArrowSortedDown } from "react-icons/ti";
 
 import UserAvater from "../../assets/images/user-avater.png";
-// import HeaderSearch from "../inputs/HeaderSearch";
-
-// import { formatFileUrl } from "../../utility/general";
 
 const Header = ({ history, details = {}, navList = [] }) => {
   const [userPix, setUserPix] = useState("");
   const [imgHasError, setImgHasError] = useState(false);
 
   const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
-
-  // useEffect(() => {
-  //   !imgHasError && setUserPix(formatFileUrl(details.userProfilePicture));
-  // }, [imgHasError, details]);
 
   const handleImgError = () => {
     setUserPix("");
@@ -31,15 +22,6 @@ const Header = ({ history, details = {}, navList = [] }) => {
           <span>{userInfo?.role}</span>
         </div>
         <div className="header-right flex flex-v-center">
-          {/* <div className="right-item notification flex p-r">
-            <MdNotifications />
-            <span className="indicator" />
-          </div>
-          <div className="right-item">
-            <ul className="nav-menu">
-              {navList && navList.map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </div> */}
           <div className="right-item">
             <div
               role="presentation"

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from "react";
 import { get, post } from "../../utility/fetch";
 import axios from "axios";
 import notification from "../../utility/notification";
-import UpdatePaymentModal from "./UpdatePayment";
 import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill } from "react-icons/ri";
 import { usePatient } from "../../contexts";
 
-function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, fetch, currentPage }) {
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
+function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentPage }) {
     const [payload, setPayload] = useState({});
     const { patientId, patientName } = usePatient();
     const [loading, setLoading] = useState(false)
@@ -25,7 +23,6 @@ function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, 
 
 
     const addNotes = () => {
-        console.log(payload)
         setLoading(true)
         const data = {
             nurseId: payload?.nurse,
@@ -40,7 +37,6 @@ function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, 
         }
         post(`/patients/add-nurse-treatment-note`, data)
             .then(res => {
-                console.log(res)
                 notification({ message: 'Added notes successfully', type: "success" });
                 fetch(currentPage)
                 closeModal()
@@ -48,20 +44,11 @@ function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, 
             })
             .catch(err => {
                 notification({ message: 'Failed to add notes', type: "error" });
-                console.log(err)
                 setLoading(false)
             })
     }
 
-    const getNurseName = (nurseId) => {
-        const nurse = nurses?.find((nurse) => nurse?.nurseEmployeeId === nurseId);
-        return nurse ? nurse?.username : "Nurse Not Found";
-    };
-
-
-
     const handleChange = (event, name) => {
-        console.log(event)
         if (name === "doctorId" || name === "nurse") {
             setPayload(prevPayload => ({ ...prevPayload, [name]: Number(event?.value) }));
         } else {
@@ -79,14 +66,14 @@ function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, 
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={() => closeModal(false)} />
-            <div className="modal-contents">
+            <div className="modal-content">
                 <div className="flex ">
                     <div className="flex  flex-v-center m-t-20 m-l-10 col-6">
                         <p className="bold-text m-r-10">Nurse Notes</p> | <p className={'m-l-10'}>{patientName}</p>
                     </div>
 
                 </div>
-                <div>
+                {/* <div>
                     <table className="bordered-table-2">
                         <thead className="border-top-none">
                             <tr className="border-top-none">
@@ -115,7 +102,7 @@ function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, 
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </div> */}
 
                 <TagInputs type={'R-select'} options={nurses?.map((nurse) => {
                     return {
@@ -153,18 +140,18 @@ function NurseNotesAdd({ closeModal, treatment, notes, doctors, nurses, visits, 
                             <td>
                                 {treatment?.medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.dosage?.frequency}</span>
+                                        <span>{item?.frequency}</span>
                                     </div>
                                 ))}
                             </td>
                             <td>
                                 {treatment?.medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.dosage?.quantity}</span>
+                                        <span>{item?.quantity}</span>
                                     </div>
                                 ))}
                             </td>
-                            <td>{treatment?.additonalNote}</td>
+                            <td>{treatment?.pharmacistNote}</td>
                         </tr>
                     </tbody>
                 </table>

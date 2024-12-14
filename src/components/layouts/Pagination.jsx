@@ -1,5 +1,3 @@
-
-
 const Pagination = ({ currentPage, totalPages, handlePageChange, generatePageNumbers }) => {
     console.log(totalPages)
     return (

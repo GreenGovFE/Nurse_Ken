@@ -4,10 +4,11 @@ import axios from "axios";
 import { usePatient } from "../../../contexts";
 import MembershipCover from "./MembershipCover";
 import IdentityDetails from "./IdentityDetails";
+import { get } from "../../../utility/fetch";
 
 
 function Finance_HMO() {
-  const { patientId, patientName, hmoId, patientInfo } = usePatient();
+  const { patientId, patientName, hmoId, patientInfo, setHmoDetails } = usePatient();
 
   const personalInfo = patientInfo;
   const [pictureUrl, setPictureUrl] = useState('')
@@ -17,33 +18,29 @@ function Finance_HMO() {
   const [selectedTab, setSelectedTab] = useState("identityDetails");
 
   useEffect(() => {
-    // getPaymentHistory()
     getHmo()
+    getHmobyId()
   }, [])
-  const getPaymentHistory = async () => {
-    try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${personalInfo?.patientId}/${pageNumber}/10/patient-payment-history`);
-      console.log(response)
-
-      setPaymentHistory(response?.data?.resultList);
-    } catch (error) {
-      console.error('Error fetching payment history:', error);
-      // Handle the error here, such as displaying an error message to the user
-    }
-  };
 
 
   const getHmo = async () => {
     try {
       const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${personalInfo?.hmoId}`);
-      console.log(response)
-
       setHmo(response?.data);
     } catch (error) {
       console.error('Error fetching payment history:', error);
-      // Handle the error here, such as displaying an error message to the user
     }
   };
+
+  const getHmobyId = async () => {
+    await get(`/HMO/get-patient-hmo/${patientId}`)
+      .then(res => {
+        setHmoDetails(res?.data);
+      })
+      .catch(err => {
+        console.error('Error fetching HMO details:', err);
+      });
+  }
 
   const renderTabContent = (selectedTab) => {
     switch (selectedTab) {
@@ -56,15 +53,10 @@ function Finance_HMO() {
     }
   };
 
-  console.log(paymentHistory)
-
-  const addDefaultSrc = (ev) => {
-    ev.target.src = ProfilePix;
-  };
   return (
     <div>
       <div className="w-100 ">
-        <div className="flex m-t-40">
+        <div className="flex m-l-10 m-t-40">
           <div
             style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "identityDetails" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "identityDetails" ? '#3C7E2D' : '#393939' }}
             onClick={() => setSelectedTab("identityDetails")}

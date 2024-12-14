@@ -6,9 +6,8 @@ import { get, post } from "../../utility/fetch";
 import { get as getPatient } from "../../utility/fetchNurse";
 import notification from "../../utility/notification";
 import Notify from "../../utility/notify";
-import axios from "axios";
 
-const BedAssignModal = ({ closeModal, getVendor, getBeds, data }) => {
+const BedAssignModal = ({ closeModal, getBeds, data }) => {
     const [payload, setPayload] = useState({
         patientAssignedName: "",
         bedId: data.id,
@@ -20,7 +19,6 @@ const BedAssignModal = ({ closeModal, getVendor, getBeds, data }) => {
     
     const getUsers = async () => {
         let res = await getPatient("/patients/AllPatient/2?pageIndex=1&pageSize=10000");
-        console.log(res)
         setUserNames(res?.data?.map((user) => ({
             name: `${user.firstName} ${user.lastName}`,
             value: user.patientId,
@@ -46,34 +44,6 @@ const BedAssignModal = ({ closeModal, getVendor, getBeds, data }) => {
         }
     }
 
-    const createVendor = async () => {
-        let res = await post("/vendor", { ...payload, userId: sessionStorage.getItem("userId") })
-        if (res) {
-            setPayload({
-                category: "",
-                name: "",
-                address: "",
-                specialty: "",
-                userId: 0
-            })
-            getVendor();
-            notification({ message: "Vendor Created Successfully", type: "success" });
-
-        }
-    }
-
-    const chosenItem = (option) => {
-        console.log(option);
-        setPayload({
-            ...payload,
-            patientAssignedName: option.username,
-            patientAssignedId: Number(option.id),
-        })
-        setStaffIdInput(option.username);
-        setUserNames([]);
-    }
-
-
     const assignBed = async () => {
         const {
             patientAssignedName,
@@ -87,9 +57,6 @@ const BedAssignModal = ({ closeModal, getVendor, getBeds, data }) => {
             Notify({ title: "Error", message: "Please fill all the fields", type: "danger" });
             return;
         }
-
-
-
 
         let res = await post("/bed/assign-bed", { ...payload })
         if (res) {
@@ -107,18 +74,15 @@ const BedAssignModal = ({ closeModal, getVendor, getBeds, data }) => {
 
     }, [staffIdInput]);
 
-
-
     return (
         <div className="overlay m-t-20 ">
             <IoMdClose className="close-btn pointer" onClick={() => closeModal()} />
-            <div className="modal-contents" >
+            <div className="modal-content" >
                 <div className="p-10">
                     <div
                         className="m-t-10 p-t-10 flex-h-center modal-content-large"
                         style={{
                             boxShadow: '0px 2px 6px #0000000A',
-                            // backgroundColor: 'white'
                         }}
                     >
                         <h3 className="m-b-10">Assign a Patient</h3>

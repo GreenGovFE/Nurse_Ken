@@ -13,8 +13,9 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     const [patients, setPatients] = useState([]);
     const [action, setAction] = useState('');
     const { beds, setBeds, bedsTablePages, setBedTablePages, bedsTablePage, setBedTablePage } = useBeds();
+    const { patientId, patientName, setPatientName, setPatientId, diagnosis, setDiagnosis, hmoDetails, setHmoDetails } = usePatient()
 
-    
+
 
 
     const handleChange = (field, event) => {
@@ -47,7 +48,6 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
 
         try {
             let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
-            console.log(res);
             setBeds(res?.data?.resultList || []);
             setBedTablePages(res?.data?.totalPages)
         } catch (error) {
@@ -55,24 +55,27 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         }
     };
 
-   
+
     const validatePayload = () => {
         const requiredFields = {
-            patientAssignedId: 'Patient',
             assignNote: 'Additional Notes',
-
         };
-
+    
+        if (!patientId) {
+            requiredFields.patientAssignedId = 'Patient';
+        }
+    
         const missingFields = Object.keys(requiredFields).filter(field => !payload[field]);
-
+    
         if (missingFields.length > 0) {
             const errorMessage = `The following fields are required: ${missingFields.map(field => requiredFields[field]).join(', ')}`;
             notification({ message: errorMessage, type: 'error' });
             return false;
         }
-
+    
         return true;
     };
+    
 
     const AssigneBed = async () => {
         if (!validatePayload()) return;
@@ -99,18 +102,21 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         const Payload = {
             ...payload,
             bedId: bedId,
-            patientAssignedId: Number(payload?.patientAssignedId?.patientId),
-            hmoId: payload?.patientAssignedId?.hmoId || 0,
-            hmoPackageId: payload?.patientAssignedId?.hmoPackageId || 0,
+            patientAssignedId: Number(payload?.patientAssignedId?.patientId || patientId),
+            hmoId: hmoDetails?.hmoId || payload?.patientAssignedId?.hmoId ||  0,
+            hmoPackageId: hmoDetails?.hmoPackageId ||  payload?.patientAssignedId?.hmoPackageId  || 0,
 
         };
 
         try {
             let res = await axios.post(url, Payload, options);
-            console.log(res)
             notification({ message: 'Assigned Successfully', type: 'success' });
             fetchBedList();
             getAssignedBeds(bedsTablePage);
+            setPatientName('')
+            setPatientId(null)
+            setDiagnosis(null)
+            setHmoDetails({})
             closeModal();
         } catch (error) {
             notification({ message: error?.response?.data?.errorData[0] || error?.message, type: 'error' });
@@ -137,7 +143,6 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
 
         try {
             let res = await axios.put(url, null, options);
-            console.log(res)
             notification({ message: 'Unassigned Successfully', type: 'success' });
             fetchBedList();
             closeModal();
@@ -148,10 +153,6 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     };
 
     const handleAction = () => {
-        if (action === '') {
-            notification({ message: 'Please select an action', type: 'error' });
-            return
-        }
         if (action === 'assign') {
             AssigneBed();
         } else {
@@ -180,19 +181,19 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         }
     };
 
-    let actions
-    if (assigned === 'Occupied') {
-        actions = [
-            { label: 'Select Action', value: '' },
-            { label: 'Unassign', value: 'unassign' },
-        ];
+    // let actions
+    // if (assigned === 'Occupied') {
+    //     actions = [
+    //         { label: 'Select Action', value: '' },
+    //         { label: 'Unassign', value: 'unassign' },
+    //     ];
 
-    } else {
-        actions = [
-            { label: 'Select Action', value: '' },
-            { label: 'Assign', value: 'assign' },
-        ];
-    }
+    // } else {
+    //     actions = [
+    //         { label: 'Select Action', value: '' },
+    //         { label: 'Assign', value: 'assign' },
+    //     ];
+    // }
 
     useEffect(() => {
         getAllPatients();
@@ -202,26 +203,27 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         <div className='modal'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
 
-            <div className='modal-contents '>
+            <div className='modal-contents'>
                 <div className='flex '>
                     <div className='flex  flex-v-center m-t-20 col-7'>
-                        <p className='m-l-10 '>Assign Bed To Patient</p>
+                        <p className='m-l-10 '>{patientName ? patientName : ''} Assign Bed To Patient</p>
                     </div>
                     {/* <div className='flex  flex-v-center m-t-20 m-l-80 col-5'>
                         <p>Time: {formattedTime}</p>
                     </div> */}
                 </div>
                 <div className='p-10'>
-                    <TagInputs label='Select Action' onChange={value => handleChange('action', value)} options={actions} name='action' type='R-select' />
-                    {action === 'assign' &&
+                    {/* <TagInputs label='Select Action' onChange={value => handleChange('action', value)} options={actions} name='action' type='R-select' /> */}
+                    {!patientId &&
                         <TagInputs label='Patient' onChange={value => handleChange('patientAssignedId', value)} options={patients} name='patientAssignedName' type='R-select' />
+
                     }
-                    <TagInputs label='Date of Vital' name='dateOfVital' onChange={value => handleChange('dateOfVital', value)} type='date' dateRestriction={'past'} />
-                    <TagInputs label='Diagnosis' name='diagnosis' onChange={value => handleChange('diagnosis', value)} type='textArea' />
+                    <TagInputs label='Date' name='dateOfVital' onChange={value => handleChange('dateOfVital', value)} type='date' dateRestriction={'past'} />
+                    <TagInputs label='Diagnosis' name='diagnosis' onChange={value => handleChange('diagnosis', value)} value={diagnosis ? diagnosis : ''} disabled={diagnosis} type='textArea' />
                     <TagInputs label='Additional Notes' name='assignNote' onChange={value => handleChange('assignNote', value)} type='textArea' />
 
-                    <button onClick={handleAction} className='submit-btn m-t-20 w-100'>
-                        {action === 'assign' ? 'Assign Bed' : action === 'unassign' ? 'Unassign Bed' : 'Action'}
+                    <button onClick={AssigneBed} className='submit-btn m-t-20 w-100'>
+                        Assign Bed
                     </button>
                 </div>
             </div>

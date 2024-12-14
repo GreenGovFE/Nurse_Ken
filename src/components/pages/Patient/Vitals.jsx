@@ -7,10 +7,14 @@ import notification from "../../../utility/notification";
 import { usePatient } from "../../../contexts";
 import AppointmentModal from "../../modals/AppointmentModal";
 import Paginate from "../../UI/paginate";
+import { checkIfAppointmentPassed } from "../../../utility/general";
+import UploadButton from "../../../Input/UploadButton";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 function Vitals({ setSelectedTab }) {
   const { patientId, nurseTypes } = usePatient();
-
+  
+  const [documentArray, setDocumentArray] = useState([]);
   const [payload, setPayload] = useState({
     dateOfVisit: "",
     temperature: "",
@@ -20,11 +24,16 @@ function Vitals({ setSelectedTab }) {
     height: "",
     weight: "",
     careType: 0,
-    VitalNurseEmployeeId: 0,
+    VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
     appointmentId: null,
     notes: "",
+    vitalDocuments: [],
+    bloodSugar: '',
+    oxygenSaturation: '',
+
   });
   const [nurses, setNurses] = useState([]);
+  const [docNames, setDocNames] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [visits, setVisits] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,12 +45,9 @@ function Vitals({ setSelectedTab }) {
   const [appointmentPassed, setAppointmentPassed] = useState(false);
 
 
-
-
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
+  const deleteDoc = (doc) => {
+    let newArr = documentArray.filter((id) => id.name !== doc);
+    setDocumentArray(newArr);
   };
 
   const handleEdit = (recordId) => {
@@ -49,62 +55,9 @@ function Vitals({ setSelectedTab }) {
     setAdd(true);
   }
 
-  const generatePageNumbers = () => {
-    let pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        pages = [1, 2, 3, 4, totalPages];
-      } else if (currentPage >= totalPages - 2) {
-        pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-      } else {
-        pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
-      }
-    }
-    return pages;
-  };
-
   const closeModal = () => {
     setAdd(false)
   };
-
-  const checkIfAppointmentPassed = (appointmentId) => {
-    const selectedAppointment = Appointments.find(
-      (item) => item.value === parseFloat(appointmentId)
-    );
-
-    if (!selectedAppointment || !selectedAppointment.name) return;
-
-    const appointmentDateString = selectedAppointment.name.split(" at ")[0];
-    const appointmentTimeString = selectedAppointment.name.split(" at ")[1].split(" with ")[0];
-
-    // Combine date and time into a single string
-    const appointmentDateTimeString = `${appointmentDateString} ${appointmentTimeString}`;
-
-    // Parse the combined string into a Date object
-    const appointmentDateTime = new Date(appointmentDateTimeString);
-
-    // Add 30 minutes to the appointment time
-    const updatedAppointmentTime = new Date(appointmentDateTime.getTime() + 30 * 60000);
-
-    // Get the current time
-    const currentDateTime = new Date();
-
-    // Check if the current time is past the updated appointment time (+30 mins)
-    if (currentDateTime > updatedAppointmentTime) {
-      return true; // Appointment has passed, including the 30-minute buffer
-    }
-
-    return false; // Appointment is still valid
-  };
-
-
-
-
-
 
   const fieldLabels = {
     dateOfVisit: "Visit Date",
@@ -114,7 +67,6 @@ function Vitals({ setSelectedTab }) {
     respiratory: "Respiratory",
     height: "Height",
     weight: "Weight",
-    careType: "Care Type",
     VitalNurseEmployeeId: "Assigned Nurse",
     appointmentId: 'Appointment',
     notes: "Notes",
@@ -123,19 +75,15 @@ function Vitals({ setSelectedTab }) {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-
     if (name === "dateOfVisit") {
-      console.log(value)
       const selectedDate = new Date(value);
       const currentDate = new Date();
 
 
       selectedDate.setHours(0, 0, 0, 0);
       currentDate.setHours(0, 0, 0, 0);
-      console.log(selectedDate, currentDate)
 
       if (selectedDate > currentDate) {
-        console.log("Invalid input");
         notification({ message: 'Date selected cannot be a future date', type: "error" });
 
         // Reset the date input to an empty string
@@ -143,30 +91,16 @@ function Vitals({ setSelectedTab }) {
         setPayload(prevPayload => ({ ...prevPayload, [name]: "" }));
         return;
       }
-    } else if (name === "appointmentId") {
-      console.log(`Appointment`, value);
-      const isPassed = checkIfAppointmentPassed(value);
-      if (!isPassed) {
-        setPayload(prevPayload => ({ ...prevPayload, [name]: Number(value) }));
-        setAppointmentPassed(false);
-      } else {
-        setAppointmentPassed(true);
-      }
     }
-
     const parsedValue = ["age", "temperature", "heartPulse", "height", "VitalNurseEmployeeId", "careType", "weight",].includes(name)
-      ? parseInt(value)
+      ? parseFloat(value)
       : value;
     setPayload(prevPayload => ({ ...prevPayload, [name]: parsedValue }));
-
-
-    console.log(payload);
   };
 
   const getNurses = async () => {
     try {
       let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
-      console.log(res);
       let tempNurses = res?.data
         ?.filter((nurse) => nurse?.username)
         .map((nurse) => {
@@ -184,7 +118,6 @@ function Vitals({ setSelectedTab }) {
   const getDoctors = async () => {
     try {
       let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
-      console.log(res);
       let tempDoc = res?.data
         ?.filter((doc) => doc?.username)
         .map((doc) => {
@@ -202,7 +135,6 @@ function Vitals({ setSelectedTab }) {
   const getVitalsDetails = async (currentPage) => {
     try {
       let res = await get(`/patients/vital-by-patientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
-      console.log(res);
       setVisits(res.data);
       setTotalPages(res.pageCount)
 
@@ -260,7 +192,14 @@ function Vitals({ setSelectedTab }) {
         dateOfVisit: dateTimeOfVisit,
         clinicId: Number(sessionStorage.getItem("clinicId")),
         PatientId: parseFloat(patientId),
-        appointmentId: Number(payload.appointmentId)
+        appointmentId: Number(payload?.appointmentId),
+        doctorId: Number(payload?.doctorId),
+        careType: 2,
+        VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
+        vitalDocuments: documentArray?.map((doc) => ({
+          docName: doc?.name,
+          docPath: doc?.path,
+        })),
       });
 
       if (res.message === "The Vital record was added successfully") {
@@ -277,6 +216,11 @@ function Vitals({ setSelectedTab }) {
           VitalNurseEmployeeId: 0,
           appointmentId: null,
           notes: "",
+          docName: "",
+          docPath: "",
+          bloodSugar: '',
+          oxygenSaturation: '',
+          vitalDocuments: [],
         })
         getVitalsDetails(currentPage);
       } else if (res.StatusCode === 401) {
@@ -288,8 +232,6 @@ function Vitals({ setSelectedTab }) {
 
         if (res && res.errors) {
           const errors = res.errors;
-          console.log(errors);
-
           const customFieldNames = {
             VitalNurseEmployeeId: "Assigned Nurse",
             // appointmentId: 'Appointment',
@@ -298,9 +240,6 @@ function Vitals({ setSelectedTab }) {
           const missingFields = Object.keys(errors).filter((field) => {
             return errors[field].some((errorMsg) => /is required/i.test(errorMsg));
           });
-
-          console.log(missingFields);
-
           if (missingFields.length > 0) {
             const formattedFields = missingFields.map((field) => {
               if (customFieldNames[field]) {
@@ -327,11 +266,15 @@ function Vitals({ setSelectedTab }) {
       let tempDoc = response?.data
         ?.filter(item => item?.tracking === 'AwaitingVitals')
         ?.map((item, idx) => {
+          const appointTime = item?.appointTime === '00:00' ? '(Visit)' : `at ${item?.appointTime}`;
+          const doctorText = item?.doctorId ? `with ${item?.doctor}` : '';
+
           return {
-            name: `${item?.appointDate} at ${item?.appointTime} with ${item?.doctor}`,
+            name: `${item?.appointDate} ${appointTime} ${doctorText}`.trim(),
             value: parseFloat(item?.id)
           };
         });
+
 
       tempDoc?.unshift({ name: "Select Appointment", value: "" });
       setAppointments(tempDoc);
@@ -339,7 +282,6 @@ function Vitals({ setSelectedTab }) {
       setAppointmentPassed(false);
 
     } catch (e) {
-      console.log(e);
     }
   };
 
@@ -387,28 +329,56 @@ function Vitals({ setSelectedTab }) {
           </div>
           <div className="flex">
             <div className="w-100">
+              <TagInputs onChange={handleChange} value={payload?.bloodSugar} name="bloodSugar" label="Blood Sugar" />
+            </div>
+          </div>
+
+          <div className="flex">
+            <div className="w-100">
+              <TagInputs onChange={handleChange} value={payload?.oxygenSaturation} name="oxygenSaturation" label="Oxygen Saturation" />
+            </div>
+          </div>
+          <div className="flex">
+            <div className="w-100">
               <TagInputs onChange={handleChange} value={payload?.height} variation={true} name="height" label="Height" />
             </div>
           </div>
           <div className="w-100">
             <TagInputs onChange={handleChange} value={payload?.weight} variation={true} name="weight" label="Weight" />
           </div>
-          <div>
+          {/* <div>
             <TagInputs onChange={handleChange} value={payload?.careType} type="select" options={careTypes} name="careType" label="Care Type" />
-          </div>
+          </div> */}
           <div>
-            <TagInputs onChange={handleChange} value={payload?.appointmentId} options={Appointments} name="appointmentId" label="Select Appointment" type="select" />
-            {appointmentPassed && (
+            <TagInputs onChange={handleChange} value={payload?.appointmentId} options={Appointments} name="appointmentId" label="Select Appointment/Visit" type="select" />
+            {/* {appointmentPassed && (
               <div className="m-t-10">
                 <p style={{ color: 'red', marginBottom: '10px' }}>This appointment has passed. Please reschedule.</p>
                 <button className="col-6 submit-btn" onClick={() => handleEdit(payload?.appointmentId)}>
                   Reschedule Appointment
                 </button>
               </div>
-            )}
+            )} */}
           </div>
           <div>
+            <TagInputs onChange={handleChange} value={payload?.doctorId} name="doctorId" label="Assign Doctor" options={doctors} type="select" />
+          </div>
+          {/* <div>
             <TagInputs onChange={handleChange} value={payload?.VitalNurseEmployeeId} name="VitalNurseEmployeeId" label="Assign Nurse" options={nurses} type="select" />
+          </div> */}
+          <div className="w-100 flex flex-h-end flex-direction-v">
+            <div className="m-t-20 m-b-20">
+              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray} />
+            </div>
+
+            {documentArray?.map((item, index) => (
+              <div key={index} className="m-t-10 flex">
+                <a href={item.path} target="_blank" className="m-r-10">
+                  {item.name}
+                </a>
+                <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
+              </div>
+            ))}
           </div>
           <div>
             <TextArea
@@ -420,35 +390,13 @@ function Vitals({ setSelectedTab }) {
               name="notes"
             />
           </div>
-          <div className="w-100">
-            <button onClick={submitPayload} className="submit-btn w-100 m-t-20">
-              Add Vitals
-            </button>
-            <>
-              {nurseTypes === 'admin' &&
-                <button onClick={next} className="save-drafts w-100 m-t-20">
-                  Continue
-                </button>
-              }
-            </>
-          </div>
+          <button onClick={submitPayload} className="submit-btn m-t-20 ">Add Vital</button>
         </div>
         <div className="col-8 m-l-20">
           <VisitsTable data={visits} />
-          <div className="m-t-20"><Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages}/></div>
+          <div className="m-t-20"><Paginate currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} /></div>
         </div>
       </div>
-      {
-        add && (
-          <AppointmentModal
-            closeModal={closeModal}
-            appointmentId={viewing}
-            type={'appointment'}
-            fetchData={fetchData}
-            currentPage={currentPage}
-          />
-        )
-      }
     </div>
   );
 }

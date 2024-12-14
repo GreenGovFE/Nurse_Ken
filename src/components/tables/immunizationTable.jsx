@@ -13,7 +13,6 @@ function ImmunizationTable({ data,  }) {
 
 
   const selectRecord = (record) => () => {
-    console.log(record);
     setViewing(record);
     setIsModalOpen(true);
   };

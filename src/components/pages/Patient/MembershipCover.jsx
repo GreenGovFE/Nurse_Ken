@@ -18,6 +18,24 @@ function MembershipCover({ setSelectedTab, hide }) {
   const [packageId, setPackageId] = useState({});
   const [categories, setCategories] = useState([]);
   const [Package, setPackage] = useState({});
+  const [packagesData, setPackagesData] = useState([]);
+
+  useEffect(() => {
+
+    if (hmoDetails?.length) {
+      fetchPackages();
+    }
+  }, [hmoDetails]);
+
+  const fetchPackages = async () => {
+    const packages = await Promise.all(
+      hmoDetails.map(async (item) => {
+        const packageData = await getPackageById(item?.hmoPackageId);
+        return { ...item, packageData };
+      })
+    );
+    setPackagesData(packages);
+  };
 
   const receiveImage = (value) => {
     console.log(value);
@@ -34,24 +52,25 @@ function MembershipCover({ setSelectedTab, hide }) {
   }, []);
 
   useEffect(() => {
-    if (hmoDetails) {
-      const hmoProvider = findHmoProvider(hmoDetails.hmoProviderId);
-      console.log(hmoProvider)
+    if (hmoDetails && hide) {
+      const hmoProvider = findHmoProvider(hmoDetails?.hmoProviderId);
       if (hmoProvider) {
         setSelectedHmoPackages(hmoProvider.packages || []);
-        const hmoPackage = findHmoPackage(hmoProvider.packages, hmoDetails.hmoPackageId);
+        const hmoPackage = findHmoPackage(hmoProvider?.packages, hmoDetails?.hmoPackageId);
         if (hmoPackage) {
           setPackage(hmoPackage);
-          setPackageId({ id: hmoPackage.id, index: hmoProvider.packages.indexOf(hmoPackage) });
+          setPackageId({ id: hmoPackage?.id, index: hmoProvider?.packages.indexOf(hmoPackage) });
         }
       }
     }
-  }, [hmoDetails,hmoList]);
+
+  }, [hmoDetails, hmoList]);
+
+  console.log(hmoDetails)
 
   const getAllCategories = async () => {
     try {
       let res = await get(`/patients/get-all-categories`);
-      console.log(res);
 
       let temp = res?.map((item, idx) => {
         return {
@@ -70,8 +89,32 @@ function MembershipCover({ setSelectedTab, hide }) {
     }
   };
 
+
+  const getPackageById = async (id) => {
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token not found in session storage');
+      return;
+    }
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    };
+    try {
+      let res = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/package/${id}`, options);
+      return res?.data
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+
   const findHmoProvider = (providerId) => {
-    return hmoList.find(hmo => hmo.id == providerId);
+    return hmoList.find(hmo => hmo?.id == providerId);
   };
 
   const findHmoPackage = (packages, packageId) => {
@@ -115,7 +158,6 @@ function MembershipCover({ setSelectedTab, hide }) {
       const currentDate = new Date();
 
       if (selectedDate >= currentDate) {
-        console.log("Invalid input");
         notification({ message: 'Please select appropriate date', type: "error" });
         return;
       }
@@ -178,12 +220,12 @@ function MembershipCover({ setSelectedTab, hide }) {
     }
 
     let res = await post("/HMO/AddHMOPlan", Payload);
-    console.log(res);
-
     if (res.message === 'Successfully assigned the patientHMO') {
       notification({ message: 'Added HMO to patient', type: "success" });
+      fetchPackages()
       setPayload({});
       setSelectedHmoPackages([])
+      setdocumentArray([])
       setPackageId([])
     } else {
 
@@ -208,7 +250,6 @@ function MembershipCover({ setSelectedTab, hide }) {
 
     try {
       let res = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/list/1/100`, options);
-      console.log(res);
       if (res) {
         setHmoList(res.data?.resultList);
       }
@@ -217,113 +258,161 @@ function MembershipCover({ setSelectedTab, hide }) {
     }
   };
 
+  console.log(hmoDetails)
+  console.log(packagesData)
+
   return (
-    <div className="flex ">
-      <div className="w-50">
-        <div className="m-t-40"></div>
-        {
-          hmoDetails ?
-            <div>
-              <TagInputs value = {hmoDetails?.hmoProviderName} label="HMO Provider" disabled={hide}/>
-              <TagInputs value = {hmoDetails?.hmoPackageName}
-               
-                name="hmoPackageId" disabled={hide} label="HMO Package"  />
-              <TagInputs onChange={handleChange} disabled={hide} value={hmoDetails?.patientHMOId || ''} name="patientHMOId" label="Patient's HMO ID" />
-              <TagInputs onChange={handleChange} disabled={hide} value={hmoDetails?.membershipValidity ? new Date(hmoDetails?.membershipValidity).toDateString() : ''} name="membershipValidity"  label="Membership Validity" />
-              <div className="w-100 flex flex-h-end flex-direction-v m-t-10">
-                {hide !== true &&
-                  <div className="m-t-20 m-b-20">
-                    <UploadButton
-                      setDocNames={setDocNames}
-                      setdocumentArray={setdocumentArray}
-                      sendImagg={receiveImage} />
-                  </div>
-                }
+    <div className="flex-col">
+      <div className="flex wrap">
+        <div className="m-l-20 w-50">
+          <div className="m-t-40"></div>
+          {
+            hmoDetails && hide ?
+              <div>
+                <TagInputs value={hmoDetails?.hmoProviderName} label="HMO Provider" disabled={hide} />
+                <TagInputs
+                  value={hmoDetails?.hmoPackageName}
+                  name="hmoPackageId" disabled={hide} label="HMO Package" />
+                <TagInputs onChange={handleChange} disabled={hide} value={hmoDetails?.patientHMOId || ''} name="patientHMOId" label="Patient's HMO ID" />
+                <TagInputs onChange={handleChange} disabled={hide} value={hmoDetails?.membershipValidity ? new Date(hmoDetails?.membershipValidity).toDateString() : ''} name="membershipValidity" label="Membership Validity" />
+                <div className="w-100 flex flex-h-end flex-direction-v m-t-10">
+                  {hide !== true &&
+                    <div className="m-t-20 m-b-20">
+                      <UploadButton
+                        setDocNames={setDocNames}
+                        setdocumentArray={setdocumentArray}
+                        sendImagg={receiveImage} />
+                    </div>
+                  }
 
-                {documentArray?.map((item, index) => (
-                  <div key={index} className="m-t-10 flex">
-                    <a href={item.path} target="_blank" className="m-r-10">
-                      {item.name}
-                    </a>
-                    <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
-                  </div>
-                ))}
+                  {documentArray?.map((item, index) => (
+                    <div key={index} className="m-t-10 flex">
+                      <a href={item.path} target="_blank" className="m-r-10">
+                        {item.name}
+                      </a>
+                      <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            :
-            <div>
-              <TagInputs onChange={handleChange}
+              :
+              <div>
+                <TagInputs onChange={handleChange}
 
-                options={[
-                  { value: '', name: 'Select HMO Provider' },
-                  ...hmoList?.map((item) => {
-                    return { value: JSON.stringify(item), name: item.vendorName }
-                  })
-                ]}
-                name="hmoProviderId" disabled={hide} label="Select HMO Provider" type={'select'}
-              />
-              <TagInputs onChange={handleChange}
-                options={[
-                  { value: '', name: 'Select HMO Package' },
-                  ...selectedHmoPackages?.map((item, index) => {
-                    return { value: JSON.stringify({ index: index, id: item.id }), name: item.name }
-                  })
-                ]}
-                name="hmoPackageId" disabled={hide} label="Select HMO Package" type={'select'} />
-              <TagInputs onChange={handleChange} disabled={hide} value={payload?.patientHMOId || ''} name="patientHMOId" label="Patient's HMO ID" />
-              <TagInputs onChange={handleChange} disabled={hide} value={payload?.membershipValidity || ''} name="membershipValidity" type={'date'} label="Membership Validity" />
-              <TagInputs onChange={handleChange} disabled={hide} value={payload?.notes || ''} name="notes" label="Notes" type={'textArea'} />
-              <div className="w-100 flex flex-h-end flex-direction-v m-t-10">
-                {hide !== true &&
-                  <div className="m-t-20 m-b-20">
-                    <UploadButton
-                      setDocNames={setDocNames}
-                      setdocumentArray={setdocumentArray}
-                      sendImagg={receiveImage} />
-                  </div>
-                }
+                  options={[
+                    { value: '', name: 'Select HMO Provider' },
+                    ...hmoList?.map((item) => {
+                      return { value: JSON.stringify(item), name: item.vendorName }
+                    })
+                  ]}
+                  name="hmoProviderId" disabled={hide} label="Select HMO Provider" type={'select'}
+                />
+                <TagInputs onChange={handleChange}
+                  options={[
+                    { value: '', name: 'Select HMO Package' },
+                    ...selectedHmoPackages?.map((item, index) => {
+                      return { value: JSON.stringify({ index: index, id: item.id }), name: item.name }
+                    })
+                  ]}
+                  name="hmoPackageId" disabled={hide} label="Select HMO Package" type={'select'} />
+                <TagInputs onChange={handleChange} disabled={hide} value={payload?.patientHMOId || ''} name="patientHMOId" label="Patient's HMO ID" />
+                <TagInputs onChange={handleChange} disabled={hide} value={payload?.membershipValidity || ''} name="membershipValidity" type={'date'} label="Membership Validity" />
+                <TagInputs onChange={handleChange} disabled={hide} value={payload?.notes || ''} name="notes" label="Notes" type={'textArea'} />
+                <div className="w-100 flex flex-h-end flex-direction-v m-t-10">
+                  {hide !== true &&
+                    <div className="m-t-20 m-b-20">
+                      <UploadButton
+                        setDocNames={setDocNames}
+                        setdocumentArray={setdocumentArray}
+                        sendImagg={receiveImage} />
+                    </div>
+                  }
 
-                {documentArray?.map((item, index) => (
-                  <div key={index} className="m-t-10 flex">
-                    <a href={item.path} target="_blank" className="m-r-10">
-                      {item.name}
-                    </a>
-                    <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
-                  </div>
-                ))}
+                  {documentArray?.map((item, index) => (
+                    <div key={index} className="m-t-10 flex">
+                      <a href={item.path} target="_blank" className="m-r-10">
+                        {item.name}
+                      </a>
+                      <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-        }
+          }
 
-        {hide !== true &&
-          <button onClick={submitPayload} className="submit-btn  m-t-20 w-100">Add HMO</button>
+          {hide !== true &&
+            <button onClick={submitPayload} className="submit-btn  m-t-20 w-100">Add HMO</button>
+          }
+        </div>
+        {packageId && packageId.index !== -1 &&
+          <div className="w-100 none-flex-item m-t-40 m-l-20">
+            <table className="bordered-table">
+              <thead className="border-top-none">
+                <tr className="border-top-none">
+                  <th className="center-text">S/N</th>
+                  <th className="center-text">Category</th>
+                  <th className="center-text">Benefit Provision</th>
+                  <th className="center-text">Benefit Limit</th>
+                </tr>
+              </thead>
+
+              <tbody className="white-bg view-det-pane">
+                {Array.isArray(selectedHmoPackages[packageId.index]?.packageBenefits) && selectedHmoPackages[Number(packageId?.index)]?.packageBenefits?.map((row, index) => (
+                  <tr key={row.id}>
+                    <td>{index + 1}</td>
+                    <td>{row.category.name}</td>
+                    <td>{row.benefitProvision}</td>
+                    <td>{row.benefitLimit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         }
       </div>
-      {packageId && packageId.index !== -1 &&
-        <div className="w-100 none-flex-item m-t-40 m-l-20">
-          <table className="bordered-table">
-            <thead className="border-top-none">
-              <tr className="border-top-none">
-                <th className="center-text">S/N</th>
-                <th className="center-text">Category</th>
-                <th className="center-text">Benefit Provision</th>
-                <th className="center-text">Benefit Limit</th>
-              </tr>
-            </thead>
 
-            <tbody className="white-bg view-det-pane">
-              {Array.isArray(selectedHmoPackages[packageId.index]?.packageBenefits) && selectedHmoPackages[Number(packageId?.index)]?.packageBenefits?.map((row, index) => (
-                <tr key={row.id}>
-                  <td>{index + 1}</td>
-                  <td>{row.category.name}</td>
-                  <td>{row.benefitProvision}</td>
-                  <td>{row.benefitLimit}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div>
+        <div>
+          {packagesData.map((item, hmoIndex) => (
+            <>
+            
+              <div key={item.id || hmoIndex} className="w-100 none-flex-item m-t-40">
+                <h3 className="m-b-10">Provider: {item?.hmoProviderName} | {item?.hmoPackageName}</h3>
+                <table className="bordered-table">
+                  <thead className="border-top-none">
+                    <tr className="border-top-none">
+                      <th className="center-text">S/N</th>
+                      <th className="center-text">Category</th>
+                      <th className="center-text">Benefit Provision</th>
+                      <th className="center-text">Benefit Limit</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="white-bg view-det-pane">
+                    {item.packageData?.packageBenefits?.length > 0 ? (
+                      item.packageData.packageBenefits.map((benefit, benefitIndex) => (
+                        <tr key={benefit.id || benefitIndex}>
+                          <td>{benefitIndex + 1}</td>
+                          <td>{benefit.category?.name || "N/A"}</td>
+                          <td>{benefit.benefitProvision || "N/A"}</td>
+                          <td>{benefit.benefitLimit || "N/A"}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="center-text">
+                          No package details available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ))}
         </div>
-      }
+
+      </div>
     </div>
   );
 }

@@ -22,17 +22,7 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
         setErrors(prevErrors => ({ ...prevErrors, [field]: '' }));
     };
 
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         setCurrentDateTime(new Date());
-    //     }, 1000);
-
-    //     // Cleanup function to clear the interval when the component unmounts
-    //     return () => clearInterval(intervalId);
-    // }, []);
-
     const validate = () => {
-        console.log(payload)
         const newErrors = {};
         if (!payload.acceptanceStatus) {
             newErrors.acceptanceStatus = 'Decision is required';
@@ -49,8 +39,6 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
     const getActionTypes = async () => {
         try {
             let res = await get(`/Referrals/GetAllAcceptanceStatus`);
-            console.log(res);
-
             let filteredRes = res?.filter(action => action?.index !== 1);
 
             let tempDoc = filteredRes?.map((action, idx) => {
@@ -93,7 +81,6 @@ function ActionReferralModal({ closeModal, referralId, referralInfo, fetch }) {
 
         try {
             let res = await post(`/Referrals/Update-patient-Referral`, Payload);
-            console.log(res);
             if (res.message === "Referral note updated successfully") {
                 if (Payload.acceptanceStatus === 3) {
                     notification({ message: 'Accepted Successfully', type: "success" });

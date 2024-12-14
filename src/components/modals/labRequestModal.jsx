@@ -3,37 +3,17 @@ import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill, RiFileDownloadFill } from "react-icons/ri";
 
 const LabrequestModal = ({ closeModal, record }) => {
-
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
-
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         setCurrentDateTime(new Date());
-    //     }, 1000);
-
-    //     // Cleanup function to clear the interval when the component unmounts
-    //     return () => clearInterval(intervalId);
-    // }, []);
-
-    const formattedDate = currentDateTime.toLocaleDateString();
-    const formattedTime = currentDateTime.toLocaleTimeString();
-
-
     const downloadFile = async (docName) => {
         try {
-            // Get the token from local storage
             const token = sessionStorage.getItem('token');
 
-            // If token is not available, handle accordingly
             if (!token) {
                 console.error('Token not found in session storage');
                 return;
             }
 
-            // Construct the URL with the document name
             const url = `https://edogoverp.com/labapi/api/document/download-document/${docName}`;
 
-            // Fetch options including the Authorization header with the JWT token
             const options = {
                 method: 'GET',
                 headers: {
@@ -41,24 +21,18 @@ const LabrequestModal = ({ closeModal, record }) => {
                 }
             };
 
-            // Fetch the file
             const response = await fetch(url, options);
 
-            // Check if the request was successful
             if (response.ok) {
-                // Convert response body to a blob
                 const blob = await response.blob();
 
-                // Create a URL for the blob
                 const blobUrl = URL.createObjectURL(blob);
 
-                // Trigger download by creating an anchor element
                 const anchor = document.createElement('a');
                 anchor.href = blobUrl;
-                anchor.download = docName; // Set the filename for download
+                anchor.download = docName; 
                 anchor.click();
 
-                // Clean up by revoking the blob URL
                 URL.revokeObjectURL(blobUrl);
             } else {
                 console.error('Failed to fetch download link:', response.statusText);
@@ -78,9 +52,6 @@ const LabrequestModal = ({ closeModal, record }) => {
                         <h3 className="m-r-10" >{record?.patientFullName}</h3> |
                         <p className="m-l-10">Lab Report</p>
                     </div>
-                    {/* <div className="flex flex-v-center m-t-20 m-l-160 col-6">
-                        <p className="m-l-10">Time: {formattedTime}</p>
-                    </div> */}
                 </div>
 
                 <div className="p-20" >
@@ -105,8 +76,6 @@ const LabrequestModal = ({ closeModal, record }) => {
                         </div>
 
                     </div>
-
-
                 </div>
 
 

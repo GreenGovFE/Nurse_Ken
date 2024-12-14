@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import InputField from "../../UI/InputField";
-import TextArea from "../../UI/TextArea";
-import { RiToggleFill } from "react-icons/ri";
 import { get, post } from "../../../utility/fetch";
 import AddMedicalRecord from "../../modals/AddMedicalRecord";
 import MedicalRecordTable from "../../tables/MedicalRecordTable";
@@ -30,7 +27,6 @@ function MedicalRecord({ data, next, fetchData }) {
       setNewData(res);
 
     } catch (error) {
-      console.log(error);
     }
     setLoading(false);
   };
@@ -44,7 +40,6 @@ function MedicalRecord({ data, next, fetchData }) {
       setMedicalTypes(res);
 
     } catch (error) {
-      console.log(error);
     }
     setLoading(false);
   };
@@ -65,7 +60,6 @@ function MedicalRecord({ data, next, fetchData }) {
       comment: typeComment,
       patientId: patientId
     };
-    console.log(payload);
     try {
       await post(`/patients/addmedicalrecord`, payload);
       toast.success('Medical record added successfully');
@@ -73,7 +67,6 @@ function MedicalRecord({ data, next, fetchData }) {
 
     } catch (error) {
       toast.error('Error adding medical record');
-      console.log(error);
     }
     setLoading(false);
   };
@@ -98,7 +91,6 @@ function MedicalRecord({ data, next, fetchData }) {
       if (selectedType) {
         const recordsOfType = data?.filter(record => record?.medicalRecordType === selectedType?.index);
         if (recordsOfType?.length === 0) {
-          // Add an empty record if no records are found
           initialRecords[selectedType?.index] = [{ name: "", comment: "" }];
         } else {
           initialRecords[selectedType?.index] = recordsOfType?.map(record => ({
@@ -113,13 +105,6 @@ function MedicalRecord({ data, next, fetchData }) {
     setMedicalRecords(initialRecords);
   };
 
-
-
-
-
-
-
-
   useEffect(() => {
     if (selectedTab) {
       initializeMedicalRecords();
@@ -129,63 +114,11 @@ function MedicalRecord({ data, next, fetchData }) {
   return (
     <div>
       {
-        loading ? <Spinner/> : (
+        loading ? <Spinner /> : (
           <div>
             <div className="m-t-40 bold-text">Medical Records</div>
             <div>
-              {/* <div className="flex m-t-30">
-                <div className="m-r-80">
-                  {medicalTypes &&
-                    medicalTypes.map((type) => (
-                      <div
-                        key={type.index}
-                        className={`pointer m-t-30 font-sm ${selectedTab === type.index ? "pilled bold-text " : ""
-                          }`}
-                        onClick={() => setSelectedTab(type.index)}
-                      >
-                        {type.value}
-                      </div>
-                    ))}
-                </div>
-
-                <div>
-                  {(selectedTab && medicalTypes) &&
-
-                    <div>
-                      <InputField
-                        label={`${medicalTypes[selectedTab - 1]?.value}`}
-                        type="text"
-                        placeholder={`${medicalTypes[selectedTab - 1]?.value}`}
-                        value={typeName}
-                        onChange={(e) => setTypeName(e.target.value)}
-                      />
-                      <TextArea
-                        label="Comment"
-                        type="text"
-                        placeholder="Comment"
-                        value={typeComment}
-                        onChange={(e) => setTypeComment(e.target.value)}
-                      />
-                    </div>
-                  }
-                  <div className="w-100 flex flex-h-end">
-                    <button
-                      className="rounded-btn m-t-20"
-                      onClick={() => addMedicalRecord()}
-                    >
-                      Add {medicalTypes[selectedTab - 1]?.value}
-                    </button>
-                  </div>
-                  <button className="btn w-100 m-t-20" onClick={() => next()}>
-                    Continue
-                  </button>
-                </div>
-              </div> */}
-
               <div className="w-100">
-                {/* <div className="flex flex-h-end">
-                  <div className="rounded-btn" onClick={() => toggleModal()}>+ Add Record</div>
-                </div> */}
                 <MedicalRecordTable data={newData || []} />
               </div>
             </div>

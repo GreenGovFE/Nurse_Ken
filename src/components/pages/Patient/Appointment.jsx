@@ -67,7 +67,6 @@ function Appointment({ data, setCurrent }) {
   const handleDelete = (id) => {
     del(`/Appointment/Delete-appointment?Id=${id}`)
       .then(res => {
-        console.log(res)
         if (res.message === "The appointment has been removed from the doctor schedule table") {
           notification({ message: 'Cancelled appointment successfully', type: "success" });
           fetchData(currentPage)
@@ -77,7 +76,6 @@ function Appointment({ data, setCurrent }) {
       })
       .catch(err => {
         notification({ message: 'Failed to delete appointment', type: "error" });
-        console.log(err)
       })
   }
 
@@ -85,16 +83,20 @@ function Appointment({ data, setCurrent }) {
   const fetchData = async (currentPage) => {
     try {
       const response = await get(`/appointment/get-appointment-bypatientId/${patientId}?pageIndex=${currentPage}&pageSize=10`);
+  
       if (response?.data?.length > 0) {
-        setCombinedData(response?.data);
-        setTotalPages(response?.pageCount);
+        const filteredData = response?.data?.filter(item => item?.tracking !== "DisCharge");
+  
+        setCombinedData(filteredData);
+        setTotalPages(response.pageCount);
       } else {
         console.error("Failed to fetch data");
       }
     } catch (e) {
-      console.error('Error fetching data:', e);
+      console.error("Error fetching data:", e);
     }
   };
+  
 
 
   useEffect(() => {
@@ -113,7 +115,6 @@ function Appointment({ data, setCurrent }) {
   };
 
   const selectRecord = (record) => () => {
-    console.log('record for discharge');
     setViewing(record);
     setIsModalOpen(true);
   };

@@ -28,9 +28,7 @@ function Dashboard() {
   const getAdmittedPatients = async () => {
     try {
       let res = await get("/dashboard/doctor/admittedpatients")
-      console.log(res)
       setAdmittedPatients(res)
-
     } catch (error) {
       console.error('Error fetching in and out patients:', error);
 
@@ -45,7 +43,6 @@ function Dashboard() {
   const getInAndOutPatients = async () => {
     try {
       let res = await get("/dashboard/AllOutPatientAndInPatientCount");
-      console.log(res);
       setInpatients(res);
       // setOutpatients(res?.outpatientCount);
     } catch (error) {
@@ -57,7 +54,6 @@ function Dashboard() {
   const getPatientAdmission = async () => {
     try {
       let res = await get("/dashboard/admission");
-      console.log(res);
       setPatientAdmission(res);
     } catch (error) {
       console.error('Error fetching patient admission:', error);
@@ -68,7 +64,6 @@ function Dashboard() {
   const getAvailableStaff = async () => {
     try {
       let res = await get(`/dashboard/AvaliableStaff/${sessionStorage?.getItem("clinicId")}`);
-      console.log(res);
       setAvailableStaff(res?.avaliableStaff);
     } catch (error) {
       console.error('Error fetching available staff:', error);
@@ -79,7 +74,6 @@ function Dashboard() {
   const getGenderDistribution = async () => {
     try {
       let res = await get("/dashboard/gender");
-      console.log(res);
       setFemalePercentage(res?.femalePatientPercentage);
       setMalePercentage(res?.malePatientPercentage);
     } catch (error) {
@@ -105,7 +99,6 @@ function Dashboard() {
 
     try {
       let res = await get("/dashboard/hmo-patient");
-      console.log(res);
       setHmoPatients(res);
     } catch (error) {
       console.error('Error fetching HMO patients:', error);
@@ -115,15 +108,12 @@ function Dashboard() {
   const getTotalPatients = async () => {
     try {
       let res = await get("/dashboard/AllPatientCount");
-      console.log(res);
       setTotalPatients(res);
     } catch (error) {
       console.error('Error fetching HMO patients:', error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
-
-  console.log(inPatients)
 
   useEffect(() => {
     getAdmittedPatients()

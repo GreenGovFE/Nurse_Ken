@@ -8,11 +8,6 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [patient, setPatient] = useState({})
 
-
-  console.log(data)
-
-
-
   const openModal = () => {
     setIsModalOpen(true);
 
@@ -23,7 +18,6 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
 
   };
 
-  //
   return (
     <div>
       {data?.status !== 'Occupied' ? (
@@ -38,7 +32,6 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
                 <div style={{border: '1px solid red !important', color: 'white', backgroundColor: 'red'}} className="comments-btn w-80">
                   <p className="text-center">{data?.status}</p>
                 </div>
-                {/* <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill /></button> */}
               </div>
             </div>
             :
@@ -66,7 +59,6 @@ function FacilityCard({ data, wards, availableBed, occupiedBeds, fetchBedList, p
             <button className="comments-btn w-80" disabled={data?.status === 'Occupied'}>
               <p className="text-center">{data?.status}</p>
             </button>
-            {/* <button className="m-l-5 facility-edit" onClick={openModal}><RiEdit2Fill/></button> */}
           </div>
         </div>
       )}

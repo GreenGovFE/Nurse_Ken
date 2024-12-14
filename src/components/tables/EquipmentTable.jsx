@@ -41,7 +41,6 @@ function EquipmentTable({ data, }) {
 
         try {
             let res = await axios.get(`https://edogoverp.com/clinicapi/api/equipment/list/${page}/10`, options);
-            console.log(res);
             setEquipments(res?.data?.resultList || []);
             setTablePages(res?.data?.totalPages); // Adjusted to access data
         } catch (error) {
@@ -50,7 +49,6 @@ function EquipmentTable({ data, }) {
     };
 
     const continueUpdate = (data) => {
-        console.log(data);
         setViewing(data)
         setIsModalOpen(true);
     };

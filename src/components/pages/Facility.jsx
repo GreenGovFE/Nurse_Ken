@@ -58,9 +58,7 @@ function Facility() {
 
     try {
       let res = await axios.get("https://edogoverp.com/clinicapi/api/room/list/1/100", options);
-      console.log(res);
       let roomList = res?.data?.resultList || []; // Adjusted to access data property
-
       roomList.unshift({ name: "Select Room", id: "" });
       setRooms(roomList.map((item) => ({ value: item?.id, name: item.name })));
     } catch (error) {
@@ -68,15 +66,9 @@ function Facility() {
     }
   };
 
-
-
-
-
-
   const getAdmittedPatients = async () => {
     try {
       let res = await get("/dashboard/doctor/admittedpatients");
-      console.log(res);
       setAdmittedPatients(res);
     } catch (error) {
       console.error('Error fetching admitted patients:', error);
@@ -86,7 +78,6 @@ function Facility() {
   const getAvailableBed = async () => {
     try {
       let res = await get("/facilities/Available-Beds-Count");
-      console.log(res);
       setAvailableBed(res);
     } catch (error) {
       console.error('Error fetching available beds:', error);
@@ -96,22 +87,12 @@ function Facility() {
   const getOccupiedBed = async () => {
     try {
       let res = await get("/facilities/Occupied-Beds-Count");
-      console.log(res);
       setOccupiedBeds(res);
     } catch (error) {
       console.error('Error fetching occupied beds:', error);
     }
   };
 
-  // const getAssignedBed = async () => {
-  //   try {
-  //     let res = await get("/facilities/beds/assignedtodoctor");
-  //     console.log(res);
-  //     setBeds(res);
-  //   } catch (error) {
-  //     console.error('Error fetching assigned beds:', error);
-  //   }
-  // };
 
   const getBedList = async () => {
     const token = sessionStorage.getItem('token');
@@ -130,7 +111,6 @@ function Facility() {
     try {
       setLoading(true);
       let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/list/${currentPage}/10`, options);
-      console.log(res);
       if (res.status === 200) {
         setBedList(res?.data?.resultList || []);
         setTotalPages(res?.data?.totalPages || 1);

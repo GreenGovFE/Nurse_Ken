@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { RiCloseFill } from 'react-icons/ri';
+import { RiCloseFill, RiFileDownloadFill } from 'react-icons/ri';
 import InputField from '../UI/InputField';
 import TextArea from '../UI/TextArea';
 import { formatDate } from "../../utility/general";
@@ -7,16 +7,9 @@ import TagInputs from '../layouts/TagInputs';
 import { get, post } from '../../utility/fetch';
 
 function ViewVisit({ closeModal, visit, next }) {
-
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
-
     const [nurses, setNurses] = useState([]);
     const [doctors, setDoctors] = useState([]);
-    const [notes, setNotes] = useState([]);
     const [payload, setPayload] = useState({});
-
-
-
 
     useEffect(() => {
         getNurses();
@@ -38,7 +31,6 @@ function ViewVisit({ closeModal, visit, next }) {
             setNurses(Array.isArray(res?.data) ? res?.data : []);
         } catch (error) {
             console.error('Error fetching nurses:', error);
-            // Handle the error here, such as displaying an error message to the user
         }
     };
 
@@ -52,62 +44,52 @@ function ViewVisit({ closeModal, visit, next }) {
             setDoctors(Array.isArray(res?.data) ? res?.data : []);
         } catch (error) {
             console.error('Error fetching doctors:', error);
-            // Handle the error here, such as displaying an error message to the user
         }
     };
-
-    const getNotes = async () => {
-        try {
-            let res = await get(
-                `/patients/${sessionStorage.getItem("patientId")}/nursenotes/${visit?.visitId}`
-            );
-            setNotes(Array.isArray(res?.data) ? res?.data : []);
-        } catch (error) {
-            // Handle the error here
-            console.error('Error fetching notes:', error);
-        }
-    };
-
-    const addNotes = async () => {
-        try {
-            let res = await post(
-                `/patients/${sessionStorage.getItem("patientId")}/addpatientnote`, { ...payload, nursesId: visit?.nurseId, doctorId: visit?.doctorId });
-        } catch (error) {
-            // Handle the error here
-            console.error('Error fetching notes:', error);
-        }
-    };
-
-
-    const getNurseName = (nurseId) => {
-        const nurse = nurses?.find((nurse) => nurse?.nurseEmployeeId === nurseId);
-        return nurse ? nurse?.username : "Nurse Not Found";
-    };
-
-    const getDoctorName = (doctorId) => {
-        const doctor = doctors?.find((doctor) => doctor?.doctorEmployeeId === doctorId);
-        return doctor ? doctor?.username : "None Assigned";
-    };
-
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-    //         setCurrentDateTime(new Date());
-    //     }, 1000);
-
-    //     // Cleanup function to clear the interval when the component unmounts
-    //     return () => clearInterval(intervalId);
-    // }, []);
-
-
-
-
-    const formattedDate = currentDateTime.toLocaleDateString();
-    const formattedTime = currentDateTime.toLocaleTimeString();
 
     const formatDate = (timestamp) => {
         const dateObject = new Date(timestamp);
         const formattedDate = dateObject.toISOString().split("T")[0];
         return formattedDate;
+    };
+
+    const downloadFile = async (docName) => {
+        try {
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+                console.error('Token not found in session storage');
+                return;
+            }
+
+            const url = `https://edogoverp.com/labapi/api/document/download-document/${docName}`;
+
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+
+            const response = await fetch(url, options);
+
+            if (response.ok) {
+                const blob = await response.blob();
+
+                const blobUrl = URL.createObjectURL(blob);
+
+                const anchor = document.createElement('a');
+                anchor.href = blobUrl;
+                anchor.download = docName; 
+                anchor.click();
+
+                URL.revokeObjectURL(blobUrl);
+            } else {
+                console.error('Failed to fetch download link:', response.statusText);
+            }
+        } catch (e) {
+            console.error('Error fetching download link:', e);
+        }
     };
 
     return (
@@ -118,62 +100,59 @@ function ViewVisit({ closeModal, visit, next }) {
                     <div className="flex space-between flex-v-center m-t-20 m-l-20 col-3">
                         <p>Vitals Details</p>
                     </div>
-                    {/* <div className="flex m-l-240 flex-v-center m-t-20 col-4">
-                        <p>Time: {formattedTime}</p>
-                    </div> */}
                 </div>
                 <div className="p-20">
 
                     <table className="bordered-table-2">
                         <thead className="border-top-none">
                             <tr className="border-top-none">
-                                <th className="w-20">Date</th>
-                                <th>Weight</th>
-                                <th>Temp</th>
-                                <th>Height</th>
-                                <th>Heart</th>
-                                <th>Resp</th>
-                                <th>Blood Pressure</th>
-
+                                <th className="center-text">Date</th>
+                                <th className="center-text">Blood Pressure (mmHg)</th>
+                                <th className="center-text">Weight (Kg)</th>
+                                <th className="center-text">Temp (°C)</th>
+                                <th className="center-text">Height (cm)</th>
+                                <th className="center-text">Heart (bpm)</th>
+                                <th className="center-text">Oxygen Saturation (SpO₂) </th>
+                                <th className="center-text">Blood sugar</th>
+                                <th className="center-text">Resp</th>
+                                <th className="center-text">Admin Nurse</th>
                             </tr>
                         </thead>
 
                         <tbody className="white-bg view-det-pane">
 
                             <tr >
-                                <td>{formatDate(visit.dateOfVisit)}</td>
-
-                                <td>{visit.weight}</td>
-                                <td>{visit.temperature}</td>
-                                <td>{visit.height}</td>
-                                <td>{visit.heartPulse}</td>
-                                <td>{visit.respiratory}</td>
-                                <td>{visit.bloodPressure}</td>
-
-
-
+                                <td style={{ minWidth: '100px' }}>{formatDate(visit?.dateOfVisit)}</td>
+                                <td>{visit?.bloodPressure}</td>
+                                <td>{visit?.weight}</td>
+                                <td>{visit?.temperature}</td>
+                                <td>{visit?.height}</td>
+                                <td>{visit?.heartPulse}</td>
+                                <td>{visit?.oxygenSaturation}</td>
+                                <td>{visit?.bloodSugar}</td>
+                                <td>{visit?.respiratory}</td>
+                                <td>{(visit?.vitalNurseName)}</td>
                             </tr>
-
-
                         </tbody>
                     </table>
 
                     <TagInputs label="Assigned Nurse" name="assignedNurse" value={visit?.vitalNurseName} readOnly={true} />
-                    {/* <TagInputs label="Assigned Doctor" name="assignedDoctor" value={visit?.doctorName} readOnly={true} /> */}
                     {
-                        visit?.notes &&
-
-                        visit.notes.map((data, index) => (
+                        visit?.notes && visit.notes.map((data, index) => (
                             <div>
                                 <TagInputs label="Additional Notes" name="additonalNoteOnTreatment" value={data} onChange={handleChange} readOnly={true} type='textArea' />
                             </div>
-                        )
-
-                        )
+                        ))
                     }
-                    
 
-                    {/* <button className="submit-btn m-t-20 w-100" onClick={() => addNotes}>Add Notes</button> */}
+                    {visit?.vitalDocuments?.map((doc, index) => (
+                        <div key={index}>
+                            <div className='text-green pointer flex flex-direction-v flex-h-center '>
+                                <RiFileDownloadFill onClick={() => downloadFile(doc?.docName)} size={20} />
+                                <a href={doc?.docPath} target="_blank" rel="noopener noreferrer">{doc?.docName}</a>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

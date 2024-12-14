@@ -5,11 +5,9 @@ import FinanceDetails from "../pages/Patient/FinanceDetails";
 
 function FinanceTable({ data, currentPage, itemsPerPage }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewing, setViewing] = useState({});
   const { setPatientId, setPatientName, setPatientPage, setHmoId } = usePatient();
 
 
-  let navigate = useNavigate();
 
   const closeModal = () => {
     setIsModalOpen(false);

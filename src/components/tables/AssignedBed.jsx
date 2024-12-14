@@ -87,7 +87,6 @@ function AssignedBed({ data, fetchBedList, }) {
 
         try {
             let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
-            console.log(res);
             setBeds(res?.data?.resultList || []);
             setBedTablePages(res?.data?.totalPages)
         } catch (error) {

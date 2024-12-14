@@ -57,10 +57,7 @@ function Immunization({ setSelectedTab }) {
   };
 
 
-  const receiveImage = (value) => {
-    console.log(value);
-  };
-
+ 
   const deleteDoc = (doc) => {
     let newArr = documentArray.filter((id) => id.name !== doc);
     setDocumentArray(newArr);
@@ -69,7 +66,6 @@ function Immunization({ setSelectedTab }) {
   const getImmunization = async () => {
     try {
       let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
-      console.log(res);
       setImmunizationData(res.data);
       setTotalPages(res.pageCount)
 
@@ -89,7 +85,6 @@ function Immunization({ setSelectedTab }) {
       currentDate.setHours(0, 0, 0, 0);
 
       if (selectedDate > currentDate) {
-        console.log("Invalid input");
         notification({ message: 'Date selected cannot be a future date', type: "error" });
 
         // Reset the date input to an empty string
@@ -99,8 +94,6 @@ function Immunization({ setSelectedTab }) {
       }
     }
     setPayload({ ...payload, [name]: value });
-
-    console.log(payload);
   };
 
   const fieldLabels = {
@@ -188,7 +181,6 @@ function Immunization({ setSelectedTab }) {
         docPath: documentArray[0]?.path,
         patientId: patientID,
       });
-      console.log(res);
 
       if (typeof res === "object") {
         notification({ message: res?.message, type: "success" });
@@ -213,14 +205,9 @@ function Immunization({ setSelectedTab }) {
 
         if (res && res.errors) {
           const errors = res.errors;
-          console.log(errors);
-
           const missingFields = Object.keys(errors).filter((field) => {
             return errors[field].some((errorMsg) => /is required/i.test(errorMsg));
           });
-
-          console.log(missingFields);
-
           if (missingFields.length > 0) {
             const formattedFields = missingFields.map((field) =>
               fieldLabels[field] || field.replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -233,7 +220,6 @@ function Immunization({ setSelectedTab }) {
         notification({ message: errorMessage, type: "error" });
       }
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -293,7 +279,7 @@ function Immunization({ setSelectedTab }) {
           </div>
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">
-              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray} sendImage={receiveImage} />
+              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray}  />
             </div>
 
             {documentArray?.map((item, index) => (

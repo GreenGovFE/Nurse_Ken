@@ -23,10 +23,8 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
     console.log(payload, hospitals);
 
     const handleChange = (field, event) => {
-        console.log(event);
         const value = event;
         const name = field;
-        console.log(name, value);
 
         if (name === 'referredClinicId') {
             setPayload(prevPayload => ({ ...prevPayload, [name]: Number(value?.value) }));
@@ -70,7 +68,6 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
         };
 
         const invalidFields = validatePayload(Payload);
-        console.log(invalidFields);
 
         if (invalidFields.length > 0) {
             const formattedFields = invalidFields.map(field => {
@@ -86,7 +83,6 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
         }
         try {
             let res = await post(`/Referrals/refer-patient`, Payload);
-            console.log(res);
             if (res?.message === "Referral note added successfully") {
                 notification({ message: 'Referred Successfully', type: "success" });
                 fetchData(currentPage);
@@ -105,7 +101,6 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
     const getAllPatients = async () => {
         try {
             let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=1&pageSize=3000`);
-            console.log(res);
             let tempDoc = res?.data?.map((patient, idx) => {
                 return {
                     label: `${patient?.firstName} ${patient?.lastName}`, value: parseFloat(patient?.patientId),
@@ -124,7 +119,6 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
     const getAllHospitals = async () => {
         try {
             let res = await get(`/facilities/Get-All-Hospital?pageSize=300&pageNumber=1`);
-            console.log(res);
             let tempDoc = res?.data
                 ?.filter(item => item?.clinicId !== Number(clinicId))
                 ?.map((item, idx) => {
@@ -142,29 +136,9 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
         }
     };
 
-
-    const getTreatment = async () => {
-        try {
-            let res = await get(`/patients/${patientId}/treatmentrecord?pageNumber=${1}&pageSize=1000`);
-            console.log(res);
-            let tempNurses = res?.data?.map((nurse) => {
-                return { label: nurse?.diagnosis, value: parseFloat(nurse?.id) };
-            });
-
-            tempNurses?.unshift({ label: "Select Treatment", value: "" });
-            setTreatment(tempNurses);
-        } catch (error) {
-            console.error('Error fetching treatment records:', error);
-            // Handle the error here, such as displaying an error message to the user
-        }
-    }
-
-
-
     useEffect(() => {
         getAllPatients();
         getAllHospitals();
-        // getTreatment();
     }, [patientId]);
 
     return (
@@ -175,16 +149,10 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
                     <div className="flex space-between flex-v-center m-t-20 col-4">
                         <p className='m-l-20'>Refer Patient</p>
                     </div>
-                    {/* <div className="flex  flex-v-center m-t-20 m-l-140 col-4">
-                        <p>Time: {formattedTime}</p>
-                    </div> */}
                 </div>
                 <div className="p-10">
-                    {/* <TagInputs label="Select Patient" onChange={(value) => handleChange("patientId", value)} options={Patient} name="patientId" type='R-select' /> */}
                     <TagInputs label="Select Clinic/Hospital" onChange={(value) => handleChange("referredClinicId", value)} options={hospitals} name="referredClinicId" type='R-select' />
-                    {/* <TagInputs label="Select Treatment" onChange={(value) => handleChange("treatmentId", value)} options={treatment} name="treatmentId" type='R-select' /> */}
                     <TagInputs label="Additional Notes" name="referralNotes" onChange={(value) => handleChange("referralNotes", value)} type='textArea' />
-
                     <button onClick={ReferPatient} className="submit-btn m-t-20 w-100" >Refer Patient</button>
                 </div>
             </div>

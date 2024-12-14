@@ -12,13 +12,9 @@ const UploadPic = (props) => {
   const [imagg, setImagg] = React.useState('');
   const [namm, setNamm] = React.useState('');
   const [imagess, setImagess] = React.useState([]);
-  
-  console.log('in up pic', imagg)
-  
+
   props.name(namm)
-  
-  console.log(  imagg);
-  
+    
   const onChangePIc = (e) => {
     // setFile(e.target.files[0]);
     // setFilename(e.target.files[0].name);
@@ -39,7 +35,6 @@ const UploadPic = (props) => {
 
     let doc = e.target.files[0];
 
-    console.log('Logging File Type and Size', type, size);
     const fileType = type.slice(type.indexOf('/') + 1);
 
 
@@ -62,9 +57,7 @@ const UploadPic = (props) => {
       setFile(e.target.files[0]);
       setFilename(e.target.files[0].name);
       data.append('files', doc);
-      FileUpload(data, (response) => {
-        console.log('file upload response Pic', response);
-       
+      FileUpload(data, (response) => {       
         if (response.code === 1) {
           setImagg(response.doclink);
           props.handlePicChange(response.doclink)

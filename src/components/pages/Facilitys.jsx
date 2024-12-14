@@ -40,7 +40,6 @@ function Facility() {
 
   const getBeds = async () => {
     let res = await get("/bed/list/1/100");
-    console.log(res);
     if (res) {
       setBeds(res.resultList);
     }
@@ -77,9 +76,7 @@ function Facility() {
       return;
     }
 
-    console.log(payload)
     let res = await post("/bed/bed", payload);
-    console.log(res);
 
     if (res?.statusCode === 400) {
       Notify({ title: "Error", message: res?.errorData[0], type: "danger" });
@@ -99,9 +96,7 @@ function Facility() {
 
   const getRooms = async () => {
     let res = await get("/room/list/1/100");
-    console.log(res);
     let roomList = res?.resultList;
-
     roomList.unshift({ name: "Select Room", id: "" })
     setRooms(res?.resultList?.map((item) => ({ value: item?.id, name: item.name })));
   }
@@ -109,13 +104,11 @@ function Facility() {
 
   const getAmbulance = async () => {
     let res = await get("/assignambulance/list/1/10000")
-    console.log(res);
     setAmbulances(res?.resultList);
   }
 
   const getEquipment = async () => {
     let res = await get("/assignequipment/list/1/10000")
-    console.log(res);
     setEquipment(res?.resultList);
   }
 

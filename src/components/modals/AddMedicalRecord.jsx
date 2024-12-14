@@ -23,7 +23,6 @@ function AddMedicalRecord({ closeModal, patientId, fetchData, medicalRecordType 
             comment: comment,
             patientId: patientId
         };
-        console.log(payload);
         try {
             await post(`/patients/addmedicalrecord`, payload);
             await fetchData();
@@ -31,7 +30,6 @@ function AddMedicalRecord({ closeModal, patientId, fetchData, medicalRecordType 
             closeModal();
         } catch (error) {
             toast.error('Error adding medical record');
-            console.log(error);
         }
         setLoading(false);
     };

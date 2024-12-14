@@ -1,5 +1,4 @@
 
-
 export const logout = async () => {
   const link = localStorage.getItem('homeLink')
   sessionStorage.removeItem('token');

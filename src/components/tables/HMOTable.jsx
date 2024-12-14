@@ -24,8 +24,6 @@ function HMOTable({ data, hmoPackages, hmoId, hmoClass }) {
   const getPaymentHistory = async () => {
     try {
       const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/41/${pageNumber}/10/patient-payment-history`);
-      console.log(response);
-
       setPaymentHistory(response?.data?.resultList);
     } catch (error) {
       console.error('Error fetching payment history:', error);
@@ -35,8 +33,6 @@ function HMOTable({ data, hmoPackages, hmoId, hmoClass }) {
   const getAllCategories = async () => {
     try {
       let res = await get(`/patients/get-all-categories`);
-      console.log(res);
-
       let temp = res?.map((item, idx) => {
         return {
           name: item?.name,
@@ -66,7 +62,6 @@ function HMOTable({ data, hmoPackages, hmoId, hmoClass }) {
 
     try {
       const response = await axios.post(`https://edogoverp.com/healthfinanceapi/api/patientpayment`, Payload);
-      console.log(response);
       setPaymentId(response?.data);
       notification({ message: response?.messages, type: "success" });
     } catch (error) {
@@ -88,7 +83,6 @@ function HMOTable({ data, hmoPackages, hmoId, hmoClass }) {
 
     try {
       const response = await axios.post(`https://edogoverp.com/healthfinanceapi/api/patient-payment/${paymentId}/add-update-payment`, Payload);
-      console.log(response);
       notification({ message: response?.messages, type: "success" });
       setPaymentHistory(response?.data?.resultList);
     } catch (error) {
@@ -184,8 +178,6 @@ function HMOTable({ data, hmoPackages, hmoId, hmoClass }) {
     updatedBreakdowns.splice(index, 1);
     setPaymentBreakdowns(updatedBreakdowns);
   };
-
-  console.log(paymentBreakdowns, hmoId, hmoClass, payload);
 
   return (
     <div className="w-100 ">

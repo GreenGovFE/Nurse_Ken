@@ -8,9 +8,7 @@ import notification from '../../utility/notification';
 
 function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses, fetch, currentPage }) {
 
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
     const [payload, setPayload] = useState({});
-
 
     const requiredFields = {
         doctorId: "Assigned Doctor",
@@ -38,12 +36,10 @@ function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses, fe
         }
         post(`/patients/${visit.patientId}/addpatientnote`, data)
             .then(res => {
-                console.log(res)
                 notification({ message: 'Added notes successfully', type: "success" });
             })
             .catch(err => {
                 notification({ message: 'Failed to add notes', type: "error" });
-                console.log(err)
             })
     }
 
@@ -78,9 +74,6 @@ function NurseNoteTreatment({ closeModal, visit, notes, add, doctors, nurses, fe
                             <p>Nurse Notes/Observations</p>
                         }
                     </div>
-                    {/* <div className="flex space-between flex-v-center m-t-20 col-4">
-                        <p>Time: {formattedTime}</p>
-                    </div> */}
                 </div>
                 <div className="p-20">
                     <div>

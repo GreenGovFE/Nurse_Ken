@@ -14,7 +14,7 @@ function Personal({ setSelectedTab, hide }) {
       lastName: patientInfo?.lastName || null,
       gender: patientInfo?.gender || null,
       dateOfBirth:patientInfo?.dateOfBirth || "",
-      email: patientInfo?.email ||  "user@example.com",
+      email: patientInfo?.email ||  "",
       phoneNumber: patientInfo?.phoneNumber || null,
       stateOfOrigin: patientInfo?.stateOfOrigin || null,
       lga: patientInfo?.lga || null,
@@ -24,7 +24,7 @@ function Personal({ setSelectedTab, hide }) {
       clinicId: 0,
       pictureUrl: patientInfo?.pictureUrl || null    
   });
-  const [pictureUrl, setPictureUrl] = useState('');
+  const [pictureUrl, setPictureUrl] = useState(null);
   const [fileName, setFilename] = useState('');
   const [states, setStates] = useState([]);
   const [nationality, setNationality] = useState([]);
@@ -120,7 +120,6 @@ function Personal({ setSelectedTab, hide }) {
         setPatientInfo(payload)
       }
     } catch (error) {
-      console.log(error);
       if (error.status && error.status === 409) {
         notification({ message: 'Patient already exists', type: "error" });
       } else {
@@ -223,7 +222,6 @@ function Personal({ setSelectedTab, hide }) {
         fetchPatientById(res.patientId);
       }
     } catch (error) {
-      console.log(error);
       notification({ message: 'An error occurred while updating patient', type: "error" });
     }
   };
@@ -244,7 +242,7 @@ function Personal({ setSelectedTab, hide }) {
   return (
     <div className="w-80">
       <div className="m-t-40 "></div>
-      <div className="flex space-between">
+      <div className="flex wrap space-between">
         <div className="col-7">
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.firstName || ''} name="firstName" label="First Name*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.lastName || ''} name="lastName" label="Last Name*" />
@@ -264,7 +262,7 @@ function Personal({ setSelectedTab, hide }) {
             <img
               style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", maxWidth: "100%", maxHeight: "100%" }}
               onError={addDefaultSrc}
-              src={pictureUrl || payload?.pictureUrl || ProfilePix}
+              src={payload?.pictureUrl || pictureUrl || ProfilePix}
               alt={fileName}
             />
           </div>

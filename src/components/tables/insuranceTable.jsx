@@ -23,9 +23,8 @@ function InsuranceTable({ data, }) {
   let navigate = useNavigate();
 
   const selectRecord = (record) => () => {
-    console.log(record);
-    setPatientId(record.patientId);
-    fetchPatientById(record.patientId)
+    setPatientId(record?.patientId || record?.id);
+    fetchPatientById(record?.patientId || record?.id)
     setHmoDetails(record)
     navigate("/patient-hmo-details");
   };
@@ -34,7 +33,6 @@ function InsuranceTable({ data, }) {
     setLoading(true); // Set loading to true before fetching data
     try {
       const res = await get(`/HMO/all-patient-hmo/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=10`);
-      console.log(res);
       setAllPatients(res.data);
       setTotalPages(res.pageCount);
       setDataFetched(true);
@@ -49,11 +47,7 @@ function InsuranceTable({ data, }) {
     try {
       const res = await get(`/patients/AllPatientById?patientId=${id}`);
       setPatientInfo(res);
-      console.log("Patient data for ID", id, ":", res.data); // Log patient data
       const name = `${res?.firstName} ${res?.lastName}`;
-      console.log("Patient name for ID", id, ":", name); // Log patient name
-      // Fetch HMO details
-
       return { name, };
     } catch (error) {
       console.error('Error fetching patient details:', error);
@@ -61,29 +55,9 @@ function InsuranceTable({ data, }) {
     }
   };
 
-
-
-
   useEffect(() => {
     getAllPatientsHmo();
   }, [currentPage]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (dataFetched && allPatients) {
-  //       const patientsWithDetails = await Promise.all(allPatients?.map(async (row) => {
-  //         const { name } = await fetchPatientById(row.patientId);
-  //         return {
-  //           ...row,
-  //           patientName: name,
-  //         };
-  //       }));
-  //       setAllPatients(patientsWithDetails);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [dataFetched]);
 
   return (
     <div className="w-100 ">

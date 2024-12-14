@@ -15,16 +15,18 @@ import AppointmentModal from "../modals/AppointmentModal";
 import { usePatient } from "../../contexts";
 import { get } from "../../utility/fetch";
 import Vitals from "./Patient/Vitals";
+import AdmitCheck from "./Patient/AdmitCheck";
 
 function PatientDetails() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [admit, setAdmit] = useState('appointment');
   const [appointment, setAppointment] = useState(false);
-  const { patientId, patientName, nurseTypes } = usePatient();
+  const { patientId, patientName, nurseTypes, patientInfo } = usePatient();
   const [selectedTab, setSelectedTab] = useState(nurseTypes === 'checkin' ? "personal" : nurseTypes === 'vital' ? 'vitals' : 'medicalRecord');
   const [combinedData, setCombinedData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [admttedPatient, setAdmittedPatients] = useState([]);
 
 
 
@@ -38,16 +40,30 @@ function PatientDetails() {
   const selectRecord = () => () => {
     setIsModalOpen(true);
   };
+  
+  const getAllAdmittedPatients = async () => {
+    try {
+      let res = await get(`/patients/${patientId}/admited-patients?pageNumber=${currentPage}&pageSize=${10}`);
+      setAdmittedPatients(res.data);
+      setTotalPages(res.pageCount);
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+    } finally {
+    }
+  };
 
   const fetchData = async (currentPage) => {
-    console.log('Patient dey cause issues')
     try {
       const response = await get(`/appointment/get-appointment-bypatientId/${patientId}?pageIndex=${currentPage}&pageSize=10`);
       setCombinedData(response?.data)
     } catch (e) {
-      console.log(e);
+      
     }
   };
+
+  useEffect(() => {
+    getAllAdmittedPatients(currentPage);
+  }, [currentPage]);
 
 
   const renderTabContent = (selectedTab) => {
@@ -90,7 +106,7 @@ function PatientDetails() {
       <div className="m-t-80 flex flex-h-center flex-v-center space-between">
         <h3>{patientName}</h3>
         <div className=" m-b-10 flex flex-h-center flex-v-center space-between float-right col-5">
-          {nurseTypes === 'admin' &&
+          {nurseTypes === 'admin' && patientInfo &&
             <>
               <button onClick={() => { setAppointment(true); setAdmit('appointment') }} className="save-drafts m-l-10">
                 Book an Appointment
@@ -100,12 +116,19 @@ function PatientDetails() {
               </button>
             </>
           }
+          {nurseTypes === 'checkin' &&  patientInfo &&
+            <>
+              <button onClick={() => { setAppointment(true); setAdmit('appointment') }} className="save-drafts m-l-10">
+                Book an Appointment
+              </button>
+            </>
+          }
         </div>
       </div>
 
       <div className=" tabs m-t-20 bold-text">
         <>
-          {nurseTypes === 'vital' ? (
+          {nurseTypes === 'vital'  && patientInfo ? (
             <div
               className={`tab-item ${selectedTab === "vitals" ? "active" : ""}`}
               onClick={() => setSelectedTab("vitals")}
@@ -127,6 +150,12 @@ function PatientDetails() {
               >
                 Immunization
               </div>
+              <div
+                className={`tab-item ${selectedTab === "vitals" ? "active" : ""}`}
+                onClick={() => setSelectedTab("vitals")}
+              >
+                Vitals
+              </div>
 
               <div
                 className={`tab-item ${selectedTab === "treatment" ? "active" : ""}`}
@@ -139,8 +168,16 @@ function PatientDetails() {
                 className={`tab-item ${selectedTab === "appointment" ? "active" : ""}`}
                 onClick={() => setSelectedTab("appointment")}
               >
-                Appointment/Admission
+                Appointment/Visits
               </div>
+
+              {/* <div
+                className={`tab-item ${selectedTab === "admit" ? "active" : ""}`}
+                onClick={() => setSelectedTab("admit")}
+              >
+                Admission 
+              </div> */}
+
 
               <div
                 className={`tab-item ${selectedTab === "labs" ? "active" : ""}`}
@@ -178,6 +215,12 @@ function PatientDetails() {
               >
                 Emergency Contact
               </div>
+              {/* <div
+                className={`tab-item ${selectedTab === "appointment" ? "active" : ""}`}
+                onClick={() => setSelectedTab("appointment")}
+              >
+                Appointment/Admission
+              </div> */}
               <div
                 className={`tab-item ${selectedTab === "financeHmo" ? "active" : ""}`}
                 onClick={() => setSelectedTab("financeHmo")}
@@ -207,6 +250,8 @@ function PatientDetails() {
                         <Treatments setSelectedTab={setSelectedTab} /> :
                         selectedTab === "appointment" ?
                           <Appointment data={combinedData} setCurrent={setCurrentPage} setSelectedTab={setSelectedTab} /> :
+                          // selectedTab === "admit" ?
+                          // <AdmitCheck data={admttedPatient} setCurrent={setCurrentPage} setSelectedTab={setSelectedTab} /> :
                           selectedTab === "labs" ?
                             <Labs setSelectedTab={setSelectedTab} /> :
                             selectedTab === "financeHmo" ?

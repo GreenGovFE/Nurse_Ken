@@ -153,7 +153,7 @@ function EmergencyContact({ setSelectedTab }) {
       <TagInputs onChange={handleChange} type = {'select'} options={states} value={payload?.stateOfResidence || ''} name="stateOfResidence" label="State Of Residence" />
       <TagInputs onChange={handleChange} value={payload?.lga || ''} name="lga" label="LGA" />
       <TagInputs onChange={handleChange} value={payload?.city || ''} name="city" label="City" />
-      <TagInputs onChange={handleChange} value={payload?.altPhone || ''} name="altPhone" label="Alternative Phone Number" />
+      <TagInputs onChange={handleChange} value={payload?.altPhone || ''} name="altPhone" label="Alt Phone Number" />
 
       <button onClick={submitPayload} className="submit-btn  m-t-20 w-100">Continue</button>
     </div>

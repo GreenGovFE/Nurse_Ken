@@ -8,12 +8,10 @@ function Treatments() {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
   const [treatment, setTreatment] = useState([])
+  const [currenttreatmentrecord, setCurrenttreatmentrecord] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
-
-
-
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -39,23 +37,28 @@ function Treatments() {
     return pages;
   };
 
- 
-
-
-
   useEffect(() => {
     getTreatment()
+    getTreatmentHistory()
   }, [currentPage])
+
+  const getTreatmentHistory = async () => {
+    try {
+      let res = await get(`/patients/${patientId}/currenttreatmentrecord?pageNumber=${currentPage}&pageSize=10`);
+      setCurrenttreatmentrecord(res?.data);
+      setTotalPages(res?.pageCount)
+    } catch (error) {
+      console.error('Error fetching treatment records:', error);
+    }
+  }
 
   const getTreatment = async () => {
     try {
       let res = await get(`/patients/${patientId}/treatmentrecord?pageNumber=${currentPage}&pageSize=10`);
-      console.log(res);
       setTreatment(res?.data);
       setTotalPages(res?.pageCount)
     } catch (error) {
       console.error('Error fetching treatment records:', error);
-      // Handle the error here, such as displaying an error message to the user
     }
   }
 

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { get, post } from "../../utility/fetch";
 import axios from "axios";
 import notification from "../../utility/notification";
-import UpdatePaymentModal from "./UpdatePayment";
 import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill } from "react-icons/ri";
 import { usePatient } from "../../contexts";
@@ -10,13 +9,10 @@ import NurseNotesAdd from "./NurseNotesAdd";
 import NurseNoteTreatment from "./NurseNoteTreatment";
 
 function DetailedNurseNotes({ closeModal, treatment, notes, doctors, nurses, vital }) {
-    const [currentDateTime, setCurrentDateTime] = useState(new Date());
-    const [payload, setPayload] = useState({});
     const [nurseNotesModal, setNurseNotesModal] = useState(false)
-
     const { patientId, patientName } = usePatient();
     const [viewing, setViewing] = useState({});
-    const [add, setAdd] = useState(false); // Add loading state'
+    const [add, setAdd] = useState(false);
     const [note, setNote] = useState([]);
     const [NotesModal, setNotesModal] = useState(false)
 
@@ -24,48 +20,15 @@ function DetailedNurseNotes({ closeModal, treatment, notes, doctors, nurses, vit
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-
-
-
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= totalPages) {
             setCurrentPage(newPage);
         }
     };
 
-    const generatePageNumbers = () => {
-        let pages = [];
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            if (currentPage <= 3) {
-                pages = [1, 2, 3, 4, totalPages];
-            } else if (currentPage >= totalPages - 2) {
-                pages = [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-            } else {
-                pages = [1, currentPage - 1, currentPage, currentPage + 1, totalPages];
-            }
-        }
-        return pages;
-    };
-
-    const requiredFields = {
-        doctorId: "Assigned Doctor",
-        nurseId: "Administering Nurse",
-        additionalNoteOnTreatment: "Additional Notes",
-    };
-
-    const checkMissingFields = (payload) => {
-        const missingFields = Object.keys(requiredFields).filter(field => !payload[field]);
-        return missingFields;
-    };
-
     const getNurseNotes = async (currentPage) => {
         try {
             let res = await get(`/patients/get-nurse-treatmentnote/${treatment?.id}?pageIndex=${currentPage}&pageSize=1`);
-            console.log(res);
             setNote(res?.data);
             setTotalPages(res?.pageCount)
         } catch (error) {
@@ -82,19 +45,6 @@ function DetailedNurseNotes({ closeModal, treatment, notes, doctors, nurses, vit
         setNotesModal(true);
     };
 
-    const getNurseName = (nurseId) => {
-        const nurse = nurses?.find((nurse) => nurse?.nurseEmployeeId === nurseId);
-        return nurse ? nurse?.username : "Nurse Not Found";
-    };
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-
-        if (name === "doctorId" || name === "nurseId") {
-            setPayload(prevPayload => ({ ...prevPayload, [name]: Number(value) }));
-        } else {
-            setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
-        }
-    };
 
     return (
         <div className='overlay'>
@@ -142,7 +92,7 @@ function DetailedNurseNotes({ closeModal, treatment, notes, doctors, nurses, vit
                                         <div key={med.id} className="m-b-10 flex flex-direction-v">
                                             <div className="flex">
                                                 <span>{index + 1}.</span>
-                                                <span className="m-l-20">{med ? med.name : 'No Medication'}</span>
+                                                <span className="m-l-20">{med ? med?.name : 'No Medication'}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -171,12 +121,12 @@ function DetailedNurseNotes({ closeModal, treatment, notes, doctors, nurses, vit
                                 <tr className="border-top-none">
                                     <th className="w-20" rowSpan="2">Diagnosis</th>
                                     <th rowSpan="2">Prescription</th>
-                                    <th colSpan="3" className="center-text">Dosage</th> {/* Dosage header spanning two columns */}
+                                    <th colSpan="3" className="center-text">Dosage</th>
                                 </tr>
                                 <tr className="">
                                     <th>Frequency</th>
                                     <th>Quantity</th>
-                                    <th>Notes</th>
+                                    <th>Duration</th>
                                 </tr>
                             </thead>
                             <tbody className="white-bg view-det-pane">
@@ -192,18 +142,24 @@ function DetailedNurseNotes({ closeModal, treatment, notes, doctors, nurses, vit
                                     <td>
                                         {treatment?.medications.map((item) => (
                                             <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                                <span>{item?.dosage?.frequency}</span>
+                                                <span>{item?.frequency} times daily</span>
                                             </div>
                                         ))}
                                     </td>
                                     <td>
                                         {treatment?.medications.map((item) => (
                                             <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                                <span>{item?.dosage?.quantity}</span>
+                                                <span>{item?.quantity}mg</span>
                                             </div>
                                         ))}
                                     </td>
-                                    <td>{treatment?.additionalNote}</td>
+                                    <td>
+                                        {treatment?.medications.map((item) => (
+                                            <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                                                <span>{item?.duration} days</span>
+                                            </div>
+                                        ))}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

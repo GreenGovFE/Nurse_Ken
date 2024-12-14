@@ -113,7 +113,8 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                 patientId,
                 appointDate: formattedValue,
                 isAdmitted: admitted,
-                ...(appointmentId ? { id: appointmentId } : {})
+                ...(appointmentId ? { id: appointmentId } : {}),
+                careType: 2
             });
 
             if (["successfully created appointment", "successfully updated appointment", "successfully addmitted patient"].includes(res?.message)) {

@@ -17,8 +17,6 @@ function AllergyTable({ data }) {
     5: "Family Medical History",
   };
 
-  console.log(data);
-
   return (
     <div className="w-100">
       <div className="w-100 none-flex-item m-t-40">

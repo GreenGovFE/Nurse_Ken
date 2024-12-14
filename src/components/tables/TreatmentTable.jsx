@@ -26,7 +26,7 @@ function TreatmentTable({ data }) {
   const fetchData = async () => {
     try {
       const response = await get(`/patients/vital-by-patientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=1000`);
-      setVital(response.data);
+      setVital(response?.data);
       const combined = data?.map(treatment => {
         const correspondingVital = response?.data?.find(vital => vital?.vitalId === treatment?.vitalId);
         return {
@@ -38,13 +38,11 @@ function TreatmentTable({ data }) {
           heartPulse: correspondingVital? correspondingVital?.heartPulse : '',
           respiratory: correspondingVital? correspondingVital?.respiratory : '',
           height: correspondingVital? correspondingVital?.height : '',
-          weight: correspondingVital? correspondingVital?.weight : '',
+          weight: correspondingVital? correspondingVital?.weight : treatment?.weight,
         };
       });
-      console.log(combined);
       setCombinedData(combined);
     } catch (e) {
-      console.log(e);
       setCombinedData(data)
     }
   };
@@ -52,7 +50,6 @@ function TreatmentTable({ data }) {
   const getNurses = async () => {
     try {
       let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
-      console.log(res);
       let tempNurses = res?.data
         ?.filter((nurse) => nurse?.username) 
         .map((nurse) => {
@@ -69,7 +66,6 @@ function TreatmentTable({ data }) {
   const getDoctors = async () => {
     try {
       let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
-      console.log(res);
       let tempDoc = res?.data?.map((doc) => {
         return { name: doc?.username, value: parseFloat(doc?.employeeId) };
       });
@@ -107,17 +103,15 @@ function TreatmentTable({ data }) {
   const addNotes = (record, type) => () => {
     if (type === 'view meds') {
       setViewing(record);
-      setNotes(record.nurseNotes);
+      setNotes(record?.nurseNotes);
       setIsModalOpen(true);
       setAdd(true)
     } else if (type === 'nurse notes') {
       setViewing(record);
-      setNotes(record.nurseNotes);
+      setNotes(record?.nurseNotes);
       setNurseNotes(true)
     }
   };
-
-  console.log(combinedData, data)
 
   return (
     <div className="w-100">
@@ -130,7 +124,7 @@ function TreatmentTable({ data }) {
               <th className="center-text">Weight (Kg)</th>
               <th className="center-text">Temperature (°C)</th>
               <th className="center-text">Admin Nurse</th>
-              <th className="center-text">Admin Note</th>
+              {/* <th className="center-text">Admin Note</th> */}
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Medication/Prescription</th>
             </tr>
@@ -142,16 +136,16 @@ function TreatmentTable({ data }) {
                 <td>{row?.age}</td>
                 <td>{row?.weight}</td>
                 <td>{row?.temperature}</td>
-                <td>{row.nurseName}</td>
-                <td onClick={selectRecord(row)}>
+                <td>{row?.nurseName}</td>
+                {/* <td onClick={selectRecord(row)}>
                   <img className="hovers pointer" src="/details.png" alt="Details" />
-                </td>
+                </td> */}
                 <td style={{ maxWidth: '650px', whiteSpace: 'wrap', textAlign: 'left', paddingLeft: '12px' }}>
                   {row?.diagnosis}
                 </td>
                 <td>
                   {row?.medications?.map((med, index) => (
-                    <div key={med.id} className="m-b-10 flex flex-direction-v">
+                    <div key={med?.id} className="m-b-10 flex flex-direction-v">
                       <div className="flex">
                         <span>{index + 1}.</span>
                         <span className="m-l-20">{med ? med.name : 'No Medication'}</span>

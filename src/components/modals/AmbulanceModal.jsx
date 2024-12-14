@@ -25,13 +25,12 @@ const AmbulanceModal = ({ closeModal, setRoomData, data, getRooms }) => {
 
     const getUsers = async () => {
         let res = await get("/patients/AllPatient/2?pageIndex=1&pageSize=10000");
-        console.log(res);
         let temp = res?.data?.map((user) => ({
             name: `${user.firstName} ${user.lastName}`,
             value: user.patientId,
         }));
 
-        temp.unshift({ name: "Select Patient", value: 0 });
+        temp?.unshift({ name: "Select Patient", value: 0 });
         setUserNames(temp);
     };
 
@@ -108,7 +107,6 @@ const AmbulanceModal = ({ closeModal, setRoomData, data, getRooms }) => {
 
         try {
             let res = await axios.post(`https://edogoverp.com/clinicapi/api/assignambulance`, updatedPayload, options);
-            console.log(res);
             if (res?.data?.statusCode === 409) {
                 notification({ message: "Ambulance Already Assigned", type: "error" });
                 return;

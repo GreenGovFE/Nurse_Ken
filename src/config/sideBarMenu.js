@@ -53,11 +53,11 @@ const useNavigationItems = () => {
             href: '/finance',
             icon: <img src={finance} className="icon" alt="Finance Icon" />
         },
-        {
-            title: 'Insurance',
-            href: '/insurance',
-            icon: <img src={insurance} className="icon" alt="Insurance Icon" />
-        }
+        // {
+        //     title: 'Insurance',
+        //     href: '/insurance',
+        //     icon: <img src={insurance} className="icon" alt="Insurance Icon" />
+        // }
     ];
 
     const vitalNurseItems = [

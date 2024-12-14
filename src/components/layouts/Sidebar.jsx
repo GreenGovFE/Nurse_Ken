@@ -4,29 +4,41 @@ import { IoIosArrowBack } from "react-icons/io";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
 import EdsgLogo from "../../assets/images/SidebarLogo.png";
-import { logout } from "../../utility/auth";
 import useNavigationItems from "../../config/sideBarMenu";
 import { usePatient } from "../../contexts";
+import Cookies from "js-cookie";
 
 const Sidebar = ({ history }) => {
-  const { setPatientId, setPatientInfo, setHmoDetails, setNurseTypes, setPatientName } = usePatient();
+  const { setPatientId, setPatientInfo, setHmoDetails, setNurseTypes, setPatientName, setDiagnosis } = usePatient();
   const [hamburger, setHamburger] = useState(true);
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const sidebarRef = useRef(null);
   const navigate = useNavigate(); // Initialize useNavigate
   const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
-  const nuresRole = userInfo?.role[0]?.toLowerCase().replace(/\s+/g, '');
+  const nuresRole = userInfo ? userInfo?.role[0]?.toLowerCase().replace(/\s+/g, '') : '';
+  const homeLink = Cookies.get('homeLink')
 
   const ToSupport = () => {
     window.location.href = 'https://greenzonetechnologies.atlassian.net/servicedesk/customer/portals';
-}
+  }
+
+  const logout = async () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    Cookies.remove('patientInfo');
+
+    window.location.assign(`${homeLink}`);
+    // window.location.assign(`${homeLink}/home`);
+  };
 
   const resetPatientInfo = () => {
     setPatientInfo(null);
-    setPatientId(0);
     setHmoDetails(null);
-    setPatientName('')
-    setNurseTypes(nuresRole === 'vitalnurse' ? 'vital' : nuresRole === 'nurse' ?  'admin' : 'checkin')
+    setPatientName(null)
+    setPatientId(null)
+    setDiagnosis(null)
+    Cookies.remove('patientInfo');
+    setNurseTypes(nuresRole === 'vitalnurse' ? 'vital' : nuresRole === 'nurse' ? 'admin' : 'checkin')
   };
 
   const {
@@ -87,9 +99,9 @@ const Sidebar = ({ history }) => {
               <span className="title  m-l-20">Log Out</span>
 
             </li>
-              <div style={{ bottom: '0%', right: '30%', position: 'fixed', zIndex: '1000' }}>
-                <img onClick={ToSupport} style={{ width: '120px', height: '120px', cursor: 'pointer' }} alt='support' src="/Support.svg"></img>
-              </div>
+            <div style={{ bottom: '0%', right: '30%', position: 'fixed', zIndex: '1000' }}>
+              <img onClick={ToSupport} style={{ width: '120px', height: '120px', cursor: 'pointer' }} alt='support' src="/Support.svg"></img>
+            </div>
           </ul>
         </div>
       </nav>

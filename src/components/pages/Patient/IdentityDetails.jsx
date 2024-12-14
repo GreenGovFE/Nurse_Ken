@@ -10,14 +10,14 @@ function IdentityDetails({ hide }) {
   const [payload, setPayload] = useState({
     identityType: "",
     connectionMeans: "",
-    specifyOrthers: "",
+    specifyOrthers: "Nil",
     identificationNumber: "",
-    resisdentPermitNo: "",
-    bvn: "",
+    resisdentPermitNo: "Nil",
     maidenName: "",
   });
   const [IdentityTypes, setIdentityTypes] = useState([]);
   const [connectionMeans, setConnectionMeans] = useState([]);
+  const [showUpdateButton, setShowUpdateButton] = useState(false);
 
   useEffect(() => {
     getIdentity();
@@ -27,15 +27,6 @@ function IdentityDetails({ hide }) {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    console.log(name, value, payload);
-
-    if (name === 'bvn') {
-      if (isNaN(value) || value.length > 11) {
-        notification({ message: 'Please enter a valid BVN', type: "error" });
-        return;
-      }
-    }
-
     setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
   };
 
@@ -44,6 +35,7 @@ function IdentityDetails({ hide }) {
       ...payload,
       connectionMeans: Number(payload.connectionMeans) || '',
       identityType: Number(payload.identityType) || '',
+      specifyOrthers: payload?.specifyOrthers || "Nil",
     };
 
     const customFieldNames = {
@@ -51,14 +43,19 @@ function IdentityDetails({ hide }) {
       connectionMeans: "Connection Means",
       identificationNumber: "Identification Number",
       resisdentPermitNo: "Resident Permit Number",
-      bvn: "BVN",
       maidenName: "Maiden Name",
     };
 
     const validatePayload = (payload) => {
-      const fieldsToCheck = Object.keys(payload).filter(field => field !== '');
-      return fieldsToCheck.filter(field => payload[field] === 0 || payload[field] === '' || payload[field] === null || payload[field] === undefined);
+      return Object.keys(payload).filter(field =>
+        field !== 'bvn' &&
+        (payload[field] === 0 ||
+          payload[field] === '' ||
+          payload[field] === null ||
+          payload[field] === undefined)
+      );
     };
+
 
     const invalidFields = validatePayload(data);
 
@@ -72,10 +69,6 @@ function IdentityDetails({ hide }) {
 
       const errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
       notification({ message: errorMessage, type: "error" });
-      return;
-    }
-    if (payload.bvn.length < 11) {
-      notification({ message: 'BVN must be 11 digits', type: 'error' });
       return;
     }
 
@@ -85,7 +78,6 @@ function IdentityDetails({ hide }) {
     }
 
     let res = await post("/patients/add-patient-identity", { ...data, patientId: Number(patientId) });
-    console.log(res);
     if (res.messages === "The patient identity has been updated successfully") {
       notification({ message: res?.messages, type: "success" });
       sessionStorage.setItem("patientId", res?.patientId);
@@ -95,10 +87,13 @@ function IdentityDetails({ hide }) {
   };
 
   const updateIdentity = async () => {
+    const conMeans = findOptionValue(connectionMeans, payload?.connectionMeans) 
+    const idType = findOptionValue(IdentityTypes, payload?.identityType)
     const data = {
       ...payload,
-      connectionMeans: Number(payload.connectionMeans) || '',
-      identityType: Number(payload.identityType) || '',
+      connectionMeans: Number(conMeans) || '',
+      identityType: Number(idType) || '',
+      specifyOrthers: payload?.specifyOrthers || "Nil",
     };
 
     const customFieldNames = {
@@ -106,14 +101,19 @@ function IdentityDetails({ hide }) {
       connectionMeans: "Connection Means",
       identificationNumber: "Identification Number",
       resisdentPermitNo: "Resident Permit Number",
-      bvn: "BVN",
       maidenName: "Maiden Name",
     };
 
     const validatePayload = (payload) => {
-      const fieldsToCheck = Object.keys(payload).filter(field => field !== '');
-      return fieldsToCheck.filter(field => payload[field] === 0 || payload[field] === '' || payload[field] === null || payload[field] === undefined);
+      return Object.keys(payload).filter(field =>
+        field !== 'bvn' &&
+        (payload[field] === 0 ||
+          payload[field] === '' ||
+          payload[field] === null ||
+          payload[field] === undefined)
+      );
     };
+
 
     const invalidFields = validatePayload(data);
 
@@ -129,10 +129,6 @@ function IdentityDetails({ hide }) {
       notification({ message: errorMessage, type: "error" });
       return;
     }
-    if (payload.bvn.length < 11) {
-      notification({ message: 'BVN must be 11 digits', type: 'error' });
-      return;
-    }
 
     if (!patientId) {
       notification({ message: 'Can only add Identity details to a selected patient. Please create one or select one first.', type: 'error' });
@@ -140,8 +136,7 @@ function IdentityDetails({ hide }) {
     }
 
     let res = await put("/patients/update-patient-identity", { ...data, patientId: Number(patientId) });
-    console.log(res);
-    if (res.messages ==="The patient identity details have been updated") {
+    if (res.messages === "The patient identity details have been updated") {
       notification({ message: res?.messages, type: "success" });
       sessionStorage.setItem("patientId", res?.patientId);
     } else {
@@ -149,11 +144,19 @@ function IdentityDetails({ hide }) {
     }
   };
 
+  console.log(payload)
+
   const getIdentity = async () => {
     try {
       let res = await get(`/patients/patient-identity-byId/${Number(patientId)}`);
       if (res) {
         setPayload(res);
+        const { identityType, connectionMeans, identificationNumber, residentPermitNo, maidenName } = res;
+        if (identityType || connectionMeans || identificationNumber || residentPermitNo || maidenName) {
+          setShowUpdateButton(true);
+        } else {
+          setShowUpdateButton(false);
+        }
       }
     } catch (error) {
       console.error('Error fetching payment history:', error);
@@ -196,17 +199,14 @@ function IdentityDetails({ hide }) {
     if (value == 'NIN') {
       value = 'National Identification Number '
     }
-    console.log(value)
     const formattedValue = value.replace(/\s+/g, '').toLowerCase();
     const option = options.find(opt => opt.name.replace(/\s+/g, '').toLowerCase() === formattedValue);
     return option ? option.value : "";
   };
 
-  console.log(connectionMeans)
-
 
   return (
-    <div className="w-50">
+    <div className="m-l-10 col-7">
       <div className="m-t-40"></div>
       <div>
         {hide ?
@@ -228,10 +228,9 @@ function IdentityDetails({ hide }) {
           />
         }
       </div>
-      <TagInputs onChange={handleChange} disabled={hide} value={payload?.specifyOrthers || ''} name="specifyOrthers" label="Specify Others" />
+      {/* <TagInputs onChange={handleChange} disabled={hide} value={payload?.specifyOrthers || ''} name="specifyOrthers" label="Specify Others" /> */}
       <TagInputs onChange={handleChange} disabled={hide} value={payload?.identificationNumber || ''} name="identificationNumber" label="Identification Number" />
-      <TagInputs onChange={handleChange} disabled={hide} value={payload?.resisdentPermitNo || ''} name="resisdentPermitNo" label="Resident Permit Number" />
-      <TagInputs onChange={handleChange} disabled={hide} value={payload?.bvn || payload?.phone} name="bvn" label="BVN" />
+      {/* <TagInputs onChange={handleChange} disabled={hide} value={payload?.resisdentPermitNo || ''} name="resisdentPermitNo" label="Resident Permit Number" /> */}
       <TagInputs onChange={handleChange} disabled={hide} value={payload?.maidenName || ''} name="maidenName" label="Maiden Name" />
       <div>
         {hide ?
@@ -256,8 +255,16 @@ function IdentityDetails({ hide }) {
 
       {hide !== true &&
         <div>
-          <button onClick={submitPayload} className="submit-btn  m-t-20 w-100" >Submit</button>
-          <button onClick={updateIdentity} className="save-drafts  m-t-20 w-100" >Update</button>
+          <>
+            {!showUpdateButton &&
+              <button onClick={submitPayload} className="submit-btn  m-t-20 w-100" >Submit</button>
+            }
+          </>
+          <>
+            {showUpdateButton &&
+              <button onClick={updateIdentity} className="save-drafts  m-t-20 w-100" >Update</button>
+            }
+          </>
         </div>
       }
     </div>

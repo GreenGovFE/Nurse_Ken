@@ -12,15 +12,10 @@ import PatientsInsurance from '../components/pages/Pinsurance';
 import ReferredPatients from '../components/pages/referrals';
 import AddPatients from '../components/pages/AddPatients';
 import { useNavigate } from "react-router-dom";
-import { AiOutlinePlus } from 'react-icons/ai';
-import Personal from '../components/pages/Patient/Personal';
-import FinanceDetails from '../components/pages/Patient/FinanceDetails';
 import PatientHMOetails from '../components/pages/PatientHmoDetails';
 
 
 export default () => {
-
-    let navigate = useNavigate()
 
     return (
         <Routes>

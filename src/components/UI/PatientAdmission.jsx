@@ -15,7 +15,6 @@ import {
 } from "recharts";
 
 function PatientAdmission({PatientAdmission}) {
-  console.log(PatientAdmission)
   const dist = PatientAdmission?.map((item) => {
     return {
       name: item?.time,

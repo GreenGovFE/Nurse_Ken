@@ -18,7 +18,6 @@ function LabsTable({ data, currentPage, itemsPerPage }) {
   };
 
   const selectRecord = (record) => () => {
-    console.log(record);
     setViewing(record);
     setIsModalOpen(true);
   };

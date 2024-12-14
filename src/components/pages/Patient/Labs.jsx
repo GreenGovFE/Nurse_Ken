@@ -16,7 +16,6 @@ function Labs() {
   const getLabReports = async () => {
     try {
       let res = await get(`/patients/${patientId}/lab_reports`);
-      console.log(res);
       setLabReports(res?.data);
     } catch (error) {
       console.error('Error fetching lab reports:', error);

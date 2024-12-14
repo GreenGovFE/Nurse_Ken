@@ -10,6 +10,7 @@ import { PatientProvider } from './contexts';
 import PageLayout from './components/layouts/PageLayout';
 import { Toaster } from 'react-hot-toast';
 import { BedProvider } from './contexts/bedContext';
+import Connect from './components/home/connect';
 
 const App = () => {
   const navigate = useNavigate();
@@ -102,8 +103,9 @@ const App = () => {
       <BedProvider>
         <div>
           <Routes>
-            <Route path="/" element={<Homepage />} />
+            <Route path="/" element={<Connect />} />
             <Route path="*" element={<PageLayout />} />
+            <Route render={() => <h1>Error 404. Page not found.</h1>} />
           </Routes>
           {warningDisplayed && (
             <div style={toastStyle}>

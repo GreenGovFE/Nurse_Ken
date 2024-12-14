@@ -3,7 +3,7 @@ import React from "react";
 
 const Footer = () => (
 
-  <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px' }}>
+  <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', flexWrap: "wrap" }}>
     <div className="footer-inner-left flex flex-v-center space-around" style={{ display: 'flex', alignItems: 'center' }}>
       <p style={{ margin: '0' }}>
         <a href="https://dms.greenwayhealth.com/my-health-record/tos/terms-of-service.htm" style={{ marginLeft: '10px' }}>Terms of Service</a>  |

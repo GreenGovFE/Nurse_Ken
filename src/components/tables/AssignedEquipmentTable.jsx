@@ -55,7 +55,6 @@ function EquipmentTableAssigned({ data }) {
 
         try {
             let res = await axios.get(`https://edogoverp.com/clinicapi/api/assignequipmentpatient/list/${page}/10`, options);
-            console.log(res);
             setEquipments(res?.data?.resultList || []);
             setTablePages(res?.data?.totalPages)
         } catch (error) {
@@ -81,7 +80,6 @@ function EquipmentTableAssigned({ data }) {
 
         try {
             let res = await axios.put(` https://edogoverp.com/clinicapi/api/assignequipmentpatient/unassign-equipment-patient/${id}`, options);
-            console.log(res);
             if (res?.statusCode === 409) {
                 notification({ message: "Equipment Already Assigned", type: "error" });
                 return;

@@ -135,3 +135,32 @@ export function timeAgo(dateTime) {
     return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
   }
 }
+
+export  const checkIfAppointmentPassed = (appointmentId , Appointments) => {
+  const selectedAppointment = Appointments?.find(
+    (item) => item.value === parseFloat(appointmentId)
+  );
+
+  if (!selectedAppointment || !selectedAppointment.name) return;
+  const appointmentDateString = selectedAppointment.name.split(" at ")[0];
+  const appointmentTimeString = selectedAppointment.name.split(" at ")[1].split(" with ")[0];
+
+  // Combine date and time into a single string
+  const appointmentDateTimeString = `${appointmentDateString} ${appointmentTimeString}`;
+
+  // Parse the combined string into a Date object
+  const appointmentDateTime = new Date(appointmentDateTimeString);
+
+  // Add 30 minutes to the appointment time
+  const updatedAppointmentTime = new Date(appointmentDateTime.getTime() + 30 * 60000);
+
+  // Get the current time
+  const currentDateTime = new Date();
+
+  // Check if the current time is past the updated appointment time (+30 mins)
+  if (currentDateTime > updatedAppointmentTime) {
+    return true; // Appointment has passed, including the 30-minute buffer
+  }
+
+  return false; 
+};

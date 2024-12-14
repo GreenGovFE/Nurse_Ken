@@ -17,7 +17,6 @@ function VisitsTable({ data }) {
 
 
   const selectRecord = (record) => () => {
-    console.log(record);
     setViewing(record);
     setIsModalOpen(true);
   };
@@ -80,9 +79,11 @@ function VisitsTable({ data }) {
               <th className="center-text">Date</th>
               <th className="center-text">Blood Pressure (mmHg)</th>
               <th className="center-text">Weight (Kg)</th>
-              <th  className="center-text">Temp</th>
-              <th  className="center-text">Height</th>
-              <th  className="center-text">Heart</th>
+              <th  className="center-text">Temp (°C)</th>
+              <th  className="center-text">Height (cm)</th>
+              <th  className="center-text">Heart (bpm)</th>
+              <th  className="center-text">Oxygen Saturation (SpO₂) </th>
+              <th  className="center-text">Blood sugar</th>
               <th  className="center-text">Resp</th>
               <th className="center-text">Admin Nurse</th>
               <th className="center-text"></th>
@@ -91,15 +92,17 @@ function VisitsTable({ data }) {
 
           <tbody className="white-bg view-det-pane">
             {Array.isArray(data) && data?.map((row) => (
-              <tr key={row.id}>
-                <td style={{ minWidth: '100px' }}>{formatDate(row.dateOfVisit)}</td>
-                <td>{row.bloodPressure}</td>
-                <td>{row.weight}</td>
-                <td>{row.temperature}</td>
-                <td>{row.height}</td>
-                <td>{row.heartPulse}</td>
-                <td>{row.respiratory}</td>
-                <td>{(row.vitalNurseName)}</td>
+              <tr key={row?.id}>
+                <td style={{ minWidth: '100px' }}>{formatDate(row?.dateOfVisit)}</td>
+                <td>{row?.bloodPressure}</td>
+                <td>{row?.weight}</td>
+                <td>{row?.temperature}</td>
+                <td>{row?.height}</td>
+                <td>{row?.heartPulse}</td>
+                <td>{row?.oxygenSaturation}</td>
+                <td>{row?.bloodSugar}</td>
+                <td>{row?.respiratory}</td>
+                <td>{(row?.vitalNurseName)}</td>
                 <td onClick={selectRecord(row)}><img className="hovers pointer" src="/details.png" /></td>
               </tr>
 
