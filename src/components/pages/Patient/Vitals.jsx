@@ -10,6 +10,7 @@ import Paginate from "../../UI/paginate";
 import { checkIfAppointmentPassed } from "../../../utility/general";
 import UploadButton from "../../../Input/UploadButton";
 import { RiDeleteBinLine } from "react-icons/ri";
+import EDMSFiles from "../../UI/EDMSFiles";
 
 function Vitals({ setSelectedTab }) {
   const { patientId, nurseTypes } = usePatient();
@@ -41,6 +42,7 @@ function Vitals({ setSelectedTab }) {
   const [loading, setLoading] = useState(true);
   const [Appointments, setAppointments] = useState([]);
   const [viewing, setViewing] = useState(false);
+  const [selectedMfiles, setSelectedMfiles] = useState([]);
   const [add, setAdd] = useState(false)
   const [appointmentPassed, setAppointmentPassed] = useState(false);
 
@@ -185,6 +187,18 @@ function Vitals({ setSelectedTab }) {
 
     const dateTimeOfVisit = `${payload.dateOfVisit} ${timeString}`;
 
+    const vitalDocs = [
+      ...(documentArray?.map((doc) => ({
+        docName: doc?.name,
+        docPath: doc?.path,
+      })) || []),
+      {
+        docName: selectedMfiles?.fileName,
+        docPath: selectedMfiles?.filePath,
+      }
+    ];
+    
+
 
     try {
       let res = await post("/patients/AddVitalsRecord", {
@@ -196,10 +210,7 @@ function Vitals({ setSelectedTab }) {
         doctorId: Number(payload?.doctorId),
         careType: 2,
         VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
-        vitalDocuments: documentArray?.map((doc) => ({
-          docName: doc?.name,
-          docPath: doc?.path,
-        })),
+        vitalDocuments:vitalDocs,
       });
 
       if (res.message === "The Vital record was added successfully") {
@@ -379,6 +390,12 @@ function Vitals({ setSelectedTab }) {
                 <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
               </div>
             ))}
+          </div>
+          <div>
+              <EDMSFiles
+                selectedFile={selectedMfiles}
+                setSelectedFile={setSelectedMfiles}
+              />
           </div>
           <div>
             <TextArea

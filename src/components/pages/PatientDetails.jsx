@@ -186,12 +186,12 @@ function PatientDetails() {
                 Labs
               </div>
 
-              <div
+              {/* <div
                 className={`tab-item ${selectedTab === "financeHmo" ? "active" : ""}`}
                 onClick={() => setSelectedTab("financeHmo")}
               >
                 Hmo
-              </div>
+              </div> */}
             </>
           ) : (
             <>
@@ -221,12 +221,12 @@ function PatientDetails() {
               >
                 Appointment/Admission
               </div> */}
-              <div
+              {/* <div
                 className={`tab-item ${selectedTab === "financeHmo" ? "active" : ""}`}
                 onClick={() => setSelectedTab("financeHmo")}
               >
                 Hmo
-              </div>
+              </div> */}
             </>
           )}
         </>

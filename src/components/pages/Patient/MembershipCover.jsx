@@ -6,6 +6,8 @@ import { usePatient } from "../../../contexts";
 import UploadButton from "../../../Input/UploadButton";
 import { RiDeleteBinLine } from "react-icons/ri";
 import axios from "axios";
+import EDMSFiles from "../../UI/EDMSFiles";
+
 
 function MembershipCover({ setSelectedTab, hide }) {
   const { patientId, patientName, hmoId, patientInfo, hmoDetails } = usePatient();
@@ -19,6 +21,8 @@ function MembershipCover({ setSelectedTab, hide }) {
   const [categories, setCategories] = useState([]);
   const [Package, setPackage] = useState({});
   const [packagesData, setPackagesData] = useState([]);
+  const [selectedMfiles, setSelectedMfiles] = useState([]);
+
 
   useEffect(() => {
 
@@ -180,7 +184,7 @@ function MembershipCover({ setSelectedTab, hide }) {
       ...payload,
       patientId: Number(patientId),
       hmoProviderId: hmoDetails?.id ? hmoDetails?.id : 0,
-      patientHMOCardDocumentUrl: documentArray[0]?.path,
+      patientHMOCardDocumentUrl: documentArray[0]?.path || selectedMfiles?.filePath,
       hmoPackageId: packageId?.id ? Number(packageId.id) : 0,
       membershipValidity: payload?.membershipValidity ? payload?.membershipValidity : "",
       patientHMOId: payload?.patientHMOId ? Number(payload?.patientHMOId) : 0
@@ -337,6 +341,12 @@ function MembershipCover({ setSelectedTab, hide }) {
                     </div>
                   ))}
                 </div>
+                <div>
+                  <EDMSFiles
+                    selectedFile={selectedMfiles}
+                    setSelectedFile={setSelectedMfiles}
+                  />
+                </div>
               </div>
           }
 
@@ -375,7 +385,7 @@ function MembershipCover({ setSelectedTab, hide }) {
         <div>
           {packagesData.map((item, hmoIndex) => (
             <>
-            
+
               <div key={item.id || hmoIndex} className="w-100 none-flex-item m-t-40">
                 <h3 className="m-b-10">Provider: {item?.hmoProviderName} | {item?.hmoPackageName}</h3>
                 <table className="bordered-table">

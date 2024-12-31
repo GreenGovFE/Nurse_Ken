@@ -7,6 +7,7 @@ import ImmunizationTable from "../../tables/immunizationTable";
 import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
 import { usePatient } from "../../../contexts";
+import EDMSFiles from "../../UI/EDMSFiles";
 
 function Immunization({ setSelectedTab }) {
   const { patientId } = usePatient();
@@ -14,7 +15,7 @@ function Immunization({ setSelectedTab }) {
   const [documentArray, setDocumentArray] = useState([]);
   const [payload, setPayload] = useState({
     vaccine: null,
-    vaccineBrand:null,
+    vaccineBrand: null,
     batchId: null,
     quantity: null,
     age: null,
@@ -28,6 +29,8 @@ function Immunization({ setSelectedTab }) {
   const [docNames, setDocNames] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedMfiles, setSelectedMfiles] = useState([]);
+
 
 
 
@@ -57,7 +60,7 @@ function Immunization({ setSelectedTab }) {
   };
 
 
- 
+
   const deleteDoc = (doc) => {
     let newArr = documentArray.filter((id) => id.name !== doc);
     setDocumentArray(newArr);
@@ -177,8 +180,8 @@ function Immunization({ setSelectedTab }) {
         temperature: parseInt(payload?.temperature),
         quantity: parseInt(payload?.quantity),
         dateGiven: payload?.dateGiven,
-        docName: documentArray[0]?.name,
-        docPath: documentArray[0]?.path,
+        docName: documentArray[0]?.name || selectedMfiles?.fileName,
+        docPath: documentArray[0]?.path || selectedMfiles?.filePath,
         patientId: patientID,
       });
 
@@ -187,7 +190,7 @@ function Immunization({ setSelectedTab }) {
         getImmunization();
         setPayload({
           vaccine: null,
-          vaccineBrand:null,
+          vaccineBrand: null,
           batchId: null,
           quantity: null,
           age: null,
@@ -265,7 +268,7 @@ function Immunization({ setSelectedTab }) {
             </div>
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''}  dateRestriction = {'past'} label="Date Given" type="date" error={errors.dateGiven} />
+            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''} dateRestriction={'past'} label="Date Given" type="date" error={errors.dateGiven} />
           </div>
           <div>
             <TextArea
@@ -279,7 +282,7 @@ function Immunization({ setSelectedTab }) {
           </div>
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">
-              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray}  />
+              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray} />
             </div>
 
             {documentArray?.map((item, index) => (
@@ -290,6 +293,12 @@ function Immunization({ setSelectedTab }) {
                 <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
               </div>
             ))}
+          </div>
+          <div>
+            <EDMSFiles
+              selectedFile={selectedMfiles}
+              setSelectedFile={setSelectedMfiles}
+            />
           </div>
           <div className="w-100 ">
             <button onClick={submitPayload} className="submit-btn w-100 m-t-20">
