@@ -6,28 +6,31 @@ import ProfilePix from "../../../assets/images/profile-pix copy.jpg";
 import UploadPic from "../../UI/UploadPic";
 import { usePatient } from "../../../contexts";
 import axios from "axios";
+import Spinner from "../../UI/Spinner";
 
 function Personal({ setSelectedTab, hide }) {
   const { patientId, patientInfo, setPatientId, setPatientInfo } = usePatient();
   const [payload, setPayload] = useState({
-      firstName: patientInfo?.firstName || null,
-      lastName: patientInfo?.lastName || null,
-      gender: patientInfo?.gender || null,
-      dateOfBirth:patientInfo?.dateOfBirth || "",
-      email: patientInfo?.email ||  "",
-      phoneNumber: patientInfo?.phoneNumber || null,
-      stateOfOrigin: patientInfo?.stateOfOrigin || null,
-      lga: patientInfo?.lga || null,
-      placeOfBirth: patientInfo?.placeOfBirth || null,
-      maritalStatus: patientInfo?.maritalStatus || null,
-      nationality: 'Nigerian',
-      clinicId: 0,
-      pictureUrl: patientInfo?.pictureUrl || null    
+    firstName: "",
+    lastName: "",
+    gender: "",
+    dateOfBirth: "",
+    email: "",
+    phoneNumber: "",
+    stateOfOrigin: "",
+    lga: "",
+    placeOfBirth: "",
+    maritalStatus: "",
+    nationality: 'Nigerian',
+    clinicId: 0,
+    pictureUrl: ""
   });
   const [pictureUrl, setPictureUrl] = useState(null);
   const [fileName, setFilename] = useState('');
   const [states, setStates] = useState([]);
   const [nationality, setNationality] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loader , setLoader] = useState(false);
 
   const gender = [
     { value: "choose", name: "Choose Gender" },
@@ -47,6 +50,39 @@ function Personal({ setSelectedTab, hide }) {
   ];
 
   useEffect(() => {
+    if (patientInfo) {
+      setPayload({
+        firstName: patientInfo?.firstName || "",
+        lastName: patientInfo?.lastName || "",
+        gender: patientInfo?.gender || "",
+        dateOfBirth: patientInfo?.dateOfBirth || "",
+        email: patientInfo?.email || "",
+        phoneNumber: patientInfo?.phoneNumber || "",
+        stateOfOrigin: patientInfo?.stateOfOrigin || "",
+        lga: patientInfo?.lga || "",
+        placeOfBirth: patientInfo?.placeOfBirth || "",
+        maritalStatus: patientInfo?.maritalStatus || "",
+        nationality: patientInfo?.nationality || 'Nigerian',
+        clinicId: patientInfo?.clinicId || 0,
+        pictureUrl: patientInfo?.pictureUrl || ""
+      });
+    } else {
+      setPayload({
+        firstName: "",
+        lastName: "",
+        gender: "",
+        dateOfBirth: "",
+        email: "",
+        phoneNumber: "",
+        stateOfOrigin: "",
+        lga: "",
+        placeOfBirth: "",
+        maritalStatus: "",
+        nationality: 'Nigerian',
+        clinicId: 0,
+        pictureUrl: ""
+      });
+    }
     fetchNationality();
     fetchStates();
   }, [patientInfo]);
@@ -73,14 +109,14 @@ function Personal({ setSelectedTab, hide }) {
   };
 
   const requiredFields = {
-    email: "Email",
-    gender: "Gender",
+    // email: "Email",
+    // gender: "Gender",
     lastName: "Last Name",
     firstName: "First Name",
-    nationality: "Nationality",
+    // nationality: "Nationality",
     phoneNumber: "Phone Number",
     dateOfBirth: 'Date Of Birth',
-    maritalStatus: "Marital Status"
+    // maritalStatus: "Marital Status"
   };
 
   const checkMissingFields = (payload) => {
@@ -89,35 +125,37 @@ function Personal({ setSelectedTab, hide }) {
   };
 
   const submitPayload = async () => {
-    const missingFields = checkMissingFields(payload);
-    if (missingFields.length > 0) {
-      const missingFieldLabels = missingFields.map(field => requiredFields[field]);
-      notification({ message: `Missing required fields: ${missingFieldLabels.join(", ")}`, type: "error" });
-      return;
-    }
+    // const missingFields = checkMissingFields(payload);
+    // if (missingFields.length > 0) {
+    //   const missingFieldLabels = missingFields.map(field => requiredFields[field]);
+    //   notification({ message: `Missing required fields: ${missingFieldLabels.join(", ")}`, type: "error" });
+    //   return;
+    // }
 
     if (patientInfo) {
       setSelectedTab("contactDetails");
       return;
     }
 
-    if (!payload.phoneNumber || payload.phoneNumber.length !== 11 || isNaN(payload.phoneNumber)) {
-      notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
-      return;
-    }
+    // if (!payload.phoneNumber || payload.phoneNumber.length !== 11 || isNaN(payload.phoneNumber)) {
+    //   notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
+    //   return;
+    // }
 
-    if (!isValidEmail(payload.email)) {
-      notification({ message: 'Please enter valid email', type: "error" });
-      return;
-    }
-
+    // if (!isValidEmail(payload.email)) {
+    //   notification({ message: 'Please enter valid email', type: "error" });
+    //   return;
+    // }
+    setLoader(true);
     try {
       let res = await post("/patients/AddPatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl });
-      if (res.patientId) {
+      if (res?.patientId) {
         notification({ message: res?.messages || 'Patient added successfully', type: "success" });
         setSelectedTab("contactDetails");
         setPatientId(res.patientId);
         setPatientInfo(payload)
+      } else {
+        throw new Error('Unexpected response format');
       }
     } catch (error) {
       if (error.status && error.status === 409) {
@@ -125,6 +163,8 @@ function Personal({ setSelectedTab, hide }) {
       } else {
         notification({ message: 'An error occurred while adding the patient', type: "error" });
       }
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -134,7 +174,7 @@ function Personal({ setSelectedTab, hide }) {
       setPayload(res);
       setPatientInfo(res);
     } catch (error) {
-    }
+          }
   };
 
   const fetchStates = async () => {
@@ -152,7 +192,7 @@ function Personal({ setSelectedTab, hide }) {
     };
 
     try {
-      let res = await axios.get(`https://edogoverp.com/clinicapi/api/profile/state/list/1/100`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/profile/state/list/1/100`, options);
       let tempDoc = res?.data?.resultList.map((doc) => {
         return { name: doc?.name, value: doc?.name };
       });
@@ -160,7 +200,7 @@ function Personal({ setSelectedTab, hide }) {
       tempDoc?.unshift({ name: "Select State", value: "" });
       setStates(tempDoc);
     } catch (error) {
-    }
+          }
   };
 
   function isValidEmail(email) {
@@ -183,7 +223,7 @@ function Personal({ setSelectedTab, hide }) {
     };
 
     try {
-      let res = await axios.get(`https://edogoverp.com/clinicapi/api/profile/nationality/list/1/100`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/profile/nationality/list/1/100`, options);
       let tempDoc = res?.data?.resultList.map((doc) => {
         return { name: doc?.name, value: doc?.name };
       });
@@ -208,13 +248,13 @@ function Personal({ setSelectedTab, hide }) {
       return;
     }
 
-    if (!isValidEmail(payload.email)) {
-      notification({ message: 'Please enter valid email', type: "error" });
-      return;
-    }
-
+    // if (!isValidEmail(payload.email)) {
+    //   notification({ message: 'Please enter valid email', type: "error" });
+    //   return;
+    // }
+    setLoader(true);
     try {
-      let res = await post("/patients/UpdatePatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl });
+      let res = await post("/patients/UpdatePatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl, patientRef: patientInfo?.patientRef });
       if (res.patientId) {
         notification({ message: res?.messages || 'Patient updated successfully', type: "success" });
         setPatientId(res.patientId);
@@ -223,6 +263,8 @@ function Personal({ setSelectedTab, hide }) {
       }
     } catch (error) {
       notification({ message: 'An error occurred while updating patient', type: "error" });
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -247,7 +289,7 @@ function Personal({ setSelectedTab, hide }) {
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.firstName || ''} name="firstName" label="First Name*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.lastName || ''} name="lastName" label="Last Name*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.gender || ''} name="gender" type="select" label="Gender*" options={gender} />
-          <TagInputs onChange={handleChange} disabled={!hide} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth"  dateRestriction = {'past'} type="date" label="Date Of Birth*" />
+          <TagInputs onChange={handleChange} disabled={!hide} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth" dateRestriction={'past'} type="date" label="Date Of Birth*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.email || ''} name="email" label="Email*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.nationality || ''} name="nationality" type="select" label="Nationality*" options={nationality} />
@@ -257,19 +299,37 @@ function Personal({ setSelectedTab, hide }) {
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.maritalStatus || ''} name="maritalStatus" type="select" label="Marital Status*" options={maritalStatus} />
         </div>
         <div className="col-4">
-          <p className="m-b-20">Profile Picture</p>
-          <div className="m-t-20" style={{ width: "180px", height: "180px", overflow: "hidden", position: "relative" }}>
-            <img
-              style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", maxWidth: "100%", maxHeight: "100%" }}
-              onError={addDefaultSrc}
-              src={payload?.pictureUrl || pictureUrl || ProfilePix}
-              alt={fileName}
-            />
-          </div>
+          <>
+            {
+              loading ? (
+                <Spinner />
+              ) : (
+                <>
+                  <p className="m-b-20">Profile Picture</p>
+                  <div className="m-t-20" style={{ width: "180px", height: "180px", overflow: "hidden", position: "relative" }}>
+                    <img
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                      }}
+                      onError={addDefaultSrc}
+                      src={payload?.pictureUrl || pictureUrl || ProfilePix}
+                      alt={fileName || "Profile Picture"}
+                    />
+                  </div>
+                </>
+              )
+            }
+          </>
+
           <div>
             <div className="flex space-between m-t-20 m-b-10">
               <div className="flex-col no-margin">
-                <UploadPic handlePicChange={setPictureUrl} name={setFilename} />
+                <UploadPic setLoading={setLoading} handlePicChange={setPictureUrl} name={setFilename} />
               </div>
             </div>
           </div>
@@ -278,9 +338,9 @@ function Personal({ setSelectedTab, hide }) {
       <div>
         {hide === true && (
           <>
-            <button onClick={submitPayload} className="submit-btn m-t-20 col-7">Continue</button>
-            {patientId !== 0 &&
-              <button onClick={updatePatient} className="save-drafts col-7">Update</button>
+            <button onClick={submitPayload} disabled={loader} className="submit-btn m-t-20 col-7">Continue</button>
+            {patientId !== 0 && patientId !== (null) &&
+              <button onClick={updatePatient} disabled={loader} className="save-drafts col-7">Update</button>
             }
           </>
         )}

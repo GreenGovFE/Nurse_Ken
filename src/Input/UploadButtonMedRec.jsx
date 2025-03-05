@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { HiOutlineUpload } from 'react-icons/hi';
-import { FileUpload } from '../utility/fetches';
+import { FileUpload } from '../utility/fetches_medical';
 import { ClipLoader } from 'react-spinners';
+import notification from '../utility/notification';
 
 const UploadButton = (props) => {
   const [files, setFiles] = React.useState([]);
@@ -18,8 +19,6 @@ const UploadButton = (props) => {
       })
     ));
   };
-
-  props.setDocNames(filenames);
 
   const onChange = async (e) => {
     const supportedTypes = ['jpeg', 'png', 'gif', 'pdf', 'msword', 'ppt', 'pptx', 'vnd.ms-excel', 'xls', 'xlsx', 'vnd.openxmlformats-officedocument.wordprocessingml.document', 'doc', 'txt', 'Text Document', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'tiff', 'tif'];
@@ -50,7 +49,7 @@ const UploadButton = (props) => {
 
         try {
           setLoading(true); // Set loading to true
-          const response = await FileUpload(data, checkResponse);
+          const response = await FileUpload(data, checkResponse, props?.patientRef);
           if (response?.code === 1) {
             const updatedImages = imagess.map((image) =>
               image.docTitle === file.name ? { ...image, docPath: response.doclink } : image
@@ -69,6 +68,10 @@ const UploadButton = (props) => {
                 [props?.stateName2]: file.name,
               });
             }
+
+            notification({ message: 'Uploaded Successfully', type: "success" });
+
+
           } else {
             // Handle upload error
           }
@@ -76,6 +79,7 @@ const UploadButton = (props) => {
           console.error('Error uploading files:', error);
           // Handle error
         } finally {
+          props?.fetch(); // Toggle the reset state
           setLoading(false); // Set loading to false after completion
         }
       } else {

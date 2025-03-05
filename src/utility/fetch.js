@@ -47,7 +47,6 @@ export const del = (endpoint, body, auth = true) => fetchBackend(endpoint, 'DELE
 
 function checkHttpStatus(response) {
 
-  console.log(response)
   if (response && response.ok) {
     return response;
   }

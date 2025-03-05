@@ -106,7 +106,7 @@ const AmbulanceModal = ({ closeModal, setRoomData, data, getRooms }) => {
         };
 
         try {
-            let res = await axios.post(`https://edogoverp.com/clinicapi/api/assignambulance`, updatedPayload, options);
+            let res = await axios.post(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/assignambulance`, updatedPayload, options);
             if (res?.data?.statusCode === 409) {
                 notification({ message: "Ambulance Already Assigned", type: "error" });
                 return;

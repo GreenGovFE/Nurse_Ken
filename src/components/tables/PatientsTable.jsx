@@ -5,7 +5,7 @@ import SendForVital from "../modals/SendForVital";
 import Cookies from "js-cookie";
 
 function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
-  const { setPatientId, setPatientName, setPatientPage, setHmoId, setPatientInfo, nurseTypes, setHmoDetails } = usePatient();
+  const { setPatientId, setPatientName, setPatientPage, setHmoId, setPatientInfo, nurseRoles, setHmoDetails } = usePatient();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   let navigate = useNavigate();
@@ -18,13 +18,13 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
 
 
   const selectRecord = (id, data) => {
-    console.log(id)
     setIsModalOpen(true);
     setPatientName(`${data.firstName} ${data.lastName}`);
+    setPatientInfo(data);
     setPatientId(id);
     Cookies.set('patientId', id);
-    Cookies.set('patientInfo', data);
-    Cookies.set('patientName', `${data.firstName} ${data.lastName}` )
+    Cookies.set('patientInfo', JSON.stringify(data));
+    Cookies.set('patientName', `${data.firstName} ${data.lastName}`);
   };
 
 
@@ -33,10 +33,10 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
     setPatientName(`${data?.firstName} ${data?.lastName}`);
     setHmoId(data?.hmoId);
     setPatientInfo(data);
-    setHmoDetails(data)
+    setHmoDetails(data);
     Cookies.set('patientId', id);
-    Cookies.set('patientInfo', data);
-    Cookies.set('patientName', `${data.firstName} ${data.lastName}`)
+    Cookies.set('patientInfo', JSON.stringify(data));
+    Cookies.set('patientName', `${data.firstName} ${data.lastName}`);
     navigate("/patient-details");
   };
 
@@ -54,7 +54,7 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
               <th className="center-text">Modified By</th>
               <th className="center-text">Created On</th>
               <>
-                {nurseTypes == 'checkin' &&
+                {nurseRoles?.includes('checkin') &&
                   <th className="center-text"></th>
                 }
               </>
@@ -77,7 +77,7 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
                   <td>{row?.modifiedByName}</td>
                   <td>{new Date(row?.createdAt).toLocaleDateString()}</td>
                   <>
-                    {nurseTypes == 'checkin' &&
+                    {nurseRoles?.includes('checkin') &&
                       <td><button onClick={(e) => { e.stopPropagation(); selectRecord(row?.patientId || row?.id, row) }} className="submit-btn">Send for vitals</button></td>
                     }
                   </>

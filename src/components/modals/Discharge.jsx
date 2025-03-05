@@ -4,6 +4,7 @@ import notification from "../../utility/notification";
 import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill } from "react-icons/ri";
 import { usePatient } from "../../contexts";
+import SpeechToTextButton from "../UI/SpeechToTextButton";
 
 function Discharge({ closeModal, appointment, fetch, currentPage }) {
     const [payload, setPayload] = useState({});
@@ -53,6 +54,10 @@ function Discharge({ closeModal, appointment, fetch, currentPage }) {
         setPayload(prevPayload => ({ ...prevPayload, [name]: event?.target?.value }));
     };
 
+    const handleTranscript = (transcript) => {
+        setPayload(prevPayload => ({ ...prevPayload, dischargeNote: prevPayload.dischargeNote ? prevPayload.dischargeNote + ' ' + transcript : transcript }));
+    };
+
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={() => closeModal(false)} />
@@ -66,7 +71,8 @@ function Discharge({ closeModal, appointment, fetch, currentPage }) {
 
                 <div className="">
 
-                    <TagInputs label="Discharge Note" name="dischargeNote" onChange={(e) => handleChange(e, 'dischargeNote')} type='textArea' />
+                    <TagInputs label="Discharge Note" name="dischargeNote" value = {payload?.dischargeNote} onChange={(e) => handleChange(e, 'dischargeNote')} type='textArea' />
+                    <SpeechToTextButton onTranscript={handleTranscript} />
                 </div>
                 <button className="submit-btn m-t-20 w-100" disabled={Loading} onClick={discharge}>Discharge</button>
 

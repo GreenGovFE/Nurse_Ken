@@ -12,7 +12,7 @@ const LabrequestModal = ({ closeModal, record }) => {
                 return;
             }
 
-            const url = `https://edogoverp.com/labapi/api/document/download-document/${docName}`;
+            const url = `${process.env.REACT_APP_BASE_URL}/labapi/api/document/download-document/${docName}`;
 
             const options = {
                 method: 'GET',

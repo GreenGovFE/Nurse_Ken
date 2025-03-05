@@ -49,7 +49,7 @@ function AssignedBed({ data, fetchBedList, }) {
                 Authorization: `Bearer ${token}`,
             },
         };
-        const url = `https://edogoverp.com/clinicapi/api/bed/unassign-bed/${bedId}`;
+        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/unassign-bed/${bedId}`;
 
         try {
             let res = await axios.put(url, null, options);
@@ -86,7 +86,7 @@ function AssignedBed({ data, fetchBedList, }) {
         };
 
         try {
-            let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
+            let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
             setBeds(res?.data?.resultList || []);
             setBedTablePages(res?.data?.totalPages)
         } catch (error) {

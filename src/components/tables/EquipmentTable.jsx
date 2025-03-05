@@ -40,7 +40,7 @@ function EquipmentTable({ data, }) {
         };
 
         try {
-            let res = await axios.get(`https://edogoverp.com/clinicapi/api/equipment/list/${page}/10`, options);
+            let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/equipment/list/${page}/10`, options);
             setEquipments(res?.data?.resultList || []);
             setTablePages(res?.data?.totalPages); // Adjusted to access data
         } catch (error) {

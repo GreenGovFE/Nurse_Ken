@@ -144,10 +144,10 @@ function Appointment({ data, setCurrent }) {
           <tbody className="white-bg view-det-pane">
             {combinedData?.map((row) => (
               <tr key={row?.id}>
-                <td>{new Date(row?.appointDate).toLocaleDateString()}</td>
+                <td>{new Date(row?.appointDate)?.toLocaleDateString()}</td>
                 <td>
                   {(() => {
-                    const [hours, minutes] = row?.appointTime.split(':');
+                    const [hours, minutes] = row?.appointTime?.split(':');
                     const date = new Date();
                     date.setHours(hours, minutes);
                     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });

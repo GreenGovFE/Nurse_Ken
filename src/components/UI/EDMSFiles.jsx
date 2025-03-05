@@ -21,7 +21,7 @@ const EDMSFiles = ({ selectedFile, setSelectedFile }) => {
 
         try {
             const response = axios.get(
-                `https://edogoverp.com/edmsdepartmentapi/api/file/paginated/user/${userId}?PageNumber=1&PageSize=100&filter=${query}`
+                `${process.env.REACT_APP_BASE_URL}/edmsdepartmentapi/api/file/paginated/user/${userId}?PageNumber=1&PageSize=100&filter=${query}`
             ).then((response) => {
                 const items = response?.data?.data?.items || [];
                 const formattedFiles = items.map((item) => ({

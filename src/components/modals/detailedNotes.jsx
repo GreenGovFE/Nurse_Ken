@@ -40,10 +40,12 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
             })
     }
 
+    const medications = [...(treatment?.medications || []), ...(treatment?.otherMedications || [])];
+
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
-            <div className="modal-contents">
+            <div className="modal-content">
                 <div className="flex ">
                     <div className="flex space-between flex-v-center m-t-20 m-l-10 col-5">
                         <p>Prescription Details</p>
@@ -87,28 +89,28 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
                         <tr>
                             <td>{treatment?.diagnosis}</td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
                                         <span>{item?.name}</span>
                                     </div>
                                 ))}
                             </td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
                                         <span>{item?.frequency} times daily</span>
                                     </div>
                                 ))}
                             </td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
                                         <span>{item?.quantity}mg</span>
                                     </div>
                                 ))}
                             </td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
                                         <span>{item?.duration} days</span>
                                     </div>
@@ -120,9 +122,9 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
 
                 <div className="flex">
                     <div className="m-r-20">
-                        <TagInputs label="Comments" name="additionalNoteOnTreatment" value={Array.isArray(notes) ? notes?.map((note) => (note)) : ''} readOnly={true} type='textArea' />
+                        <TagInputs label="Vital Nurse's Comment" name="additionalNoteOnTreatment" value={Array.isArray(notes) ? notes?.map((note) => (note)) : ''} readOnly={true} type='textArea' />
                     </div>
-                    <TagInputs label="Administration Status" name="additionalNoteOnTreatment" value={Array.isArray(notes) ? notes?.map((note) => (note)) : ''} readOnly={true} type='textArea' />
+                    <TagInputs label="Care Plan" name="carePlan" value={treatment?.carePlan} readOnly={true} type='textArea' />
                 </div>
 
                 <div className='m-t-20'>

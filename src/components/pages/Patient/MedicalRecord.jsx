@@ -5,6 +5,12 @@ import MedicalRecordTable from "../../tables/MedicalRecordTable";
 import toast from "react-hot-toast";
 import { usePatient } from "../../../contexts";
 import Spinner from "../../UI/Spinner";
+import UploadButton from "../../../Input/UploadButtonMedRec";
+import { RiDeleteBinLine, RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
+import Cookies from "js-cookie";
+import DocViewer, { DocViewerRenderers } from "react-doc-viewer";
+
+
 
 function MedicalRecord({ data, next, fetchData }) {
   const [selectedTab, setSelectedTab] = useState(1);
@@ -15,8 +21,28 @@ function MedicalRecord({ data, next, fetchData }) {
   const [typeName, setTypeName] = useState("");
   const [typeComment, setTypeComment] = useState("");
   const [newData, setNewData] = useState(false);
-  const { patientId, patientInfo, setPatientId, setPatientInfo } = usePatient();
+  const { patientId, setPatientId, setPatientInfo, patientInfo } = usePatient();
+  const [fileNames, setfileNames] = useState([]);
+  const [documentArray, setDocumentArray] = useState([]);
+  const [medicalFiles, setMedicalFiles] = useState([]);
+  const [reset, setReset] = useState(false);
+  const [isScannedFilesOpen, setIsScannedFilesOpen] = useState(false);
+  const [expandedFiles, setExpandedFiles] = useState({});
 
+
+
+
+  useEffect(() => {
+    const cookiePatientId = Cookies.get('patientId');
+
+    if (cookiePatientId && cookiePatientId !== patientId) {
+      setPatientId(cookiePatientId);
+    }
+
+    if (patientInfo && Object.keys(patientInfo).length === 0) {
+      setPatientInfo(patientInfo);
+    }
+  }, [patientId, patientInfo, setPatientId, setPatientInfo]);
 
 
   const getNewData = async () => {
@@ -32,12 +58,29 @@ function MedicalRecord({ data, next, fetchData }) {
   };
 
 
+  const deleteDoc = (doc) => {
+    let newArr = documentArray.filter((id) => id.name !== doc);
+    setDocumentArray(newArr);
+  };
+
+
 
   const getMedicalTypes = async () => {
     setLoading(true);
     try {
       const res = await get("/Patients/getAllMedicalTypes");
       setMedicalTypes(res);
+
+    } catch (error) {
+    }
+    setLoading(false);
+  };
+
+  const getMedicalFiles = async () => {
+    setLoading(true);
+    try {
+      const res = await get(`/patients/${patientId}/patient_files`);
+      setMedicalFiles(res);
 
     } catch (error) {
     }
@@ -74,7 +117,7 @@ function MedicalRecord({ data, next, fetchData }) {
   useEffect(() => {
     getNewData();
     getMedicalTypes();
-
+    getMedicalFiles();
   }, []);
 
   useEffect(() => {
@@ -111,13 +154,86 @@ function MedicalRecord({ data, next, fetchData }) {
     }
   }, [selectedTab]);
 
+  const toggleScannedFiles = () => {
+    setIsScannedFilesOpen(!isScannedFilesOpen);
+  };
+
+  const toggleFileView = (index) => {
+    setExpandedFiles((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const getFileType = (filePath) => {
+    const fileExtension = filePath.split('.').pop().toLowerCase();
+    return fileExtension;
+  };
+
+  const isImageFile = (fileType) => {
+    return ['png', 'jpg', 'jpeg'].includes(fileType);
+  };
+
+  const isDocFile = (fileType) => {
+    return ['pdf', 'tif', 'bmp', 'tiff'].includes(fileType);
+  };
+
   return (
     <div>
       {
         loading ? <Spinner /> : (
           <div>
             <div className="m-t-40 bold-text">Medical Records</div>
+            <div className="col-5">
+              <UploadButton patientRef={patientInfo?.patientRef} fetch={getMedicalFiles} setdocumentArray={setDocumentArray} />
+            </div>
             <div>
+              <div className="flex m-t-20 flex-direction-v">
+                <span onClick={toggleScannedFiles} className="pointer collapse">
+                  {isScannedFilesOpen ? "Hide Scanned Medical Records" : "Show Scanned Medical Records"} {isScannedFilesOpen ? <RiArrowUpSLine /> : <RiArrowDownSLine />}
+                </span>
+                {isScannedFilesOpen && (
+                  <div className="card m-t-10 p-10">
+                    {medicalFiles?.map((item, index) => (
+                      <div key={index} className="m-t-10 flex flex-direction-v">
+                        <span onClick={() => toggleFileView(index)} className="pointer save-drafts">
+                          {expandedFiles[index] ? "Hide  " : "Show  "} {item?.fileName}
+                        </span>
+                        {expandedFiles[index] && (
+                          <div className="m-t-10">
+                            {isDocFile(getFileType(item?.filePath)) ? (
+                              <iframe
+                                src={`https://docs.google.com/gview?url=${encodeURIComponent(item?.filePath)}&embedded=true`}
+                                title={item?.fileName}
+                                width="100%"
+                                height="800px"
+                                frameBorder="0"
+                              />
+                            ) : isImageFile(getFileType(item?.filePath)) ? (
+                              <img
+                                src={item?.filePath}
+                                alt={item?.fileName}
+                                style={{
+                                  width: 'auto',
+                                  height: 'auto',
+                                  maxHeight: '80vh',
+                                  objectFit: 'contain',
+                                }}
+                              />
+                            ) : (
+                              <DocViewer
+                                documents={[{ uri: item?.filePath }]}
+                                pluginRenderers={DocViewerRenderers}
+                                style={{ width: '100%', height: '500px' }}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="w-100">
                 <MedicalRecordTable data={newData || []} />
               </div>

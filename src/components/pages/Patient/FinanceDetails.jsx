@@ -44,7 +44,7 @@ function FinanceDetails({ closeModal }) {
     };
 
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/patientpayment/list/patient/${patientId}/${currentPage}/10/patient-payment-history`, options);
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/patientpayment/list/patient/${patientId}/${currentPage}/10/patient-payment-history`, options);
       setPaymentHistory(response?.data?.resultList);
       setTotalPages(response?.data?.totalPages);
       setLoading(false);
@@ -70,7 +70,7 @@ function FinanceDetails({ closeModal }) {
     };
 
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${hmoId}`, options);
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/hmo/${hmoId}`, options);
       setHmo(response?.data);
     } catch (error) {
       console.error("Error fetching HMO:", error);

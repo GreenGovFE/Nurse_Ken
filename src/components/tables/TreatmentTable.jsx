@@ -5,7 +5,7 @@ import { usePatient } from "../../contexts";
 import DetailedNotes from "../modals/detailedNotes";
 import DetailedNurseNotes from "../modals/DetailedNurseNotes";
 
-function TreatmentTable({ data }) {
+function TreatmentTable({ data, reset}) {
   const { patientId } = usePatient();
   const [combinedData, setCombinedData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,10 +35,10 @@ function TreatmentTable({ data }) {
           nurseNotes: correspondingVital ? correspondingVital.notes : 'No Notes',
           nurseId: correspondingVital ? correspondingVital.vitalNurseId : 0,
           bloodPressure: correspondingVital ? correspondingVital?.bloodPressure : '',
-          heartPulse: correspondingVital? correspondingVital?.heartPulse : '',
-          respiratory: correspondingVital? correspondingVital?.respiratory : '',
-          height: correspondingVital? correspondingVital?.height : '',
-          weight: correspondingVital? correspondingVital?.weight : treatment?.weight,
+          heartPulse: correspondingVital ? correspondingVital?.heartPulse : '',
+          respiratory: correspondingVital ? correspondingVital?.respiratory : '',
+          height: correspondingVital ? correspondingVital?.height : '',
+          weight: correspondingVital ? correspondingVital?.weight : treatment?.weight,
         };
       });
       setCombinedData(combined);
@@ -51,11 +51,11 @@ function TreatmentTable({ data }) {
     try {
       let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
       let tempNurses = res?.data
-        ?.filter((nurse) => nurse?.username) 
+        ?.filter((nurse) => nurse?.username)
         .map((nurse) => {
           return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
         });
-  
+
       tempNurses?.unshift({ name: "Select Nurse", value: "" });
       setNurses(tempNurses);
     } catch (error) {
@@ -124,9 +124,10 @@ function TreatmentTable({ data }) {
               <th className="center-text">Weight (Kg)</th>
               <th className="center-text">Temperature (°C)</th>
               <th className="center-text">Admin Nurse</th>
-              {/* <th className="center-text">Admin Note</th> */}
+              <th className="center-text">Doctor</th>
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Medication/Prescription</th>
+              <th className="center-text">Attached Documents</th>
             </tr>
           </thead>
           <tbody className="white-bg view-det-pane">
@@ -137,9 +138,7 @@ function TreatmentTable({ data }) {
                 <td>{row?.weight}</td>
                 <td>{row?.temperature}</td>
                 <td>{row?.nurseName}</td>
-                {/* <td onClick={selectRecord(row)}>
-                  <img className="hovers pointer" src="/details.png" alt="Details" />
-                </td> */}
+                <td>{row?.doctorName}</td>
                 <td style={{ maxWidth: '650px', whiteSpace: 'wrap', textAlign: 'left', paddingLeft: '12px' }}>
                   {row?.diagnosis}
                 </td>
@@ -162,6 +161,13 @@ function TreatmentTable({ data }) {
                   </div>
 
                 </td>
+                <td>{row?.consentDocuments?.map((doc) => (
+                  <div className="flex flex-direction-v">
+                    <a href={doc.docPath} target="_blank" className="m-r-10">
+                      {doc.docName}
+                    </a>
+                  </div>
+                ))}</td>
               </tr>
             ))}
           </tbody>
@@ -197,6 +203,7 @@ function TreatmentTable({ data }) {
           doctors={doctors}
           nurses={nurses}
           vital={vital}
+          reset={reset}
 
         />
       )}

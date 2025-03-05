@@ -18,7 +18,7 @@ function PatientHMOetails() {
   const [hmo, setHmo] = useState([]);
   const [patientInformation, setPatientInfomation] = useState('');
   const [selectedTab, setSelectedTab] = useState("personal");
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   const renderTabContent = (selectedTab) => {
     switch (selectedTab) {

@@ -11,9 +11,11 @@ import { checkIfAppointmentPassed } from "../../../utility/general";
 import UploadButton from "../../../Input/UploadButton";
 import { RiDeleteBinLine } from "react-icons/ri";
 import EDMSFiles from "../../UI/EDMSFiles";
+import { useNavigate } from "react-router-dom";
+import SpeechToTextButton from "../../UI/SpeechToTextButton";
 
 function Vitals({ setSelectedTab }) {
-  const { patientId, nurseTypes } = usePatient();
+  const { patientId, } = usePatient();
   
   const [documentArray, setDocumentArray] = useState([]);
   const [payload, setPayload] = useState({
@@ -22,8 +24,8 @@ function Vitals({ setSelectedTab }) {
     bloodPressure: "",
     heartPulse: "",
     respiratory: "",
-    height: "",
-    weight: "",
+    height: 0,
+    weight: 0,
     careType: 0,
     VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
     appointmentId: null,
@@ -34,7 +36,7 @@ function Vitals({ setSelectedTab }) {
 
   });
   const [nurses, setNurses] = useState([]);
-  const [docNames, setDocNames] = useState([]);
+    const [docNames, setDocNames] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [visits, setVisits] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +47,8 @@ function Vitals({ setSelectedTab }) {
   const [selectedMfiles, setSelectedMfiles] = useState([]);
   const [add, setAdd] = useState(false)
   const [appointmentPassed, setAppointmentPassed] = useState(false);
+  const navigate = useNavigate();
+  
 
 
   const deleteDoc = (doc) => {
@@ -67,8 +71,6 @@ function Vitals({ setSelectedTab }) {
     bloodPressure: "Blood Pressure",
     heartPulse: "Heart Pulse",
     respiratory: "Respiratory",
-    height: "Height",
-    weight: "Weight",
     VitalNurseEmployeeId: "Assigned Nurse",
     appointmentId: 'Appointment',
     notes: "Notes",
@@ -233,7 +235,10 @@ function Vitals({ setSelectedTab }) {
           oxygenSaturation: '',
           vitalDocuments: [],
         })
+        setSelectedMfiles([]);
+        setDocumentArray([]);
         getVitalsDetails(currentPage);
+        navigate('/patients')
       } else if (res.StatusCode === 401) {
         notification({ message: "Unauthorized Session", type: "error" });
       } else if (res.StatusCode === 500) {
@@ -266,6 +271,7 @@ function Vitals({ setSelectedTab }) {
         notification({ message: errorMessage, type: "error" });
       }
     } catch (error) {
+      console.log(error)
       notification({ message: "Failed to add Vital record", type: "error" });
     }
   };
@@ -310,6 +316,10 @@ function Vitals({ setSelectedTab }) {
   useEffect(() => {
     getVitalsDetails(currentPage);
   }, [currentPage]);
+
+  const handleTranscript = (transcript) => {
+    setPayload(prevPayload => ({ ...prevPayload, notes: prevPayload.notes ? prevPayload.notes + ' ' + transcript : transcript }));
+  };
 
   return (
     <div className="">
@@ -406,6 +416,7 @@ function Vitals({ setSelectedTab }) {
               value={payload?.notes}
               name="notes"
             />
+            <SpeechToTextButton onTranscript={handleTranscript} />
           </div>
           <button onClick={submitPayload} className="submit-btn m-t-20 ">Add Vital</button>
         </div>

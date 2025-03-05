@@ -17,7 +17,7 @@ const Connect = () => {
   const ModuleName = "Nurse";
 
   const renderTimeoutMessage = () => {
-    window.location.assign(`http://emr-test.greenzonetechnologies.com.ng`);
+    window.location.assign(`${Cookies?.get("homeLink")}`);
     notification({ message: "Timed out please try again", type: "error" });
   };
 
@@ -76,7 +76,7 @@ const Connect = () => {
           Cookies.set("_APIBaseURL", parsed?.base);
           Cookies.set("tokenExist", true, { expires: 0.0416665 });
 
-          if (AppToken) {
+          if (AppToken ) {
             setLoading(false); 
             navigate("/dashboard"); // Redirect to dashboard
           } else {
@@ -94,7 +94,7 @@ const Connect = () => {
                 onScreen: true,
               },
             });
-            window.location.assign(`http://emr-test.greenzonetechnologies.com.ng`);
+            window.location.assign(`${Cookies?.get("homeLink")}`);
           }
         })
         .catch((error) => {
@@ -119,7 +119,7 @@ const Connect = () => {
               onScreen: true,
             },
           });
-          window.location.assign(`http://emr-test.greenzonetechnologies.com.ng`);
+          window.location.assign(`${Cookies?.get("homeLink")}`);
         });
     }
   };

@@ -10,6 +10,7 @@ function ViewVisit({ closeModal, visit, next }) {
     const [nurses, setNurses] = useState([]);
     const [doctors, setDoctors] = useState([]);
     const [payload, setPayload] = useState({});
+    const [tiffData, setTiffData] = useState(null);
 
     useEffect(() => {
         getNurses();
@@ -62,7 +63,7 @@ function ViewVisit({ closeModal, visit, next }) {
                 return;
             }
 
-            const url = `https://edogoverp.com/labapi/api/document/download-document/${docName}`;
+            const url = `${process.env.REACT_APP_BASE_URL}/labapi/api/document/download-document/${docName}`;
 
             const options = {
                 method: 'GET',
@@ -80,7 +81,7 @@ function ViewVisit({ closeModal, visit, next }) {
 
                 const anchor = document.createElement('a');
                 anchor.href = blobUrl;
-                anchor.download = docName; 
+                anchor.download = docName;
                 anchor.click();
 
                 URL.revokeObjectURL(blobUrl);
@@ -95,7 +96,7 @@ function ViewVisit({ closeModal, visit, next }) {
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
-            <div className="modal-contents">
+            <div className="modal-content">
                 <div className="flex ">
                     <div className="flex space-between flex-v-center m-t-20 m-l-20 col-3">
                         <p>Vitals Details</p>
@@ -145,14 +146,44 @@ function ViewVisit({ closeModal, visit, next }) {
                         ))
                     }
 
-                    {visit?.vitalDocuments?.map((doc, index) => (
-                        <div key={index}>
-                            <div className='text-green pointer flex flex-direction-v flex-h-center '>
-                                <RiFileDownloadFill onClick={() => downloadFile(doc?.docName)} size={20} />
-                                <a href={doc?.docPath} target="_blank" rel="noopener noreferrer">{doc?.docName}</a>
+                    {visit?.vitalDocuments
+                        ?.filter(doc => doc?.docName && doc?.docPath) // Filter out invalid docs
+                        .map((doc, index) => (
+                            <div key={index}>
+                                <div className='text-green pointer flex flex-direction-v flex-h-center'>
+                                    <RiFileDownloadFill onClick={() => downloadFile(doc?.docName)} size={20} />
+                                    <span className='' onClick={() => downloadFile(doc?.docName)}>Download {doc?.docName}</span>
+                                    {/* Check if the document is a PDF, otherwise display images or other files */}
+                                    {doc?.docPath?.endsWith('.pdf') || doc?.docPath?.endsWith('.tif') || doc?.docPath?.endsWith('.bmp') || doc?.docPath?.endsWith('.tiff') ? (
+                                        <iframe
+                                            src={`https://docs.google.com/gview?url=${encodeURIComponent(doc?.docPath)}&embedded=true`}
+                                            title={doc?.docName}
+                                            width="100%"
+                                            height="auto"
+                                            frameBorder="0"
+                                        />
+                                    ) : doc?.docPath?.endsWith('.png') || doc?.docPath?.endsWith('.jpg') || doc?.docPath?.endsWith('.jpeg') ? (
+                                        // For image files, use an img tag
+                                        <img src={doc?.docPath} alt={doc?.docName}
+                                            style={{
+                                                width: 'auto',   
+                                                height: 'auto',       
+                                                maxHeight: '80vh',   
+                                                objectFit: 'contain'  
+                                            }}
+                                        />
+                                    ) : (
+                                        // For other types (e.g., Word, Excel), provide a link to download or view
+                                        <a href={doc?.docPath} target="_blank" rel="noopener noreferrer">
+                                            {doc?.docName}
+                                        </a>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+
+
+
                 </div>
             </div>
         </div>

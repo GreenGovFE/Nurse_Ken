@@ -53,7 +53,7 @@ function ContactDetails({ setSelectedTab, hide }) {
     };
 
     try {
-      let res = await axios.get(`https://edogoverp.com/clinicapi/api/profile/state/list/1/100`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/profile/state/list/1/100`, options);
       let tempDoc = res?.data?.resultList.map((doc) => {
         return { name: doc?.name, value: doc?.name };
       });
@@ -77,27 +77,27 @@ function ContactDetails({ setSelectedTab, hide }) {
   const submitPayload = async () => {
     // Validate phone number
     
-    const missingFields = checkMissingFields(payload);
-    if (missingFields.length > 0) {
-      const missingFieldLabels = missingFields.map(field => requiredFields[field]);
-      notification({ message: `Missing required fields: ${missingFieldLabels.join(", ")}`, type: "error" });
-      return;
-    }
+    // const missingFields = checkMissingFields(payload);
+    // if (missingFields.length > 0) {
+    //   const missingFieldLabels = missingFields.map(field => requiredFields[field]);
+    //   notification({ message: `Missing required fields: ${missingFieldLabels.join(", ")}`, type: "error" });
+    //   return;
+    // }
     
-    if (!payload.phone || payload.phone.length !== 11 || isNaN(payload.phone)) {
-      notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
-      return;
-    }
+    // if (!payload.phone || payload.phone.length !== 11 || isNaN(payload.phone)) {
+    //   notification({ message: 'Please make sure phone number is 11 digits', type: "error" });
+    //   return;
+    // }
 
-    if (!payload.altPhone || payload.altPhone.length !== 11 || isNaN(payload.altPhone)) {
-      notification({ message: 'Please make sure alt phone number is 11 digits', type: "error" });
-      return;
-    }
+    // if (!payload.altPhone || payload.altPhone.length !== 11 || isNaN(payload.altPhone)) {
+    //   notification({ message: 'Please make sure alt phone number is 11 digits', type: "error" });
+    //   return;
+    // }
 
-    if (!isValidEmail(payload.email)) {
-      notification({ message: 'Please enter a valid email address', type: "error" });
-      return;
-    }
+    // if (!isValidEmail(payload.email)) {
+    //   notification({ message: 'Please enter a valid email address', type: "error" });
+    //   return;
+    // }
 
     try {
       let res = await post("/patients/updateContact", { ...payload, patientId: Number(patientId) });

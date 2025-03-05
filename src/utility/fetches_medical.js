@@ -7,11 +7,11 @@ import axios from 'axios';
 import { useState } from "react";
 
 
-export const FileUpload = async (data, callbackfunction) => {
+export const FileUpload = async (data, callbackfunction, patientref) => {
   let fileProgress;
   let Access_token = localStorage.getItem('token');
   const response = axios.post(
-    `${process.env.REACT_APP_BASE_URL}/services/api/documents/medicals`,
+    `${process.env.REACT_APP_BASE_URL}/services/api/documents/UploadMedicalRecords/${patientref}`,
     data,
     {
       headers: {

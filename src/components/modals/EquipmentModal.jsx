@@ -53,7 +53,7 @@ const EquipmentModal = ({ closeModal, setRoomData, roomId, data }) => {
         };
 
         try {
-            let res = await axios.get("https://edogoverp.com/clinicapi/api/room/list/1/1000", options);
+            let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/room/list/1/1000`, options);
             let roomList = res?.data?.resultList || []; // Adjusted to access data property
 
             roomList.unshift({ name: "Select Room", id: 0 });
@@ -103,7 +103,7 @@ const EquipmentModal = ({ closeModal, setRoomData, roomId, data }) => {
         };
 
         try {
-            let res = await axios.post(`https://edogoverp.com/clinicapi/api/assignequipmentpatient`, payload, options);
+            let res = await axios.post(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/assignequipmentpatient`, payload, options);
             if (res?.statusCode === 409) {
                 notification({ message: "Equipment Already Assigned", type: "error" });
                 return;

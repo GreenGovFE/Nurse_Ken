@@ -25,7 +25,7 @@ function Finance_HMO() {
 
   const getHmo = async () => {
     try {
-      const response = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/${personalInfo?.hmoId}`);
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/hmo/${personalInfo?.hmoId}`);
       setHmo(response?.data);
     } catch (error) {
       console.error('Error fetching payment history:', error);

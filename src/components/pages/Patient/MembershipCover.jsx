@@ -22,6 +22,7 @@ function MembershipCover({ setSelectedTab, hide }) {
   const [Package, setPackage] = useState({});
   const [packagesData, setPackagesData] = useState([]);
   const [selectedMfiles, setSelectedMfiles] = useState([]);
+  const [loading , setLoading] = useState(false)
 
 
   useEffect(() => {
@@ -46,7 +47,7 @@ function MembershipCover({ setSelectedTab, hide }) {
   };
 
   const deleteDoc = (doc) => {
-    let newarr = documentArray.filter((id) => id.name !== doc);
+    let newarr = documentArray?.filter((id) => id?.name !== doc);
     setdocumentArray(newarr);
   };
 
@@ -109,7 +110,7 @@ function MembershipCover({ setSelectedTab, hide }) {
       }
     };
     try {
-      let res = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/package/${id}`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/hmo/package/${id}`, options);
       return res?.data
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -253,7 +254,7 @@ function MembershipCover({ setSelectedTab, hide }) {
     };
 
     try {
-      let res = await axios.get(`https://edogoverp.com/healthfinanceapi/api/hmo/list/1/100`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/hmo/list/1/100`, options);
       if (res) {
         setHmoList(res.data?.resultList);
       }
@@ -261,9 +262,6 @@ function MembershipCover({ setSelectedTab, hide }) {
       console.error('Error fetching HMO list:', error);
     }
   };
-
-  console.log(hmoDetails)
-  console.log(packagesData)
 
   return (
     <div className="flex-col">

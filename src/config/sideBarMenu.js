@@ -10,22 +10,7 @@ import facility from '../assets/images/faclty.svg';
 import patient from '../assets/images/pats.svg';
 
 const useNavigationItems = () => {
-    const { setPatientId, setPatientInfo, setNurseTypes } = usePatient();
-
-    const resetPatientInfo = () => {
-        setPatientInfo({});
-        setPatientId('');
-    };
-
-    const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
-    const nuresRole = userInfo?.role[0]?.toLowerCase().replace(/\s+/g, '');
-
-    useEffect(() => {
-        setNurseTypes(nuresRole === 'vitalnurse' ? 'vital' : 'admin')
-    }, [])
-
-    console.log(nuresRole);
-
+    const { setPatientId, setPatientInfo, nurseRoles } = usePatient();
 
     const commonItems = [
         {
@@ -89,9 +74,19 @@ const useNavigationItems = () => {
             href: '/patients',
             icon: <img src={patient} className="icon" alt="Patient Icon" />
         },
-    ]
+    ];
 
-    return nuresRole === 'nurse' ? [...commonItems] : nuresRole === 'vitalnurse' ? vitalNurseItems : addPatientItem;
+    if (nurseRoles.includes('nurse') && nurseRoles.includes('checkin')) {
+        return [addPatientItem[1], ...commonItems] ;
+    }else if (nurseRoles.includes('checkin') && nurseRoles.includes('vitalnurse')) {
+        return [addPatientItem[1], ...vitalNurseItems] ;
+    }else if (nurseRoles.includes('nurse')) {
+        return commonItems;
+    }else if (nurseRoles.includes('vitalnurse')) {
+        return vitalNurseItems;
+    } else {
+        return addPatientItem;
+    }
 };
 
 export default useNavigationItems;

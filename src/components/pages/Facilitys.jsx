@@ -8,9 +8,6 @@ import Notify from "../../utility/notify";
 import EquipmentTable from "../tables/AssignedEquipmentTable";
 import AmbulanceTable from "../tables/AmbulanceTable";
 
-
-
-
 const location = [
   { value: "", name: "Select location" },
   { value: "Left", name: "Left" },
@@ -19,7 +16,6 @@ const location = [
 ]
 
 function Facility() {
-  // Sample data with a patient's name
   const [selectedTab, setSelectedTab] = useState("beds");
   const [payload, setPayload] = useState({
     name: "",

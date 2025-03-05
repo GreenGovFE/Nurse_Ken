@@ -6,6 +6,7 @@ import { get, post } from "../../utility/fetch";
 import { get as getPatient } from "../../utility/fetchNurse";
 import notification from "../../utility/notification";
 import Notify from "../../utility/notify";
+import SpeechToTextButton from "../UI/SpeechToTextButton";
 
 const BedAssignModal = ({ closeModal, getBeds, data }) => {
     const [payload, setPayload] = useState({
@@ -43,6 +44,10 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
             setPayload({ ...payload, [event.target.name]: event.target.value });
         }
     }
+
+    const handleTranscript = (transcript) => {
+        setPayload(prevPayload => ({ ...prevPayload, assignNote: prevPayload.assignNote ? prevPayload.assignNote + ' ' + transcript : transcript }));
+    };
 
     const assignBed = async () => {
         const {
@@ -88,7 +93,7 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
                         <h3 className="m-b-10">Assign a Patient</h3>
                         <TagInputs type="select" value={staffIdInput} name="patientAssignedId" options={userNames} onChange={handleChange} label="Select Patient" />
                         <TagInputs type="textArea" onChange={handleChange} name="assignNote" label="Additional Notes " />
-
+                        <SpeechToTextButton onTranscript={handleTranscript} />
                         <button onClick={assignBed} className="btn w-100 m-t-10">Submit</button>
 
                     </div>

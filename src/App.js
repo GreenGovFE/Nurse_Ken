@@ -55,7 +55,7 @@ const App = () => {
           });
         }, 60000);
         setInactivityWarning(true);
-      }, 1500000);
+      }, 7200000);
     };
 
     const checkAndSetTimeout = () => {

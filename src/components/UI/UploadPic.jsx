@@ -12,25 +12,17 @@ const UploadPic = (props) => {
   const [imagg, setImagg] = React.useState('');
   const [namm, setNamm] = React.useState('');
   const [imagess, setImagess] = React.useState([]);
-
+  
   props.name(namm)
-    
+  
   const onChangePIc = (e) => {
+    props?.setLoading(true)     
     // setFile(e.target.files[0]);
     // setFilename(e.target.files[0].name);
     const data = new FormData();
 
-    const supportedTypes = [
-      'jpeg',
-      'png',
-      'gif',
-      'pdf',
-      "msword",
-      "ppt", "pptx", "vnd.ms-excel", "xls", "xlsx",
-      'vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'doc',
-      'vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ];
+    const supportedTypes = ['jpeg', 'png', 'gif', 'pdf', 'msword', 'ppt', 'pptx', 'vnd.ms-excel', 'xls', 'xlsx', 'vnd.openxmlformats-officedocument.wordprocessingml.document', 'doc', 'txt', 'Text Document', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'tiff', 'tif'];
+
     const { type, size } = e.target.files[0] ?? '';
 
     let doc = e.target.files[0];
@@ -57,7 +49,7 @@ const UploadPic = (props) => {
       setFile(e.target.files[0]);
       setFilename(e.target.files[0].name);
       data.append('files', doc);
-      FileUpload(data, (response) => {       
+      FileUpload(data, (response) => {  
         if (response.code === 1) {
           setImagg(response.doclink);
           props.handlePicChange(response.doclink)
@@ -95,6 +87,7 @@ const UploadPic = (props) => {
         }
       });
     }
+    props?.setLoading(false)
   };
 
   React.useEffect(() => {

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import InputField from '../UI/InputField';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Cookies from 'js-cookie';
 
 const Home = (props) => {
   const [email, setEmail] = useState("");
@@ -34,6 +35,8 @@ const Home = (props) => {
         localStorage.setItem('nurseRole', data?.role);
         localStorage.setItem('USER_INFO', JSON.stringify(data));
         sessionStorage.setItem('isAdmin', data?.isAdmin);
+        Cookies.set("homeLink", data?.homeLink);
+        
 
         const loginTime = new Date().getTime();
         localStorage.setItem('LOGIN_TIME', loginTime);

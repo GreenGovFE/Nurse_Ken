@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import TagInputs from "../../layouts/TagInputs";
 import TextArea from "../../UI/TextArea";
 import UploadButton from "../../../Input/UploadButton";
@@ -8,6 +8,7 @@ import { get, post } from "../../../utility/fetch";
 import notification from "../../../utility/notification";
 import { usePatient } from "../../../contexts";
 import EDMSFiles from "../../UI/EDMSFiles";
+import SpeechToTextButton from "../../UI/SpeechToTextButton";
 
 function Immunization({ setSelectedTab }) {
   const { patientId } = usePatient();
@@ -30,10 +31,9 @@ function Immunization({ setSelectedTab }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedMfiles, setSelectedMfiles] = useState([]);
-
-
-
-
+  const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -58,8 +58,6 @@ function Immunization({ setSelectedTab }) {
     }
     return pages;
   };
-
-
 
   const deleteDoc = (doc) => {
     let newArr = documentArray.filter((id) => id.name !== doc);
@@ -234,6 +232,34 @@ function Immunization({ setSelectedTab }) {
     getImmunization();
   }, [currentPage]);
 
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setPayload(prevPayload => ({ ...prevPayload, notes: prevPayload.notes ? prevPayload.notes + ' ' + transcript : transcript }));
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const handleTranscript = (transcript) => {
+    setPayload(prevPayload => ({ ...prevPayload, notes: prevPayload.notes ? prevPayload.notes + ' ' + transcript : transcript }));
+  };
+
   return (
     <div className="">
       <div className="w-100  wrap flex ">
@@ -279,6 +305,7 @@ function Immunization({ setSelectedTab }) {
               placeholder="Write your notes here..."
               onChange={handleChange}
             />
+            <SpeechToTextButton onTranscript={handleTranscript} />
           </div>
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">

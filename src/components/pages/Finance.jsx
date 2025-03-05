@@ -23,6 +23,7 @@ function PatientsFinance() {
     }
   }, [filterSelected, payload, currentPage]);
 
+
   const getPaymentHistory = async () => {
     setLoading(true);
 

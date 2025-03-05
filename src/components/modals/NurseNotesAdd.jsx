@@ -5,6 +5,7 @@ import notification from "../../utility/notification";
 import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill } from "react-icons/ri";
 import { usePatient } from "../../contexts";
+import SpeechToTextButton from "../UI/SpeechToTextButton";
 
 function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentPage }) {
     const [payload, setPayload] = useState({});
@@ -21,6 +22,7 @@ function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentP
         return missingFields;
     };
 
+    const medications = [...(treatment?.medications || []), ...(treatment?.otherMedications || [])];
 
     const addNotes = () => {
         setLoading(true)
@@ -54,6 +56,10 @@ function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentP
         } else {
             setPayload(prevPayload => ({ ...prevPayload, [name]: event?.target?.value }));
         }
+    };
+
+    const handleTranscript = (transcript) => {
+        setPayload(prevPayload => ({ ...prevPayload, note: prevPayload.note ? prevPayload.note + ' ' + transcript : transcript }));
     };
 
     const getDoctorName = (doctorId) => {
@@ -124,6 +130,7 @@ function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentP
                         <tr className="">
                             <th>Frequency</th>
                             <th>Quantity</th>
+                            <th>Duration</th>
                             <th>Notes</th>
                         </tr>
                     </thead>
@@ -131,23 +138,30 @@ function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentP
                         <tr>
                             <td>{treatment?.diagnosis}</td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
                                         <span>{item?.name}</span>
                                     </div>
                                 ))}
                             </td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.frequency}</span>
+                                        <span>{item?.frequency} times daily</span>
                                     </div>
                                 ))}
                             </td>
                             <td>
-                                {treatment?.medications.map((item) => (
+                                {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.quantity}</span>
+                                        <span>{item?.quantity}mg</span>
+                                    </div>
+                                ))}
+                            </td>
+                            <td>
+                                {medications.map((item) => (
+                                    <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                                        <span>{item?.duration} days</span>
                                     </div>
                                 ))}
                             </td>
@@ -158,7 +172,8 @@ function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentP
 
                 <div className="">
 
-                    <TagInputs label="Administering Nurse's Comment" name="note" onChange={(e) => handleChange(e, 'note')} type='textArea' />
+                    <TagInputs label="Administering Nurse's Comment" name="note" value = {payload.note} onChange={(e) => handleChange(e, 'note')} type='textArea' />
+                    <SpeechToTextButton onTranscript={handleTranscript} />
                 </div>
                 <button className="submit-btn m-t-20 w-100" onClick={addNotes}>Add Notes</button>
 

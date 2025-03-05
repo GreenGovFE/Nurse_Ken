@@ -52,7 +52,7 @@ function AmbulanceTableAssigned({ data, }) {
         };
 
         try {
-            let res = await axios.put(` https://edogoverp.com/clinicapi/api/assignambulance/unassign-ambulance/${id}`, options);
+            let res = await axios.put(` ${process.env.REACT_APP_BASE_URL}/clinicapi/api/assignambulance/unassign-ambulance/${id}`, options);
             if (res?.statusCode === 409) {
                 notification({ message: "Equipment Already Assigned", type: "error" });
                 return;
@@ -90,7 +90,7 @@ function AmbulanceTableAssigned({ data, }) {
         };
 
         try {
-            let res = await axios.get(`https://edogoverp.com/clinicapi/api/assignambulance/list/${page}/10`, options);
+            let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/assignambulance/list/${page}/10`, options);
             setAmbulances(res?.data?.resultList || []); // Adjusted to access data property
         } catch (error) {
             console.error('Error fetching ambulances:', error);

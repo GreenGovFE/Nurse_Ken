@@ -33,7 +33,7 @@ function AmbulanceTable({ data }) {
         };
 
         try {
-            let res = await axios.get(`https://edogoverp.com/clinicapi/api/equipment/ambulance/list/${page}/10`, options);
+            let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/equipment/ambulance/list/${page}/10`, options);
             setAmbulances(res?.data?.resultList || []);
             setTablePages(res?.data?.totalPages) // Adjusted to access data property
         } catch (error) {

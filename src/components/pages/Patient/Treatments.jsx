@@ -11,6 +11,7 @@ function Treatments() {
   const [currenttreatmentrecord, setCurrenttreatmentrecord] = useState([])
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [reset, setReset] = useState(false)
   
 
   const handlePageChange = (newPage) => {
@@ -42,6 +43,11 @@ function Treatments() {
     getTreatmentHistory()
   }, [currentPage])
 
+  useEffect(() => {
+    getTreatment()
+    getTreatmentHistory()
+  }, [reset])
+
   const getTreatmentHistory = async () => {
     try {
       let res = await get(`/patients/${patientId}/currenttreatmentrecord?pageNumber=${currentPage}&pageSize=10`);
@@ -65,7 +71,7 @@ function Treatments() {
   return (
     <div>
       <div className="w-100">
-        <TreatmentTable data={treatment} />
+        <TreatmentTable data={treatment} reset={setReset}/>
         <div className="pagination flex space-between float-right col-3 m-t-20">
           <div className="flex gap-8">
             <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>

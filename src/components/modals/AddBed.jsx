@@ -6,6 +6,7 @@ import axios from 'axios';
 import notification from '../../utility/notification';
 import { usePatient } from '../../contexts';
 import { useBeds } from '../../contexts/bedContext';
+import SpeechToTextButton from '../UI/SpeechToTextButton';
 
 function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -47,7 +48,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         };
 
         try {
-            let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
+            let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/assign-bed/list/${page}/10`, options);
             setBeds(res?.data?.resultList || []);
             setBedTablePages(res?.data?.totalPages)
         } catch (error) {
@@ -98,7 +99,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
                 Authorization: `Bearer ${token}`,
             },
         };
-        const url = 'https://edogoverp.com/clinicapi/api/bed/assign-bed';
+        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/assign-bed`;
         const Payload = {
             ...payload,
             bedId: bedId,
@@ -139,7 +140,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
                 Authorization: `Bearer ${token}`,
             },
         };
-        const url = `https://edogoverp.com/clinicapi/api/bed/unassign-bed/${bedId}`;
+        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/unassign-bed/${bedId}`;
 
         try {
             let res = await axios.put(url, null, options);
@@ -199,11 +200,15 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         getAllPatients();
     }, []);
 
+    const handleTranscript = (transcript) => {
+        setPayload(prevPayload => ({ ...prevPayload, assignNote: prevPayload.assignNote ? prevPayload.assignNote + ' ' + transcript : transcript }));
+    };
+
     return (
-        <div className='modal'>
+        <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
 
-            <div className='modal-contents'>
+            <div className='modal-content'>
                 <div className='flex '>
                     <div className='flex  flex-v-center m-t-20 col-7'>
                         <p className='m-l-10 '>{patientName ? patientName : ''} Assign Bed To Patient</p>
@@ -220,8 +225,8 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
                     }
                     <TagInputs label='Date' name='dateOfVital' onChange={value => handleChange('dateOfVital', value)} type='date' dateRestriction={'past'} />
                     <TagInputs label='Diagnosis' name='diagnosis' onChange={value => handleChange('diagnosis', value)} value={diagnosis ? diagnosis : ''} disabled={diagnosis} type='textArea' />
-                    <TagInputs label='Additional Notes' name='assignNote' onChange={value => handleChange('assignNote', value)} type='textArea' />
-
+                    <TagInputs label='Additional Notes' name='assignNote' onChange={value => handleChange('assignNote', value)} value ={payload?.assignNote} type='textArea' />
+                    <SpeechToTextButton onTranscript={handleTranscript} />
                     <button onClick={AssigneBed} className='submit-btn m-t-20 w-100'>
                         Assign Bed
                     </button>

@@ -4,6 +4,8 @@ import TagInputs from '../layouts/TagInputs';
 import { get, post } from '../../utility/fetch';
 import { usePatient } from '../../contexts';
 import notification from '../../utility/notification';
+import axios from 'axios';
+import SpeechToTextButton from "../UI/SpeechToTextButton";
 
 const MemoizedTagInputs = React.memo(TagInputs);
 
@@ -15,7 +17,9 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
     const [loading, setLoading] = useState(false);
     const [payload, setPayload] = useState({});
     const [minTime, setMinTime] = useState(undefined);
-    const { patientId } = usePatient();
+    const [services, setServices] = useState([]);
+    const [service, setService] = useState({});
+    const { patientId, patientName } = usePatient();
 
     useEffect(() => {
         const today = new Date().toISOString().split("T")[0];
@@ -28,6 +32,7 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
     useEffect(() => {
         getNurses();
         getDoctors();
+        getServices();
     }, []);
 
     const handleChange = useCallback((event) => {
@@ -41,9 +46,9 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
         }));
 
         if (name === 'appointDate' && value === today) {
-            setMinTime(currentTime); 
+            setMinTime(currentTime);
         } else if (name === 'appointDate') {
-            setMinTime(undefined);  
+            setMinTime(undefined);
         }
 
         if (name === 'appointTime' && payload?.appointDate === today && value < currentTime) {
@@ -59,9 +64,12 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
         if (name === 'nurse') {
             setNurse(value);
             setPayload(prevPayload => ({ ...prevPayload, nurseEmployeeId: value?.value }));
-        } else {
+        } else if (name === 'doctor') {
             setDoctor(value);
             setPayload(prevPayload => ({ ...prevPayload, doctorEmployeeId: value?.value }));
+        } else {
+            setService(value);
+            setPayload(prevPayload => ({ ...prevPayload, serviceId: value?.value }));
         }
     }, []);
 
@@ -91,6 +99,36 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
         }
     };
 
+    const getServices = async () => {
+        const token = sessionStorage.getItem('token');
+
+        if (!token) {
+            console.error('Token not found in session storage');
+            return;
+        }
+
+        const options = {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        };
+
+        try {
+            const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/costsetup/list/1/1000`, options);
+
+            const tempServices = res?.data?.resultList
+                // ?.filter((service) => service.category.name === "Clinical Service" || service.category.name === "Clinical Services")
+                .map((service) => ({ label: service?.serviceName, value: parseFloat(service?.serviceId) }));
+
+            tempServices?.unshift({ label: "Select Service", value: "" });
+
+            setServices(tempServices);
+        } catch (error) {
+            console.error("Error fetching services:", error);
+        }
+    };
+
     const fieldLabels = {
         appointDate: "Appointment Date",
         appointTime: "Appointment Time",
@@ -114,7 +152,7 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                 appointDate: formattedValue,
                 isAdmitted: admitted,
                 ...(appointmentId ? { id: appointmentId } : {}),
-                careType: 2
+                careType: 0
             });
 
             if (["successfully created appointment", "successfully updated appointment", "successfully addmitted patient"].includes(res?.message)) {
@@ -123,6 +161,7 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                 setPayload({ appointDate: "", appointTime: "", description: "", doctorEmployeeId: 0, nurseEmployeeId: 0 });
                 setDoctor({});
                 setNurse({});
+                setService({});
                 closeModal();
             } else {
                 handleErrorResponse(res);
@@ -170,13 +209,17 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
         return Object.keys(validationErrors).length === 0;
     };
 
+    const handleTranscript = (transcript) => {
+        setPayload(prevPayload => ({ ...prevPayload, description: prevPayload.description ? prevPayload.description + ' ' + transcript : transcript }));
+    };
+
     return (
         <div className='overlay'>
             <RiCloseFill className='close-btn pointer' onClick={closeModal} />
-            <div className="modal-contents">
+            <div className="modal-content">
                 <div className="flex">
                     <div className="flex space-between flex-v-center m-t-20 m-l-20 col-4">
-                        <h4>{type === 'admission' ? 'Admit Patient' : (appointmentId ? 'Reschedule Appointment' : "Patient's Appointment")}</h4>
+                        <h4>{type === 'admission' ? 'Admit Patient' : (appointmentId ? `Reschedule Appointment For ${patientName}` : "Patient's Appointment")}</h4>
                     </div>
                 </div>
                 <div className="p-20">
@@ -191,6 +234,7 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                                 name="appointDate"
                             />
                         </div>
+
                         <div>
                             <MemoizedTagInputs
                                 label={type === 'admission' ? 'Admission Time' : "Appointment Time"}
@@ -201,6 +245,16 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                                 min={minTime}
                             />
                         </div>
+                    </div>
+                    <div className='w-100'>
+                        <MemoizedTagInputs
+                            label="Select Service"
+                            name="serviceId"
+                            value={service}
+                            onChange={(e) => handleSelectChange(e, 'serviceId')}
+                            type='R-select'
+                            options={services}
+                        />
                     </div>
                     <div className='w-100'>
                         <MemoizedTagInputs
@@ -230,6 +284,7 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                             onChange={handleChange}
                             type='textArea'
                         />
+                        <SpeechToTextButton onTranscript={handleTranscript} />
                     </div>
                     <button className="submit-btn m-t-20 w-100" onClick={addAppointmemt} disabled={loading}>Submit</button>
                 </div>

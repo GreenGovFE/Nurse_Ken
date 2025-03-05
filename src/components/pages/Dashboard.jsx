@@ -35,9 +35,6 @@ function Dashboard() {
     }
   }
 
-
-  console.log(userInfo)
-
   const token = sessionStorage.getItem('token');
 
   const getInAndOutPatients = async () => {

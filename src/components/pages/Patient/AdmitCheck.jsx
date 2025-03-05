@@ -80,7 +80,7 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
     };
 
     try {
-      let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/assign-bed/list/${1}/1000`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/assign-bed/list/${1}/1000`, options);
       setBeds(res?.data?.resultList || []);
     } catch (error) {
       console.error('Error fetching equipment:', error);
@@ -93,7 +93,7 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
       return "";
     }
     const patientRecord = patient?.find((p) => p?.patientId === id);
-    
+
     return patientRecord ? `${patientRecord?.firstName} ${patientRecord?.lastName}` : "";
   };
 
@@ -108,8 +108,6 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
     getAllPatients();
     getAssignedBeds()
   }, []);
-
-  console.log(patient, beds)
 
   useEffect(() => {
     setCombinedData(data);
@@ -126,18 +124,18 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
     const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
 
     if (patientRecord) {
-        const hmoDetails = {
-            hmoId: patientRecord?.hmoId,
-            hmoPackageId: patientRecord?.hmoPackageId
-        };
-        setHmoDetails(hmoDetails);
-        const patientName = `${patientRecord?.firstName} ${patientRecord?.lastName}`;
-        setPatientName(patientName);
+      const hmoDetails = {
+        hmoId: patientRecord?.hmoId,
+        hmoPackageId: patientRecord?.hmoPackageId
+      };
+      setHmoDetails(hmoDetails);
+      const patientName = `${patientRecord?.firstName} ${patientRecord?.lastName}`;
+      setPatientName(patientName);
     }
     setDiagnosis(record?.diagnosis);
     setViewing(record);
     navigate('/facility');
-};
+  };
 
 
   const handleEdit = (recordId) => {
@@ -161,7 +159,7 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
     };
     try {
       setLoading(true);
-      let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/list/${1}/10`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/list/${1}/10`, options);
       if (res.status === 200) {
         setBedsList(res?.data?.resultList || []);
       } else if (res.status === 500) {
@@ -185,10 +183,12 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
           <thead className="border-top-none">
             <tr className="border-top-none">
               <th className="center-text">Date</th>
+              <th className="center-text">Time</th>
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Patient</th>
               <th className="center-text">Bed Occupying</th>
               <th className="center-text">Action</th>
+
 
             </tr>
           </thead>
@@ -200,12 +200,20 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
                 <tr className="hovers" key={row?.id}>
                   <td>{new Date(row?.dateOfVisit).toLocaleDateString()}</td>
                   <td>
+                    {new Date(row?.createdAt?.split('.')[0]).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true, // 12-hour format
+                    })}
+                  </td>
+                  <td>
                     {row?.diagnosis}
                   </td>
                   <td>{patientName ? patientName : ''}</td>
                   <td>{bed ? bed : ''}</td>
-                  <td> <RiEdit2Fill size={20}  onClick={selectRecord(row)} style={{ color: 'green', cursor: 'pointer' }} /></td>
-                 
+                  <td> <RiEdit2Fill size={20} onClick={selectRecord(row)} style={{ color: 'green', cursor: 'pointer' }} /></td>
+
                 </tr>
               )
             })}

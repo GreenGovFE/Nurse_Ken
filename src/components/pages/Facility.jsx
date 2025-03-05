@@ -31,9 +31,6 @@ function Facility() {
   const [rooms, setRooms] = useState([]);
   const [selectedTabInner, setSelectedTabInner] = useState("identityDetails");
 
-
-
-
   let handleAssign = (data) => {
     setShowAssignModal(true);
     setAssignmentData(data);
@@ -57,7 +54,7 @@ function Facility() {
     };
 
     try {
-      let res = await axios.get("https://edogoverp.com/clinicapi/api/room/list/1/100", options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/room/list/1/100`, options);
       let roomList = res?.data?.resultList || []; // Adjusted to access data property
       roomList.unshift({ name: "Select Room", id: "" });
       setRooms(roomList.map((item) => ({ value: item?.id, name: item.name })));
@@ -110,7 +107,7 @@ function Facility() {
     };
     try {
       setLoading(true);
-      let res = await axios.get(`https://edogoverp.com/clinicapi/api/bed/list/${currentPage}/10`, options);
+      let res = await axios.get(`${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/list/${currentPage}/10`, options);
       if (res.status === 200) {
         setBedList(res?.data?.resultList || []);
         setTotalPages(res?.data?.totalPages || 1);

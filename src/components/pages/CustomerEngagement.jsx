@@ -67,7 +67,6 @@ function CustomerEngagement() {
       }));
 
     setAvg(logData);
-    console.log("avg", logData);
     const total = logData.reduce((acc, entry) => acc + entry.value, 0);
     setTotalValue(total);
   };
@@ -76,7 +75,6 @@ function CustomerEngagement() {
 
     fetchData();
     fetchAvg();
-    console.log(totalValue)
   }, [month, currentPage, typeNum]);
 
   const handlePageChange = (newPage) => {
