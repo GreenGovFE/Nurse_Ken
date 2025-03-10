@@ -21,3 +21,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignore zipped files
+*.zip
+*.tar.gz
+*.rar
+*.7z

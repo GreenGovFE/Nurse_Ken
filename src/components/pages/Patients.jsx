@@ -44,6 +44,8 @@ function Patients() {
     }
   };
 
+  console.log(nurseRoles)
+
   const generatePageNumbers = (currentPage, totalPages) => {
     let pages = [];
     if (totalPages <= 5) {
@@ -240,7 +242,7 @@ function Patients() {
                     options={filterOptions}
                   />
                 </div>
-                {nurseRoles.includes('checkin') &&
+                {nurseRoles?.includes('checkin') &&
                   <div className=" m-t-10 ">
                     <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex gap-16 flex-h-center flex-v-center">
                       <>
@@ -265,7 +267,7 @@ function Patients() {
               </div>
               <>
                 {
-                  nurseRoles.includes('checkin') && (
+                  nurseRoles?.includes('checkin') && (
                     <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex gap-16 flex-h-center col-3 m-t-30 flex-v-center">
                       <>
                         <AiOutlinePlus size={24} color="white" />
@@ -282,7 +284,7 @@ function Patients() {
       <div>
         <div className=" tabs m-t-20 bold-text">
           <>
-            {nurseRoles.includes('nurse') && nurseRoles.includes('checkin') && (
+            {nurseRoles?.includes('nurse') && (
               <>
                 <div
                   className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
@@ -310,7 +312,7 @@ function Patients() {
                 </div>
               </>
             )}
-            {nurseRoles.includes('vitalnurse') && nurseRoles.includes('checkin') && (
+            {nurseRoles?.includes('vitalnurse') && (
               <>
                 <div
                   className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
@@ -318,43 +320,9 @@ function Patients() {
                 >
                   Patients Awaiting Vital
                 </div>
-                <div
-                  className={`tab-item ${nurseTypes === "checkin" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients(true) }}
-                >
-                  Patients For Appointment
-                </div>
               </>
             )}
-            {nurseRoles.includes('nurse') && nurseRoles.includes('vitalnurse') && nurseRoles.includes('checkin') && (
-              <>
-                <div
-                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
-                >
-                  Patients
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
-                >
-                  Patients Awaiting Vital
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "admit" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admit"); setCurrentPage(1) }}
-                >
-                  Patients For Admission
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "checkin" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients(true) }}
-                >
-                  Patients For Appointment
-                </div>
-              </>
-            )}
-            {nurseRoles == ('checkin') && (
+            {nurseRoles?.includes('checkin') && (
               <>
                 <div
                   className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
@@ -368,39 +336,6 @@ function Patients() {
                 >
                   Patients For Appointment
                 </div>
-              </>
-            )}
-            {nurseRoles == ('vitalnurse') && (
-              <>
-                <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
-                >
-                  Patients Awaiting Vital
-                </div>
-              </>
-            )}
-            {nurseRoles === ('nurse') && (
-              <>
-                <div
-                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
-                >
-                  Patients
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
-                >
-                  Patients Awaiting Vital
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "admit" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admit"); setCurrentPage(1) }}
-                >
-                  Patients For Admission
-                </div>
-
               </>
             )}
           </>
