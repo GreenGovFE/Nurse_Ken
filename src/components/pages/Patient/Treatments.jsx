@@ -12,7 +12,8 @@ function Treatments() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [reset, setReset] = useState(false)
-  
+  const [selectedTab, setSelectedTab] = useState("general");
+
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -45,12 +46,12 @@ function Treatments() {
 
   useEffect(() => {
     getTreatment()
-    getTreatmentHistory()
+    // getTreatmentHistory()
   }, [reset])
 
   const getTreatmentHistory = async () => {
     try {
-      let res = await get(`/patients/${patientId}/currenttreatmentrecord?pageNumber=${currentPage}&pageSize=10`);
+      let res = await get(`/ServiceTreatment/list/patient/${patientId}/${currentPage}/10`);
       setCurrenttreatmentrecord(res?.data);
       setTotalPages(res?.pageCount)
     } catch (error) {
@@ -60,19 +61,83 @@ function Treatments() {
 
   const getTreatment = async () => {
     try {
-      let res = await get(`/patients/${patientId}/treatmentrecord?pageNumber=${currentPage}&pageSize=10`);
-      setTreatment(res?.data);
+      let res = await get(`/ServiceTreatment/list/patient/${patientId}/${currentPage}/10000`);
+      setTreatment(res?.data?.recordList);
       setTotalPages(res?.pageCount)
     } catch (error) {
       console.error('Error fetching treatment records:', error);
     }
   }
 
+  // Group treatment by their specific type IDs
+  const groupTreatmentsByType = (treatments) => {
+    return {
+      general: treatments?.filter(t => t.generalPracticeId !== 0),
+      ogIvf: treatments?.filter(t => t.oG_IVFId !== 0),
+      ortho: treatments?.filter(t => t.orthopedicId !== 0),
+      ante: treatments?.filter(t => t.antenatalId !== 0),
+      surg: treatments?.filter(t => t.generalSurgeryId !== 0),
+      famPlan: treatments?.filter(t => t.familyMedicineId !== 0),
+    };
+  };
+
+  const groupedTreatments = groupTreatmentsByType(treatment);
+
+
   return (
     <div>
       <div className="w-100">
-        <TreatmentTable data={treatment} reset={setReset}/>
-        <div className="pagination flex space-between float-right col-3 m-t-20">
+        <div className="tabs m-t-20 bold-text">
+          <div
+            className={`tab-item ${selectedTab === "general" ? "active" : ""}`}
+            onClick={() => setSelectedTab("general")}
+          >
+            General Practice
+          </div>
+          <div
+            className={`tab-item ${selectedTab === "og-ivf" ? "active" : ""}`}
+            onClick={() => setSelectedTab("og-ivf")}
+          >
+            OG & IVF
+          </div>
+          <div
+            className={`tab-item ${selectedTab === "ortho" ? "active" : ""}`}
+            onClick={() => setSelectedTab("ortho")}
+          >
+            Orthopedic
+          </div>
+          <div
+            className={`tab-item ${selectedTab === "ante" ? "active" : ""}`}
+            onClick={() => setSelectedTab("ante")}
+          >
+            Antenatal
+          </div>
+          <div
+            className={`tab-item ${selectedTab === "surg" ? "active" : ""}`}
+            onClick={() => setSelectedTab("surg")}
+          >
+            Surgery
+          </div>
+          <div
+            className={`tab-item ${selectedTab === "fam-plan" ? "active" : ""}`}
+            onClick={() => setSelectedTab("fam-plan")}
+          >
+            Family Planning
+          </div>
+        </div>
+        <TreatmentTable
+          data={
+            selectedTab === "general" ? groupedTreatments.general :
+              selectedTab === "og-ivf" ? groupedTreatments.ogIvf :
+                selectedTab === "ortho" ? groupedTreatments.ortho :
+                  selectedTab === "ante" ? groupedTreatments.ante :
+                    selectedTab === "surg" ? groupedTreatments.surg :
+                      selectedTab === "fam-plan" ? groupedTreatments.famPlan :
+                        []
+          }
+          reset={setReset}
+        />
+        {/* <div className="pagination flex space-between float-right col-3 m-t-20">
           <div className="flex gap-8">
             <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
           </div>
@@ -103,7 +168,7 @@ function Treatments() {
               {"Next"}
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

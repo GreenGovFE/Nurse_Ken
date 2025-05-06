@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import "./assets/css/general.css";
 import "./assets/css/index.css";
@@ -11,6 +11,8 @@ import PageLayout from './components/layouts/PageLayout';
 import { Toaster } from 'react-hot-toast';
 import { BedProvider } from './contexts/bedContext';
 import Connect from './components/home/connect';
+import notification from './utility/notification';
+import { get } from './utility/fetch';
 
 const App = () => {
   const navigate = useNavigate();
@@ -19,6 +21,43 @@ const App = () => {
   const [sessionExpired, setSessionExpired] = useState(false);
   const [minutesLeft, setMinutesLeft] = useState(null);
   const [inactivityMinutesLeft, setInactivityMinutesLeft] = useState(5); // 5 minutes countdown
+  const [previousLabPatients, setPreviousLabPatients] = useState([]);
+  const isInitialFetch = useRef(true);
+
+  const getPatientsAwaitingLab = async () => {
+    try {
+      const res = await get(`/patients/labrequests-not-attended/${sessionStorage.getItem('clinicId')}`);
+      
+      // Only compare if this is not the initial fetch
+      if (!isInitialFetch.current) {
+        // Get IDs from both lists
+        const previousIds = previousLabPatients.map(patient => patient.id);
+        const currentIds = res.map(patient => patient.id);
+
+        // Determine which records were removed (i.e. previously present but now missing)
+        const removedRecords = previousLabPatients.filter(patient => !currentIds.includes(patient.id));
+        
+        if (removedRecords.length > 0) {
+          const names = removedRecords.map(record => record.fullName).join(", ");
+          notification({ message: `Lab records ready for: ${names}`, type: "success" });
+        }
+      } else {
+        // Skip notification on initial fetch
+        isInitialFetch.current = false;
+      }
+      
+      // Update previousLabPatients with the current result for next comparison
+      setPreviousLabPatients(res);
+    } catch (error) {
+      // notification({ message: "Error fetching lab patients", type: "error" });
+    }
+  };
+
+  useEffect(() => {
+    // Poll every 10 seconds
+    const interval = setInterval(getPatientsAwaitingLab, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let activityTimeoutId;

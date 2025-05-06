@@ -5,6 +5,7 @@ import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill } from "react-icons/ri";
 import { usePatient } from "../../contexts";
 import SpeechToTextButton from "../UI/SpeechToTextButton";
+import GhostTextCompletion from "../UI/TextPrediction";
 
 function Discharge({ closeModal, appointment, fetch, currentPage }) {
     const [payload, setPayload] = useState({});
@@ -70,9 +71,13 @@ function Discharge({ closeModal, appointment, fetch, currentPage }) {
                 </div>
 
                 <div className="">
-
-                    <TagInputs label="Discharge Note" name="dischargeNote" value = {payload?.dischargeNote} onChange={(e) => handleChange(e, 'dischargeNote')} type='textArea' />
-                    <SpeechToTextButton onTranscript={handleTranscript} />
+                    <GhostTextCompletion
+                        label="Discharge Notes"
+                        name="dischargeNotes"
+                        value={payload?.dischargeNote}
+                        handleChange={(e) => handleChange(e, 'dischargeNote')}
+                    />
+                    
                 </div>
                 <button className="submit-btn m-t-20 w-100" disabled={Loading} onClick={discharge}>Discharge</button>
 

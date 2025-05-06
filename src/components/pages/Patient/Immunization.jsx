@@ -9,6 +9,7 @@ import notification from "../../../utility/notification";
 import { usePatient } from "../../../contexts";
 import EDMSFiles from "../../UI/EDMSFiles";
 import SpeechToTextButton from "../../UI/SpeechToTextButton";
+import GhostTextCompletion from "../../UI/TextPrediction";
 
 function Immunization({ setSelectedTab }) {
   const { patientId } = usePatient();
@@ -297,15 +298,13 @@ function Immunization({ setSelectedTab }) {
             <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''} dateRestriction={'past'} label="Date Given" type="date" error={errors.dateGiven} />
           </div>
           <div>
-            <TextArea
+            <GhostTextCompletion
               label="Notes"
               name="notes"
-              type="text"
-              value={payload?.notes || ''}
-              placeholder="Write your notes here..."
-              onChange={handleChange}
+              value={payload?.notes}
+              handleChange={handleChange}
             />
-            <SpeechToTextButton onTranscript={handleTranscript} />
+            
           </div>
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">

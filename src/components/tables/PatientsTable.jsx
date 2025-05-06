@@ -3,15 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { usePatient } from "../../contexts";
 import SendForVital from "../modals/SendForVital";
 import Cookies from "js-cookie";
+import Blacklist from "../modals/Blacklist";
 
 function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
   const { setPatientId, setPatientName, setPatientPage, setHmoId, setPatientInfo, nurseRoles, setHmoDetails } = usePatient();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [isModalOpenBlackList, setIsModalOpenBlackList] = useState(false);
+
   let navigate = useNavigate();
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setIsModalOpenBlackList(false);
 
   };
 
@@ -19,6 +23,16 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
 
   const selectRecord = (id, data) => {
     setIsModalOpen(true);
+    setPatientName(`${data.firstName} ${data.lastName}`);
+    setPatientInfo(data);
+    setPatientId(id);
+    Cookies.set('patientId', id);
+    Cookies.set('patientInfo', JSON.stringify(data));
+    Cookies.set('patientName', `${data.firstName} ${data.lastName}`);
+  };
+
+  const selectRecordBlackList = (id, data) => {
+    setIsModalOpenBlackList(true);
     setPatientName(`${data.firstName} ${data.lastName}`);
     setPatientInfo(data);
     setPatientId(id);
@@ -54,8 +68,18 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
               <th className="center-text">Modified By</th>
               <th className="center-text">Created On</th>
               <>
-                {nurseRoles?.includes('checkin') &&
-                  <th className="center-text"></th>
+                {(nurseRoles?.includes('checkin') && nurseRoles?.includes('nurse')) &&
+                  <>
+                    <th className="center-text"></th>
+                    <th className="center-text"></th>
+                  </>
+                }
+              </>
+              <>
+                {(nurseRoles?.includes('checkin') || nurseRoles?.includes('nurse')) &&
+                  <>
+                    <th className="center-text"></th>
+                  </>
                 }
               </>
             </tr>
@@ -77,9 +101,42 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
                   <td>{row?.modifiedByName}</td>
                   <td>{new Date(row?.createdAt).toLocaleDateString()}</td>
                   <>
-                    {nurseRoles?.includes('checkin') &&
-                      <td><button onClick={(e) => { e.stopPropagation(); selectRecord(row?.patientId || row?.id, row) }} className="submit-btn">Send for vitals</button></td>
-                    }
+                    {(nurseRoles?.includes('checkin')) && (
+                      <>
+                        <td>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              selectRecord(row?.patientId || row?.id, row);
+                            }}
+                            className="submit-btn m-b-10"
+                          >
+                            Send for vitals
+                          </button>
+                          
+                        </td>
+                      </>
+                    )}
+
+                  </>
+                  <>
+                    {nurseRoles?.includes('nurse')&& (
+                      <>
+                        <td>
+                         
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              selectRecordBlackList(row?.patientId || row?.id, row);
+                            }}
+                            className="submit-btn"
+                          >
+                            BlackList
+                          </button>
+                        </td>
+                      </>
+                    )}
+
                   </>
                 </tr>
               ))}
@@ -89,7 +146,12 @@ function PatientsTable({ data, currentPage, itemsPerPage, renderTabContent }) {
 
       {isModalOpen &&
         <SendForVital
-        closeModal={closeModal}
+          closeModal={closeModal}
+        />
+      }
+      {isModalOpenBlackList &&
+        <Blacklist
+          closeModal={closeModal}
         />
       }
     </div>

@@ -36,8 +36,10 @@ const Sidebar = () => {
     setPatientName(null);
     setPatientId(null);
     setDiagnosis(null);
+    localStorage.removeItem("from");
     Cookies.remove("patientInfo");
     Cookies.remove("patientName");
+    Cookies.remove('patientId')
   };
 
   const handleMenuItemClick = (title, href) => {

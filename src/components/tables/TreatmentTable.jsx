@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { get } from "../../utility/fetch";
+import { get, put } from "../../utility/fetch";
 import NurseNoteTreatment from "../modals/NurseNoteTreatment";
 import { usePatient } from "../../contexts";
 import DetailedNotes from "../modals/detailedNotes";
 import DetailedNurseNotes from "../modals/DetailedNurseNotes";
+import notification from "../../utility/notification";
+import { useNavigate } from "react-router-dom";
 
-function TreatmentTable({ data, reset}) {
-  const { patientId } = usePatient();
+function TreatmentTable({ data, reset }) {
+  const { patientId, setPatientId, setPatientInfo, setPatientName, setDiagnosis, setHmoDetails } = usePatient();
   const [combinedData, setCombinedData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewing, setViewing] = useState({});
@@ -18,8 +20,11 @@ function TreatmentTable({ data, reset}) {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [nurseNotes, setNurseNotes] = useState(false);
+  const [patient, setPatient] = useState([]);
   const [NotesModal, setNotesModal] = useState(false)
   const [vital, setVital] = useState([])
+  const navigate = useNavigate()
+
 
 
 
@@ -77,6 +82,7 @@ function TreatmentTable({ data, reset}) {
     }
   };
 
+
   useEffect(() => {
     getNurses();
     getDoctors();
@@ -94,11 +100,11 @@ function TreatmentTable({ data, reset}) {
     setNotesModal(false)
   };
 
-  const selectRecord = (record) => () => {
-    setViewing(record);
-    setNotes(record.nurseNotes);
-    setNotesModal(true);
-  };
+  // const selectRecord = (record) => () => {
+  //   setViewing(record);
+  //   setNotes(record.nurseNotes);
+  //   setNotesModal(true);
+  // };
 
   const addNotes = (record, type) => () => {
     if (type === 'view meds') {
@@ -113,6 +119,67 @@ function TreatmentTable({ data, reset}) {
     }
   };
 
+  const getAllPatients = async () => {
+    setLoading(true);
+    try {
+      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${1}&pageSize=${1000}`);
+      setPatient(res?.data);
+    } catch (error) {
+      console.error('Error fetching all patients:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectRecord = (record) => async () => {
+    const admitted = await Admit(record?.id);
+    if (!admitted) return;
+
+    setPatientId(record?.patient?.id);
+    const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
+
+    if (patientRecord) {
+      setHmoDetails({
+        hmoId: patientRecord.hmoId,
+        hmoPackageId: patientRecord.hmoPackageId,
+      });
+      setPatientName(`${patientRecord.firstName} ${patientRecord.lastName}`);
+    }
+    setDiagnosis(record?.diagnosis);
+    setViewing(record);
+    navigate('/facility');
+  };
+
+  const Admit = async (id, record) => {
+    const url = `/ServiceTreatment/${id}/patient/${patientId}/admit-patient`;
+    setLoading(true);
+    try {
+      const res = await put(url);
+      if (res?.statusCode === 200) {
+        notification({ message: "Successfully admitted patient", type: "success" });
+        setPatientId(record?.patient?.id);
+        const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
+
+        if (patientRecord) {
+          setHmoDetails({
+            hmoId: patientRecord.hmoId,
+            hmoPackageId: patientRecord.hmoPackageId,
+          });
+          setPatientName(`${patientRecord.firstName} ${patientRecord.lastName}`);
+        }
+        setDiagnosis(record?.diagnosis);
+        setViewing(record);
+        navigate('/facility');
+      } else {
+        notification({ message: "Failed to admit patient", type: "error" });
+      }
+    } catch (error) {
+      notification({ message: `Failed to admit patient`, type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-100">
       <div className="w-100 none-flex-item m-t-40">
@@ -120,10 +187,7 @@ function TreatmentTable({ data, reset}) {
           <thead className="border-top-none">
             <tr className="border-top-none">
               <th className="center-text">Date</th>
-              <th className="center-text">Age</th>
-              <th className="center-text">Weight (Kg)</th>
-              <th className="center-text">Temperature (°C)</th>
-              <th className="center-text">Admin Nurse</th>
+              <th className="center-text">Care Plan</th>
               <th className="center-text">Doctor</th>
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Medication/Prescription</th>
@@ -134,11 +198,8 @@ function TreatmentTable({ data, reset}) {
             {combinedData.map((row) => (
               <tr key={row?.id}>
                 <td>{new Date(row?.dateOfVisit).toLocaleDateString()}</td>
-                <td>{row?.age}</td>
-                <td>{row?.weight}</td>
-                <td>{row?.temperature}</td>
-                <td>{row?.nurseName}</td>
-                <td>{row?.doctorName}</td>
+                <td>{row?.carePlan}</td>
+                <td>{row?.doctor?.firstName} {row?.doctor?.lastName}</td>
                 <td style={{ maxWidth: '650px', whiteSpace: 'wrap', textAlign: 'left', paddingLeft: '12px' }}>
                   {row?.diagnosis}
                 </td>
@@ -147,16 +208,28 @@ function TreatmentTable({ data, reset}) {
                     <div key={med?.id} className="m-b-10 flex flex-direction-v">
                       <div className="flex">
                         <span>{index + 1}.</span>
-                        <span className="m-l-20">{med ? med.name : 'No Medication'}</span>
+                        <span className="m-l-20">{med ? med?.pharmacyInventory?.productName : 'No Medication'}</span>
                       </div>
                     </div>
                   ))}
-                  <div className="flex flex col-8">
-                    <span className="m-t-10 m-b-10 add-note" onClick={addNotes(row, 'view meds')}>
+                  <div className="flex flex-direction-v">
+                    {row?.isAdmitted ? ''
+                      :
+                      <>
+                        <button className="m-t-10 m-b-10 submit-btn" onClick={() => Admit(row?.id, row)}>
+                          Admit Patient
+                        </button>
+                      </>
+
+                    }
+                    <button className="m-t-10 m-b-10 submit-btn" onClick={addNotes(row, 'view meds')}>
                       View Medications/Prescription Details
-                    </span>
-                    <span className="m-t-10 m-b-10 m-l-20 add-note" onClick={addNotes(row, 'nurse notes')}>
+                    </button>
+                    <button className="m-t-10 m-b-10 submit-btn" onClick={addNotes(row, 'nurse notes')}>
                       View Nurse Notes
+                    </button>
+                    <span className="m-t-10 m-b-10 admit-status">
+                      {row?.isAdmitted ? 'Admitted' : 'Vitisted'}
                     </span>
                   </div>
 
@@ -207,9 +280,6 @@ function TreatmentTable({ data, reset}) {
 
         />
       )}
-
-
-
     </div>
   );
 }

@@ -23,7 +23,10 @@ function Personal({ setSelectedTab, hide }) {
     maritalStatus: "",
     nationality: 'Nigerian',
     clinicId: 0,
-    pictureUrl: ""
+    pictureUrl: "",
+    nin: '',
+    hasHmo: false,
+    hasRetainership: false,
   });
   const [pictureUrl, setPictureUrl] = useState(null);
   const [fileName, setFilename] = useState('');
@@ -49,6 +52,12 @@ function Personal({ setSelectedTab, hide }) {
     { value: "Referred", name: "Referred" }
   ];
 
+  const options = [
+    { label: "Private", value: "private" },
+    { label: "HMO", value: "hasHmo" },
+    { label: "Retainership", value: "hasRetainership" },
+  ];
+
   useEffect(() => {
     if (patientInfo) {
       setPayload({
@@ -64,7 +73,11 @@ function Personal({ setSelectedTab, hide }) {
         maritalStatus: patientInfo?.maritalStatus || "",
         nationality: patientInfo?.nationality || 'Nigerian',
         clinicId: patientInfo?.clinicId || 0,
-        pictureUrl: patientInfo?.pictureUrl || ""
+        pictureUrl: patientInfo?.pictureUrl || "",
+        patientRef: patientInfo?.patientRef || '',
+        nin: patientInfo?.nin || '',
+        hasHmo: patientInfo?.hasHmo || false,
+        hasRetainership: patientInfo?.hasRetainership || false,
       });
     } else {
       setPayload({
@@ -80,7 +93,10 @@ function Personal({ setSelectedTab, hide }) {
         maritalStatus: "",
         nationality: 'Nigerian',
         clinicId: 0,
-        pictureUrl: ""
+        pictureUrl: "",
+        nin: '',
+        hasHmo: false,
+        hasRetainership: false,
       });
     }
     fetchNationality();
@@ -88,25 +104,36 @@ function Personal({ setSelectedTab, hide }) {
   }, [patientInfo]);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
 
-    if (name === "dateOfBirth") {
-      const selectedDate = new Date(value);
-      const currentDate = new Date();
-
-      if (selectedDate >= currentDate) {
-        notification({ message: 'Date selected cannot be a future date', type: "error" });
-        return;
-      }
-    } else if (name === 'phoneNumber') {
-      if ((value.length <= 11 && isNaN(value)) || value.length > 11) {
-        notification({ message: 'Please enter a valid phone number', type: "error" });
-        return;
-      }
+    if (type === "checkbox") {
+      setPayload(prevPayload => ({ ...prevPayload, [name]: checked }));
+    } else {
+      setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
     }
-
-    setPayload(prevPayload => ({ ...prevPayload, [name]: value }));
   };
+
+  const handleDropdownChange = (selectedOptions) => {
+    // Reset the flags for all available options
+    const updatedPayload = { 
+      hasHmo: false, 
+      hasRetainership: false, 
+      private: false 
+    };
+  
+    // Ensure selectedOptions is always an array
+    const optionsArray = Array.isArray(selectedOptions)
+      ? selectedOptions
+      : (selectedOptions ? [selectedOptions] : []);
+  
+    // Set the corresponding flag to true for each selected option
+    optionsArray.forEach(option => {
+      updatedPayload[option.value] = true;
+    });
+  
+    setPayload(prevPayload => ({ ...prevPayload, ...updatedPayload }));
+  };
+  
 
   const requiredFields = {
     // email: "Email",
@@ -254,12 +281,12 @@ function Personal({ setSelectedTab, hide }) {
     // }
     setLoader(true);
     try {
-      let res = await post("/patients/UpdatePatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl, patientRef: patientInfo?.patientRef });
+      let res = await post("/patients/UpdatePatient", { ...payload, clinicId: Number(sessionStorage.getItem("clinicId")), pictureUrl, });
       if (res.patientId) {
         notification({ message: res?.messages || 'Patient updated successfully', type: "success" });
         setPatientId(res.patientId);
         setPatientInfo(payload)
-        fetchPatientById(res.patientId);
+        fetchPatientById(res?.patientId);
       }
     } catch (error) {
       notification({ message: 'An error occurred while updating patient', type: "error" });
@@ -290,13 +317,23 @@ function Personal({ setSelectedTab, hide }) {
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.lastName || ''} name="lastName" label="Last Name*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.gender || ''} name="gender" type="select" label="Gender*" options={gender} />
           <TagInputs onChange={handleChange} disabled={!hide} value={formatDate(payload?.dateOfBirth) || ''} name="dateOfBirth" dateRestriction={'past'} type="date" label="Date Of Birth*" />
-          <TagInputs onChange={handleChange} disabled={!hide} value={payload?.email || ''} name="email" label="Email*" />
+          <TagInputs onChange={handleChange} disabled={!hide} value={payload?.email || ''} name="email" label="Email" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.phoneNumber || ''} name="phoneNumber" label="Phone Number*" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.nationality || ''} name="nationality" type="select" label="Nationality*" options={nationality} />
+          <TagInputs onChange={handleChange} disabled={!hide} value={payload?.nin || ''} name="nin" label="NIN" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.stateOfOrigin || ''} name="stateOfOrigin" type="select" label="State Of Origin" options={states} />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.lga || ''} name="lga" label="LGA" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.placeOfBirth || ''} name="placeOfBirth" label="Place Of Birth" />
           <TagInputs onChange={handleChange} disabled={!hide} value={payload?.maritalStatus || ''} name="maritalStatus" type="select" label="Marital Status*" options={maritalStatus} />
+          <TagInputs
+            label="Patient Class"
+            name="additionalOptions"
+            value={options.filter(option => payload[option.value])}
+            onChange={handleDropdownChange}
+            type="R-select"
+            options={options}
+            isMulti={false}
+          />
         </div>
         <div className="col-4">
           <>

@@ -1,0 +1,63 @@
+.ghost-container {
+    position: relative;
+    width: 100%;
+}
+
+.textarea-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.ghost-textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    resize: none;
+    background-color: #f9f9f9;
+    color: #333;
+    font-family: Arial, sans-serif;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.ghost-textarea::before {
+    content: attr(data-placeholder);
+    color: #aaa;
+    position: absolute;
+    pointer-events: none;
+    left: 10px;
+    top: 10px;
+    font-size: 14px;
+}
+
+.ghost-suggestion {
+    color: rgba(0, 0, 0, 0.3);
+    font-weight: normal;
+    pointer-events: none;
+}
+
+.loading-indicator {
+    margin-top: 5px;
+    text-align: center;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-top: 2px solid #17621A;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

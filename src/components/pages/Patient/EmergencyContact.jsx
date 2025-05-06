@@ -4,10 +4,14 @@ import notification from "../../../utility/notification";
 import { get, post } from "../../../utility/fetch";
 import { usePatient } from "../../../contexts";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function EmergencyContact({ setSelectedTab }) {
-  const { patientId } = usePatient();
+  const { patientId, patientInfo, setPatientId, setPatientInfo } = usePatient();
+
   const [states, setStates] = useState(null);
+  
+  let navigate = useNavigate();
 
 
   const [payload, setPayload] = useState({});
@@ -121,6 +125,11 @@ function EmergencyContact({ setSelectedTab }) {
       if (res.patientId) {
         notification({ message: res?.messages, type: "success" });
         // setSelectedTab("financeHmo");
+        // setPayload({});
+        // setPatientInfo({})
+        // setSelectedTab('personal')
+        navigate("/patients");
+
         sessionStorage.setItem("patientId", res?.patientId);
       } else {
         notification({ message: res?.messages, type: "error" });

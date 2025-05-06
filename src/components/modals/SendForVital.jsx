@@ -179,7 +179,7 @@ function SendForVital({ closeModal }) {
     };
 
     const sendForVital = async () => {
-        if (!validatePayload()) return;
+        // if (!validatePayload()) return;
 
         const url = `/Appointment/checkin-patient`;
 
@@ -278,7 +278,7 @@ function SendForVital({ closeModal }) {
                     </div>
                 }
                 <div className="p-20">
-                    <div className='w-100'>
+                    {/* <div className='w-100'>
                         <MemoizedTagInputs
                             label="Assign Nurse"
                             name="NurseId"
@@ -287,7 +287,7 @@ function SendForVital({ closeModal }) {
                             type='R-select'
                             options={nurses}
                         />
-                    </div>
+                    </div> */}
                     <div className="flex flex-v-center m-t-20">
                         <input
                             type="checkbox"

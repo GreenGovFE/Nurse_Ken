@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { RiAddCircleFill } from 'react-icons/ri';
+import { RiAddCircleFill, RiNotification2Fill } from 'react-icons/ri';
 import { usePatient } from '../contexts';
 
 import finance from '../assets/images/finance.svg';
@@ -38,6 +38,11 @@ const useNavigationItems = () => {
             href: '/finance',
             icon: <img src={finance} className="icon" alt="Finance Icon" />
         },
+        {
+            title: 'Notifications',
+            href: '/notify',
+            icon: <RiNotification2Fill style={{ width: '20px', height: '20px', color: '#3C7E2D' }}/>
+        },
         // {
         //     title: 'Insurance',
         //     href: '/insurance',
@@ -74,6 +79,7 @@ const useNavigationItems = () => {
             href: '/patients',
             icon: <img src={patient} className="icon" alt="Patient Icon" />
         },
+        
     ];
 
     if (nurseRoles.includes('nurse') && nurseRoles.includes('checkin')) {

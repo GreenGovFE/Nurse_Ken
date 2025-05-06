@@ -25,6 +25,8 @@ function PatientsAppointTable({ data, currentPage, itemsPerPage, fetchData }) {
     setAdd(false)
   };
 
+  console.log(data)
+
   const handleDelete = (id) => {
     del(`/Appointment/Delete-appointment?Id=${id}`)
       .then(res => {

@@ -78,9 +78,10 @@ function VisitsTable({ data }) {
             <tr className="border-top-none">
               <th className="center-text">Date</th>
               <th className="center-text">Blood Pressure (mmHg)</th>
-              <th className="center-text">Weight (Kg)</th>
               <th  className="center-text">Temp (°C)</th>
+              <th className="center-text">Weight (Kg)</th>
               <th  className="center-text">Height (cm)</th>
+              <th  className="center-text">BMI</th>
               <th  className="center-text">Heart (bpm)</th>
               <th  className="center-text">Oxygen Saturation (SpO₂) </th>
               <th  className="center-text">Blood sugar</th>
@@ -95,9 +96,10 @@ function VisitsTable({ data }) {
               <tr key={row?.id}>
                 <td style={{ minWidth: '100px' }}>{formatDate(row?.dateOfVisit)}</td>
                 <td>{row?.bloodPressure}</td>
-                <td>{row?.weight}</td>
                 <td>{row?.temperature}</td>
+                <td>{row?.weight}</td>
                 <td>{row?.height}</td>
+                <td>{row?.bmi}</td>
                 <td>{row?.heartPulse}</td>
                 <td>{row?.oxygenSaturation}</td>
                 <td>{row?.bloodSugar}</td>

@@ -7,6 +7,75 @@ import { RiCloseFill } from "react-icons/ri";
 function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
     const [payload, setPayload] = useState({});
 
+    const medications = [...(treatment?.medications || []), ...(treatment?.otherMedications || [])];
+
+    const administrationFrequencies = [
+        { id: 1, name: 'Immediately' },
+        { id: 2, name: 'As needed' },
+        { id: 3, name: 'Once daily' },
+        { id: 4, name: 'Twice a day' },
+        { id: 5, name: 'Three times a day' },
+        { id: 6, name: 'Four times a day' },
+        { id: 7, name: 'At night' },
+        { id: 8, name: 'Morning' },
+        { id: 9, name: 'Evening' },
+        { id: 10, name: 'Every 24 hours' },
+        { id: 11, name: 'Every 12 hours' },
+        { id: 12, name: 'Every 8 hours' },
+        { id: 13, name: 'Every 6 hours' },
+        { id: 14, name: 'Every 4 hours' },
+        { id: 15, name: 'Every 3 hours' },
+        { id: 16, name: 'Every 2 hours' },
+        { id: 17, name: 'Every hour' },
+        { id: 18, name: 'Every 2 months' },
+        { id: 19, name: 'Every 3 months' },
+    ];
+
+    const drugStrengthUnits = [
+        { id: 0, name: "Milligrams" },
+        { id: 1, name: "Grams" },
+        { id: 2, name: "Micrograms" },
+        { id: 3, name: "Milliliters" },
+        { id: 4, name: "Liters" },
+        { id: 5, name: "Units" },
+        { id: 6, name: "Puffs" },
+        { id: 7, name: "Sprays" },
+        { id: 8, name: "Drops" },
+        { id: 9, name: "Patch" },
+        { id: 10, name: "Bottle" },
+        { id: 11, name: "TransdermalSystem" },
+        { id: 12, name: "Tablet" },
+        { id: 13, name: "Capsule" },
+        { id: 14, name: "Suppository" },
+        { id: 15, name: "Scoop" },
+        { id: 16, name: "Sachet" },
+        { id: 17, name: "Ampoule" },
+        { id: 18, name: "Vial" },
+        { id: 19, name: "InjectionPen" },
+        { id: 20, name: "Enema" },
+        { id: 21, name: "Ounces" },
+        { id: 22, name: "Teaspoon" },
+        { id: 23, name: "Tablespoon" },
+        { id: 24, name: "Milliequivalents" },
+        { id: 25, name: "InternationalUnits" }
+    ];
+
+
+    const routesOfAdministration = [
+        { id: 1, name: 'Orally' },
+        { id: 2, name: 'Sublingual' },
+        { id: 3, name: 'Topical' },
+        { id: 4, name: 'Inhalation' },
+        { id: 5, name: 'Suppository' },
+        { id: 6, name: 'IV' },
+        { id: 7, name: 'IM' },
+        { id: 8, name: 'Subcut' },
+        { id: 9, name: 'Intradermal' },
+        { id: 10, name: 'PerRectum' },
+        { id: 11, name: 'PerVagina' },
+        { id: 12, name: 'Implant' },
+    ];
+
     const requiredFields = {
         doctorId: "Assigned Doctor",
         nurseId: "Administering Nurse",
@@ -40,7 +109,6 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
             })
     }
 
-    const medications = [...(treatment?.medications || []), ...(treatment?.otherMedications || [])];
 
     return (
         <div className='overlay'>
@@ -51,38 +119,19 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
                         <p>Prescription Details</p>
                     </div>
                 </div>
-                <div>
-                    <table className="bordered-table-2">
-                        <thead className="border-top-none">
-                            <tr className="border-top-none">
-                                <th className="w-20">Date</th>
-                                <th>Age</th>
-                                <th>Weight (kg)</th>
-                                <th>Temp (°C)</th>
-                            </tr>
-                        </thead>
-                        <tbody className="white-bg view-det-pane">
-                            <tr >
-                                <td>{new Date(treatment.dateOfVisit).toLocaleDateString()}</td>
-                                <td>{treatment.age}</td>
-                                <td>{treatment.weight}</td>
-                                <td>{treatment.temperature}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
 
                 <table className="bordered-table-2 m-t-40">
                     <thead className="border-top-none">
                         <tr className="border-top-none">
                             <th className="w-20" rowSpan="2">Diagnosis</th>
                             <th rowSpan="2">Prescription</th>
-                            <th colSpan="3" className="center-text">Dosage</th> {/* Dosage header spanning two columns */}
+                            <th colSpan="5" className="center-text">Dosage</th> {/* Dosage header spanning two columns */}
                         </tr>
                         <tr className="">
-                            <th>Frequency</th>
                             <th>Quantity</th>
                             <th>Duration</th>
+                            <th>Route</th>
+                            <th>Frequency of Administration</th>
                         </tr>
                     </thead>
                     <tbody className="white-bg view-det-pane">
@@ -91,21 +140,15 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
                             <td>
                                 {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.name}</span>
+                                        <span>{item?.pharmacyInventory?.productName}</span>
                                     </div>
                                 ))}
                             </td>
+                           
                             <td>
                                 {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.frequency} times daily</span>
-                                    </div>
-                                ))}
-                            </td>
-                            <td>
-                                {medications.map((item) => (
-                                    <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                                        <span>{item?.quantity}mg</span>
+                                        <span>{item?.quantity} {drugStrengthUnits.find(unit => unit.id === item?.drugStrengthUnit)?.name || 'N/A'}</span>
                                     </div>
                                 ))}
                             </td>
@@ -113,6 +156,20 @@ function DetailedNotes({ closeModal, treatment, notes, doctors, nurses, }) {
                                 {medications.map((item) => (
                                     <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
                                         <span>{item?.duration} days</span>
+                                    </div>
+                                ))}
+                            </td>
+                            <td>
+                                {medications.map((item) => (
+                                    <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                                        <span>{routesOfAdministration.find(route => route.id === item.routeOfAdministration)?.name || 'N/A'}</span>
+                                    </div>
+                                ))}
+                            </td>
+                            <td>
+                                {medications.map((item) => (
+                                    <div key={item?.id} style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                                        <span>{administrationFrequencies.find(route => route.id === item.administrationFrequency)?.name || 'N/A'}</span>
                                     </div>
                                 ))}
                             </td>

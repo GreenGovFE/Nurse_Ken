@@ -6,6 +6,7 @@ import { usePatient } from '../../contexts';
 import notification from '../../utility/notification';
 import axios from 'axios';
 import SpeechToTextButton from "../UI/SpeechToTextButton";
+import GhostTextCompletion from '../UI/TextPrediction';
 
 const MemoizedTagInputs = React.memo(TagInputs);
 
@@ -277,14 +278,13 @@ function AppointmentModal({ closeModal, appointmentId, type, fetchData, currentP
                         />
                     </div>
                     <div>
-                        <MemoizedTagInputs
+                        <GhostTextCompletion
                             label="Additional Details"
-                            value={payload?.description}
                             name="description"
-                            onChange={handleChange}
-                            type='textArea'
+                            value={payload?.description}
+                            handleChange={handleChange}
                         />
-                        <SpeechToTextButton onTranscript={handleTranscript} />
+                        
                     </div>
                     <button className="submit-btn m-t-20 w-100" onClick={addAppointmemt} disabled={loading}>Submit</button>
                 </div>

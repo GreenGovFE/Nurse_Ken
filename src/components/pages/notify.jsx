@@ -17,7 +17,7 @@ import PatientsAppointTable from "../tables/PatientsAppointTable";
 import BlackListTable from "../tables/BlackListTable";
 import LabsTablePending from "../tables/awaitingLab";
 
-function Patients() {
+function Notify() {
   const [allPatients, setAllPatients] = useState([]);
   const [vitalPatients, setVitalPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -33,10 +33,10 @@ function Patients() {
   const [appointPatients, setAppointPatients] = useState([])
   const [labPatient, setLabPatient] = useState([])
   const [BlacklistPatient, setBlacklistPatient] = useState([])
-  const [checkinPatients, setCheckinPatients] = useState(false)
-  const [nurseTypes, setNurseTypes] = useState('admin');
-
-
+  const [checkinPatients, setCheckinPatients] = useState('notify')
+  const [nurseTypes, setNurseTypes] = useState('checkin');
+  const [previousLabPatients, setPreviousLabPatients] = useState([]);
+  const [notificationMessage, setNotificationMessage] = useState("");
 
   const itemsPerPage = 10;
 
@@ -114,7 +114,7 @@ function Patients() {
   const getAllAdmittedPatients = async (currentPage) => {
     setLoading(true);
     try {
-      let res = await get(`/patients/admitted-patients-service?pageNumber=${currentPage}&pageSize=10`);
+      let res = await get(`/patients/admitted-patients?pageNumber=${currentPage}&pageSize=10`);
       setAdmittedPatients(res?.data);
       setTotalPages(res?.pageCount);
     } catch (error) {
@@ -128,10 +128,24 @@ function Patients() {
     setLoading(true);
     try {
       let res = await get(`/patients/labrequests-not-attended/${sessionStorage.getItem('clinicId')}`);
+
+      // Compare the previous state with the current state
+      const previousIds = previousLabPatients.map(patient => patient.id);
+      const currentIds = res.map(patient => patient.id);
+      const completedRecords = previousLabPatients.filter(patient => !currentIds.includes(patient.id));
+
+      // If there are completed records, display a notification banner
+      if (completedRecords.length > 0) {
+        const names = completedRecords.map(record => record.fullName).join(", ");
+        setNotificationMessage(`Lab records ready for: ${names}`);
+        setTimeout(() => setNotificationMessage(""), 5000); // Clear the notification after 5 seconds
+      }
+
+      setPreviousLabPatients(res); // Update the previous state
       setLabPatient(res);
       setTotalPages(1);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error('Error fetching lab patients:', error);
     } finally {
       setLoading(false);
     }
@@ -226,23 +240,11 @@ function Patients() {
   };
 
   useEffect(() => {
-    if (nurseTypes === ('admit')) {
-      getAllAdmittedPatients(currentPage);
-    } else if (nurseTypes === ('vital')) {
-      getPatientsAwaitingVital(searchTerm);
-    }
-    else if (nurseTypes === ('blacklist') && checkinPatients === true) {
-      getBlacklistedPatients(currentPage);
-    } else if (nurseTypes === ('checkin') && checkinPatients === true) {
-      getAppointmentPatients(currentPage);
-    }
-    else if (nurseTypes === ('checkin') && checkinPatients === 'notify') {
+    if (nurseTypes === ('checkin') && checkinPatients === 'notify') {
       getPatientsAwaitingLab()
     }
-    else {
-      getAllPatients(currentPage);
-    }
-  }, [currentPage, searchTerm, nurseTypes, checkinPatients]);
+    
+  }, [nurseTypes, checkinPatients]);
 
   useEffect(() => {
     if (payload) {
@@ -251,6 +253,17 @@ function Patients() {
       getAllPatients();
     }
   }, [filterSelected, payload]);
+
+  useEffect(() => {
+    // Call the function every 10 seconds to mimic real-time updates
+    const interval = setInterval(() => {
+      if (nurseTypes === 'checkin' && checkinPatients === 'notify') {
+        getPatientsAwaitingLab();
+      }
+    }, 10000);
+
+    return () => clearInterval(interval); // Clear the interval on component unmount
+  }, [nurseTypes, checkinPatients]);
 
   const filterOptions = [
     { value: "firstName", name: "First Name" },
@@ -262,6 +275,11 @@ function Patients() {
 
   return (
     <div className="w-100 m-t-40">
+      {notificationMessage && (
+        <div className="notification-banner">
+          {notificationMessage}
+        </div>
+      )}
       <>
         {
           nurseTypes !== 'vital' ? (
@@ -321,70 +339,14 @@ function Patients() {
       <div>
         <div className=" tabs m-t-20 bold-text">
           <>
-            {nurseRoles?.includes('nurse') && (
-              <>
-                <div
-                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
-                >
-                  Patients
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
-                >
-                  Patients Awaiting Vital
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "admit" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admit"); setCurrentPage(1) }}
-                >
-                  Patients For Admission
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "checkin" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients(true) }}
-                >
-                  Patients For Appointment
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "blacklist" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("blacklist"); setCurrentPage(1); setCheckinPatients(true) }}
-                >
-                  Patients Blacklisted
-                </div>
-              </>
-            )}
-            {nurseRoles?.includes('vitalnurse') && (
-              <>
-                <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
-                >
-                  Patients Awaiting Vital
-                </div>
-              </>
-            )}
             {nurseRoles?.includes('checkin') && (
               <>
                 <div
-                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
-                >
-                  Patients
-                </div>
-                <div
-                  className={`tab-item ${nurseTypes === "checkin" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients(true) }}
-                >
-                  Patients For Appointment
-                </div>
-                {/* <div
                   className={`tab-item ${nurseTypes === "checkin" && checkinPatients === 'notify' ? "active" : ""}`}
                   onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients('notify') }}
                 >
                   Patients Awaiting Lab Reports
-                </div> */}
+                </div>
               </>
             )}
           </>
@@ -461,4 +423,4 @@ function Patients() {
   );
 }
 
-export default Patients;
+export default Notify;

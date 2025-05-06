@@ -7,6 +7,7 @@ import { get as getPatient } from "../../utility/fetchNurse";
 import notification from "../../utility/notification";
 import Notify from "../../utility/notify";
 import SpeechToTextButton from "../UI/SpeechToTextButton";
+import GhostTextCompletion from "../UI/TextPrediction";
 
 const BedAssignModal = ({ closeModal, getBeds, data }) => {
     const [payload, setPayload] = useState({
@@ -17,7 +18,11 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
         assignerUserId: Number(sessionStorage?.getItem("userId"))
     });
     const [selectedStaff, setSelectedStaff] = useState();
+
     
+    const [staffIdInput, setStaffIdInput] = useState("");
+    
+    const [userNames, setUserNames] = useState([]);
     const getUsers = async () => {
         let res = await getPatient("/patients/AllPatient/2?pageIndex=1&pageSize=10000");
         setUserNames(res?.data?.map((user) => ({
@@ -25,10 +30,6 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
             value: user.patientId,
         })))
     }
-
-    const [staffIdInput, setStaffIdInput] = useState("");
-
-    const [userNames, setUserNames] = useState([]);
 
     const handleChange = (event) => {
         if (event.target.name === "patientAssignedId") {
@@ -92,8 +93,13 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
                     >
                         <h3 className="m-b-10">Assign a Patient</h3>
                         <TagInputs type="select" value={staffIdInput} name="patientAssignedId" options={userNames} onChange={handleChange} label="Select Patient" />
-                        <TagInputs type="textArea" onChange={handleChange} name="assignNote" label="Additional Notes " />
-                        <SpeechToTextButton onTranscript={handleTranscript} />
+                        <GhostTextCompletion
+                            label="Additional Notes"
+                            name="additionalNote"
+                            value={payload?.assignNote}
+                            handleChange={handleChange}
+                        />
+                       
                         <button onClick={assignBed} className="btn w-100 m-t-10">Submit</button>
 
                     </div>

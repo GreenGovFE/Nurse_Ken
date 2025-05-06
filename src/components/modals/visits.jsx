@@ -109,9 +109,10 @@ function ViewVisit({ closeModal, visit, next }) {
                             <tr className="border-top-none">
                                 <th className="center-text">Date</th>
                                 <th className="center-text">Blood Pressure (mmHg)</th>
-                                <th className="center-text">Weight (Kg)</th>
                                 <th className="center-text">Temp (°C)</th>
+                                <th className="center-text">Weight (Kg)</th>
                                 <th className="center-text">Height (cm)</th>
+                                <th className="center-text">BMI</th>
                                 <th className="center-text">Heart (bpm)</th>
                                 <th className="center-text">Oxygen Saturation (SpO₂) </th>
                                 <th className="center-text">Blood sugar</th>
@@ -125,9 +126,10 @@ function ViewVisit({ closeModal, visit, next }) {
                             <tr >
                                 <td style={{ minWidth: '100px' }}>{formatDate(visit?.dateOfVisit)}</td>
                                 <td>{visit?.bloodPressure}</td>
-                                <td>{visit?.weight}</td>
                                 <td>{visit?.temperature}</td>
+                                <td>{visit?.weight}</td>
                                 <td>{visit?.height}</td>
+                                <td>{visit?.bmi}</td>
                                 <td>{visit?.heartPulse}</td>
                                 <td>{visit?.oxygenSaturation}</td>
                                 <td>{visit?.bloodSugar}</td>
@@ -166,10 +168,10 @@ function ViewVisit({ closeModal, visit, next }) {
                                         // For image files, use an img tag
                                         <img src={doc?.docPath} alt={doc?.docName}
                                             style={{
-                                                width: 'auto',   
-                                                height: 'auto',       
-                                                maxHeight: '80vh',   
-                                                objectFit: 'contain'  
+                                                width: 'auto',
+                                                height: 'auto',
+                                                maxHeight: '80vh',
+                                                objectFit: 'contain'
                                             }}
                                         />
                                     ) : (

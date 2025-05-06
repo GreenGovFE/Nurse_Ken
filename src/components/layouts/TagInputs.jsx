@@ -55,6 +55,7 @@ export default function TagInputs(props) {
                             isDisabled={props.disabled}
                             options={props.options}
                             menuShouldScrollIntoView={false} // Prevent automatic scrolling to dropdown
+                            isMulti={props.isMulti}
                             styles={{
                                 container: (provided) => ({
                                     ...provided,

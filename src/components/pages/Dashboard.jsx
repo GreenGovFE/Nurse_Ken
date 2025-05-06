@@ -14,6 +14,7 @@ function Dashboard() {
 
   const [admittedpatients, setAdmittedPatients] = useState(0)
   const [inPatients, setInpatients] = useState(0)
+  const [patientsVisited, setPatientsVisited] = useState(0) 
   const [outPatients, setOutpatients] = useState(0)
   const [malePercentage, setMalePercentage] = useState(0)
   const [femalePercentage, setFemalePercentage] = useState(0)
@@ -41,6 +42,7 @@ function Dashboard() {
     try {
       let res = await get("/dashboard/AllOutPatientAndInPatientCount");
       setInpatients(res);
+      setPatientsVisited(res?.monthlyStats)
       // setOutpatients(res?.outpatientCount);
     } catch (error) {
       console.error('Error fetching in and out patients:', error);
@@ -139,13 +141,13 @@ function Dashboard() {
             }} icon={<RiHotelBedFill className="icon" size={32} />}
             />
           </div>
-          <div className="col-3">
+          {/* <div className="col-3">
             <StatCard data={{
               number: availableStaff,
               title: "Available Staff",
             }} icon={<RiAccountCircleFill className="icon" size={32} />}
             />
-          </div>
+          </div> */}
           <div className="col-3">
             <StatCard data={{
               number: hmopatients,
@@ -166,8 +168,7 @@ function Dashboard() {
           <div className="flex wrap space-between m-t-40">
             <div className="col-8">
               <OutAndInpatientGraph
-                InPatients={inPatients}
-                OutPatients={outPatients}
+                monthlyStats={patientsVisited}
               />
             </div>
             <div className="col-4 ">

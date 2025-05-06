@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { usePatient } from "../../contexts";
 import React from "react";
+import Cookies from 'js-cookie';
+
 
 const VitalPatientsTable = ({ currentPage, data, itemsPerPage }) => {
   const { setPatientId, setPatientName, setHmoId, setPatientInfo } = usePatient();
@@ -9,9 +11,11 @@ const VitalPatientsTable = ({ currentPage, data, itemsPerPage }) => {
 
   const continueUpdate = (id, data) => {
     setPatientId(id);
+    Cookies.set('patientId', id)
     setPatientName(`${data.firstName} ${data.lastName}`);
     setHmoId(data?.hmoId);
     setPatientInfo(data);
+    localStorage.setItem('from', true);
     navigate("/patient-details");
   }
   return (
@@ -33,7 +37,7 @@ const VitalPatientsTable = ({ currentPage, data, itemsPerPage }) => {
 
           <tbody className="white-bg view-det-pane">
             {Array.isArray(data) &&
-              data.map((row, index) => (
+              data?.map((row, index) => (
                 <tr className="hovers pointer" onClick={() => continueUpdate(row?.patientId || row?.id, row)} key={row?.id}>
                   <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
                   <td>{row?.patientRef}</td>

@@ -13,6 +13,7 @@ import ReferredPatients from '../components/pages/referrals';
 import AddPatients from '../components/pages/AddPatients';
 import { useNavigate } from "react-router-dom";
 import PatientHMOetails from '../components/pages/PatientHmoDetails';
+import Notify from '../components/pages/notify';
 
 
 export default () => {
@@ -29,6 +30,7 @@ export default () => {
             <Route path="/insurance" element={<AuthRoute><PatientsInsurance /></AuthRoute>} />
             <Route path="/customer-engagement" element={<AuthRoute><CustomerEngagement /></AuthRoute>} />
             <Route path="/referrals" element={<AuthRoute><ReferredPatients /></AuthRoute>} />
+            <Route path="/notify" element={<AuthRoute><Notify /></AuthRoute>} />
         </Routes>
     )
 

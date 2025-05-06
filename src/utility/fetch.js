@@ -100,7 +100,7 @@ function parseJSON(response) {
       });
   } else {
     // If the response status is not OK, throw an error with the response status
-    throw new Error(`Response status: ${response.status}`);
+    throw new Error(`Response status: ${response}`);
   }
 }
 

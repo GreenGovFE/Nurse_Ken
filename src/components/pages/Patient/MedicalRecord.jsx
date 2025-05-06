@@ -35,6 +35,8 @@ function MedicalRecord({ data, next, fetchData }) {
   useEffect(() => {
     const cookiePatientId = Cookies.get('patientId');
 
+    console.log(cookiePatientId)
+
     if (cookiePatientId && cookiePatientId !== patientId) {
       setPatientId(cookiePatientId);
     }

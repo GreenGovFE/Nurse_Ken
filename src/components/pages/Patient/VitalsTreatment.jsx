@@ -15,10 +15,11 @@ import { useNavigate } from "react-router-dom";
 import GhostTextCompletion from "../../UI/TextPrediction";
 import VitalsChart from "./VitalChart"; // Import the VitalsChart component
 
-function Vitals({ setSelectedTab }) {
+function VitalsTreat({ treatment }) {
   const { patientId, nurseTypes, setNurseTypes } = usePatient();
 
   const [documentArray, setDocumentArray] = useState([]);
+
   const [payload, setPayload] = useState({
     dateOfVisit: "",
     temperature: "",
@@ -29,14 +30,19 @@ function Vitals({ setSelectedTab }) {
     weight: 0,
     bmi: 0, // Added BMI to the payload
     careType: 0,
-    VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
+    vitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
     appointmentId: null,
+    treatmentId: 0,
+    serviceTreatmentId: treatment?.id || 0,
+    doctorId: treatment?.doctorId,
     notes: "",
     vitalDocuments: [],
     bloodSugar: '',
     oxygenSaturation: '',
 
   });
+console.log(treatment)
+
   const [nurses, setNurses] = useState([]);
   const [docNames, setDocNames] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -74,7 +80,7 @@ function Vitals({ setSelectedTab }) {
     bloodPressure: "Blood Pressure",
     heartPulse: "Heart Pulse",
     respiratory: "Respiratory",
-    VitalNurseEmployeeId: "Assigned Nurse",
+    vitalNurseEmployeeId: "Assigned Nurse",
     appointmentId: 'Appointment',
     notes: "Notes",
   };
@@ -143,7 +149,7 @@ function Vitals({ setSelectedTab }) {
 
   const getVitalsDetails = async (currentPage) => {
     try {
-      let res = await get(`/patients/vital-by-patientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
+      let res = await get(`/patients/GetVitalsByServiceTreatmentId?treatmentId=${treatment?.id}&pageIndex=${currentPage}&pageSize=10`);
       setVisits(res.data);
       setTotalPages(res.pageCount)
 
@@ -187,8 +193,6 @@ function Vitals({ setSelectedTab }) {
       return;
     }
 
-    setLoading(true);
-
     const currentDate = new Date();
     const hours = currentDate.getHours().toString().padStart(2, "0");
     const minutes = currentDate.getMinutes().toString().padStart(2, "0");
@@ -207,18 +211,20 @@ function Vitals({ setSelectedTab }) {
       }
     ];
 
-
+    setLoading(true);
 
     try {
-      let res = await post("/patients/AddVitalsRecord", {
+      let res = await post("/patients/AddTreatmentVitalsRecord", {
         ...payload,
         dateOfVisit: dateTimeOfVisit,
         clinicId: Number(sessionStorage.getItem("clinicId")),
-        PatientId: parseFloat(patientId),
-        appointmentId: Number(payload?.appointmentId),
-        doctorId: Number(payload?.doctorId),
+        patientId: parseFloat(patientId),
+        appointmentId: Number(treatment?.appointmentId),
+        doctorId: Number(treatment?.doctorId),
         careType: 2,
-        VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
+        treatmentId: 0, 
+        serviceTreatmentId: treatment?.id || 0,
+        vitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
         vitalDocuments: vitalDocs,
       });
 
@@ -246,7 +252,6 @@ function Vitals({ setSelectedTab }) {
         setDocumentArray([]);
         getVitalsDetails(currentPage);
         setNurseTypes('vital');
-        navigate('/patients')
         return
       } else if (res.StatusCode === 401) {
         notification({ message: "Unauthorized Session", type: "error" });
@@ -276,14 +281,15 @@ function Vitals({ setSelectedTab }) {
             errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
           }
         }
-
+        console.log(res)
         notification({ message: errorMessage, type: "error" });
       }
     } catch (error) {
+      console.error("Error adding vital record:", error);
       // notification({ message: "Failed to add Vital record", type: "error" });
-    } finally {
+    }finally {
       setLoading(false);
-    } 
+    }
   };
 
   const fetchData = async () => {
@@ -312,9 +318,6 @@ function Vitals({ setSelectedTab }) {
     }
   };
 
-  const next = () => {
-    setSelectedTab("treatment");
-  };
 
   const toggleChart = () => {
     setShowChart((prev) => !prev); // Toggle chart visibility
@@ -400,17 +403,7 @@ function Vitals({ setSelectedTab }) {
           {/* <div>
             <TagInputs onChange={handleChange} value={payload?.careType} type="select" options={careTypes} name="careType" label="Care Type" />
           </div> */}
-          <div>
-            <TagInputs onChange={handleChange} value={payload?.appointmentId} options={Appointments} name="appointmentId" label="Select Appointment/Visit" type="select" />
-            {/* {appointmentPassed && (
-              <div className="m-t-10">
-                <p style={{ color: 'red', marginBottom: '10px' }}>This appointment has passed. Please reschedule.</p>
-                <button className="col-6 submit-btn" onClick={() => handleEdit(payload?.appointmentId)}>
-                  Reschedule Appointment
-                </button>
-              </div>
-            )} */}
-          </div>
+          
           {/* <div>
             <TagInputs onChange={handleChange} value={payload?.doctorId} name="doctorId" label="Assign Doctor" options={doctors} type="select" />
           </div> */}
@@ -475,4 +468,4 @@ function Vitals({ setSelectedTab }) {
   );
 }
 
-export default Vitals;
+export default VitalsTreat;

@@ -9,6 +9,7 @@ import axios from 'axios';
 import notification from '../../utility/notification';
 import { usePatient } from '../../contexts';
 import SpeechToTextButton from "../UI/SpeechToTextButton";
+import GhostTextCompletion from '../UI/TextPrediction';
 
 function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage }) {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -157,8 +158,13 @@ function ReferralModal({ closeModal, AppointmentId, next, fetchData, currentPage
                 </div>
                 <div className="p-10">
                     <TagInputs label="Select Clinic/Hospital" onChange={(value) => handleChange("referredClinicId", value)} options={hospitals} name="referredClinicId" type='R-select' />
-                    <TagInputs label="Additional Notes" name="referralNotes" value = {payload?.referralNotes} onChange={(value) => handleChange("referralNotes", value)} type='textArea' />
-                    <SpeechToTextButton onTranscript={handleTranscript} />
+                    <GhostTextCompletion
+                        label="Additional Notes"
+                        name="referralNotes"
+                        value={payload?.referralNotes}
+                        handleChange={(value) => handleChange("referralNotes", value)}
+                    />
+                   
                     <button onClick={ReferPatient} className="submit-btn m-t-20 w-100" >Refer Patient</button>
                 </div>
             </div>

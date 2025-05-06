@@ -4,6 +4,7 @@ import InputField from '../UI/InputField';
 import TextArea from '../UI/TextArea';
 import { post } from '../../utility/fetch';
 import toast from 'react-hot-toast';
+import GhostTextCompletion from '../UI/TextPrediction';
 
 function AddMedicalRecord({ closeModal, patientId, fetchData, medicalRecordType }) {
 
@@ -40,13 +41,13 @@ function AddMedicalRecord({ closeModal, patientId, fetchData, medicalRecordType 
             <div className="modal-box max-w-600">
                 <div className="p-40">
                     <h3 className="bold-text">Add Medical Record</h3>
-
-
-                    <TextArea
+                    <GhostTextCompletion
                         label="Comment"
+                        name="comment"
                         value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                        handleChange={(e) => setComment(e.target.value )}
                     />
+
                     <button className="btn m-t-20 w-100" onClick={addMedicalRecord} disabled={loading}>Add Medical Record</button>
                 </div>
             </div>
