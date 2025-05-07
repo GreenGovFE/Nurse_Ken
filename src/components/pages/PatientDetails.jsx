@@ -93,11 +93,11 @@ function PatientDetails() {
       <div className="m-t-80 flex flex-h-center flex-v-center space-between">
         <h3>{patientName}</h3>
         <div className="m-b-10 flex flex-h-center flex-v-center space-between float-right col-5">
-          {nurseRoles.includes('nurse') && patientInfo && (
+          {/* {nurseRoles.includes('nurse') && patientInfo && (
             <button onClick={() => { setAppointment(true); setAdmit('admission'); }} className="save-drafts m-l-10">
               Admit Patient
             </button>
-          )}
+          )} */}
           {nurseRoles.includes('checkin') && patientInfo && (
             <button onClick={() => { setAppointment(true); setAdmit('appointment'); }} className="save-drafts m-l-10">
               Book an Appointment
