@@ -37,6 +37,9 @@ const Sidebar = () => {
     setPatientId(null);
     setDiagnosis(null);
     localStorage.removeItem("from");
+    localStorage.removeItem('admitPatients')
+    localStorage.removeItem('hmoPatients')
+    localStorage.removeItem('patients')
     Cookies.remove("patientInfo");
     Cookies.remove("patientName");
     Cookies.remove('patientId')

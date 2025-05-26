@@ -1,0 +1,64 @@
+.readonly-table-wrapperR input {
+    padding: 4px 8px;
+    border: 1px solid #3c7e2d !important;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: scroll;
+    background-color: white;
+  }
+  
+ 
+
+  .readonly-tableR input {
+    padding: 4px 8px;
+    border: 1px solid #3c7e2d !important;
+    background-color: white;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    overflow-x: auto;
+    overflow-x: scroll;
+
+  }
+  
+  .readonly-tableR input:focus {
+    /* outline: none; */
+    border-color: #3c7e2d;
+    border: 1px solid #3c7e2d;
+    box-shadow: 0 0 0 1px #3c7e2d;
+    background-color: white;
+    overflow-x: auto;
+    overflow-x: scroll;
+    border: none;
+
+  }
+
+  /* .readonly-table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+  } */
+  
+  .readonly-tableR {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* force horizontal scroll if needed */
+    margin-top: 10px;
+  }
+  
+  .readonly-tableR th,
+  .readonly-tableR td {
+    border: 1px solid #109615;
+    padding: 8px 2px;
+    /* font-size: 13px; */
+    text-align: left;
+  }
+  
+  .readonly-tableR th {
+    background-color: #e6fbe6;
+    font-weight: bold;
+  }
+  

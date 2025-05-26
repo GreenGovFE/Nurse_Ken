@@ -8,7 +8,7 @@ import notification from "../../utility/notification";
 import { useNavigate } from "react-router-dom";
 
 function TreatmentTable({ data, reset }) {
-  const { patientId, setPatientId, setPatientInfo, setPatientName, setDiagnosis, setHmoDetails } = usePatient();
+  const { patientId, setPatientId, setPatientInfo, setPatientName, setDiagnosis, setHmoDetails, setAppointmentId } = usePatient();
   const [combinedData, setCombinedData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewing, setViewing] = useState({});
@@ -135,6 +135,7 @@ function TreatmentTable({ data, reset }) {
     const admitted = await Admit(record?.id);
     if (!admitted) return;
 
+    setAppointmentId(record?.appointmenId);
     setPatientId(record?.patient?.id);
     const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
 
@@ -159,6 +160,7 @@ function TreatmentTable({ data, reset }) {
         notification({ message: "Successfully admitted patient", type: "success" });
         setPatientId(record?.patient?.id);
         const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
+        setAppointmentId(record?.appointmentId);
 
         if (patientRecord) {
           setHmoDetails({
@@ -166,6 +168,7 @@ function TreatmentTable({ data, reset }) {
             hmoPackageId: patientRecord.hmoPackageId,
           });
           setPatientName(`${patientRecord.firstName} ${patientRecord.lastName}`);
+
         }
         setDiagnosis(record?.diagnosis);
         setViewing(record);

@@ -3,9 +3,9 @@ const Paginate = ({ currentPage, totalPages, setCurrentPage }) => {
 
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= totalPages) {
-          setCurrentPage(newPage);
+            setCurrentPage(newPage);
         }
-      };
+    };
 
     return (
         <div className="pagination flex space-between float-right col-5  m-b-80">

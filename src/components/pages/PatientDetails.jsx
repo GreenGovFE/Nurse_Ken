@@ -20,7 +20,8 @@ function PatientDetails() {
   const [appointment, setAppointment] = useState(false);
   const { patientId, patientName, patientInfo, nurseRoles } = usePatient();
   const fromVital = localStorage.getItem('from');
-  const [selectedTab, setSelectedTab] = useState(fromVital ? 'vitals' : nurseRoles?.includes('checkin') ? "personal" : nurseRoles?.includes('vitalnurse') ? 'vitals' : 'medicalRecord');
+  const fromAdmit = localStorage.getItem('admit');
+   const [selectedTab, setSelectedTab] = useState(fromAdmit ? 'treatment' : fromVital ? 'vitals' : nurseRoles?.includes('checkin') ? "personal" : nurseRoles?.includes('vitalnurse') ? 'vitals' : 'medicalRecord');
   const [combinedData, setCombinedData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);

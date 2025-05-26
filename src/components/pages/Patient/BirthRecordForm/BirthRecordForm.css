@@ -1,0 +1,100 @@
+.birth-form {
+  max-width: 900px;
+  margin: 24px auto;
+  font-family: sans-serif;
+}
+.birth-form h2 {
+  margin-bottom: 16px;
+  color: #006400;
+}
+
+/* 2‑column grid with gaps */
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+/* Each label + input group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #004d00;
+}
+
+/* Shared styles for inputs, selects, textarea */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 8px;
+  border: 1px solid #006400;
+  border-radius: 4px;
+  background-color: #e6f9e6;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Icon wrapper for date/time/search fields */
+.input-icon {
+  position: relative;
+}
+.input-icon .icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #006400;
+  font-size: 18px;
+}
+
+/* Make activity span both columns */
+.activity-group {
+  grid-column: 1 / -1;
+}
+
+/* Footer buttons */
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+/* + View button */
+.btn-view {
+  display: flex;
+  align-items: center;
+  border: 1px solid #006400;
+  background: white;
+  color: #006400;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.plus-icon {
+  margin-right: 6px;
+}
+
+/* cloud‑download icon */
+.icon-download {
+  color: #e91e63;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Submit button */
+.btn-submit {
+  background: #006400;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}

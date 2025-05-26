@@ -16,6 +16,7 @@ function AssignedBed({ data, fetchBedList, }) {
     const [isModalOpenDel, setIsModalOpenDel] = useState(false);
     const closeModalDel = () => { setIsModalOpenDel(false); }
     const [recordToDelete, setRecordToDelete] = useState(null);
+    const [days, setDays] = useState(null);
     
 
 
@@ -49,7 +50,7 @@ function AssignedBed({ data, fetchBedList, }) {
                 Authorization: `Bearer ${token}`,
             },
         };
-        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/unassign-bed/${bedId}`;
+        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/unassign-bed/${bedId}/days-accumulated/${days}`;
 
         try {
             let res = await axios.put(url, null, options);
@@ -150,6 +151,7 @@ function AssignedBed({ data, fetchBedList, }) {
                     closeModal={closeModalDel}
                     equipment={'bed'}
                     confirmDelete={confirmDelete}
+                    setDays={setDays}
                 />
             )}
         </div>

@@ -13,8 +13,9 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     const [payload, setPayload] = useState({});
     const [patients, setPatients] = useState([]);
     const [action, setAction] = useState('');
+    const [days, setDays] = useState(null);
     const { beds, setBeds, bedsTablePages, setBedTablePages, bedsTablePage, setBedTablePage } = useBeds();
-    const { patientId, patientName, setPatientName, setPatientId, diagnosis, setDiagnosis, hmoDetails, setHmoDetails } = usePatient()
+    const { patientId, patientName, setPatientName, setPatientId, diagnosis, setDiagnosis, hmoDetails, setHmoDetails, appointmentId, setAppointmentId } = usePatient()
 
 
 
@@ -24,6 +25,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
         const name = field;
 
         if (name === 'patientAssignedId') {
+            console.log(value, 'value')
             setPayload(prevPayload => ({ ...prevPayload, [name]: value?.label, patientAssignedId: value?.value }));
         } else if (name === 'action') {
             setAction(value?.value);
@@ -106,6 +108,8 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
             patientAssignedId: Number(payload?.patientAssignedId?.patientId || patientId),
             hmoId: hmoDetails?.hmoId || payload?.patientAssignedId?.hmoId ||  0,
             hmoPackageId: hmoDetails?.hmoPackageId ||  payload?.patientAssignedId?.hmoPackageId  || 0,
+            appointmentId: appointmentId,
+            dateOfVital: payload?.dateOfVital || formattedDate,
 
         };
 
@@ -118,6 +122,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
             setPatientId(null)
             setDiagnosis(null)
             setHmoDetails({})
+            setAppointmentId(null)
             closeModal();
         } catch (error) {
             notification({ message: error?.response?.data?.errorData[0] || error?.message, type: 'error' });
@@ -140,7 +145,7 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
                 Authorization: `Bearer ${token}`,
             },
         };
-        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/unassign-bed/${bedId}`;
+        const url = `${process.env.REACT_APP_BASE_URL}/clinicapi/api/bed/unassign-bed/${bedId}/days-accumulated/${days}`;
 
         try {
             let res = await axios.put(url, null, options);
@@ -199,6 +204,8 @@ function AddBed({ closeModal, bedId, fetchBedList, assigned }) {
     useEffect(() => {
         getAllPatients();
     }, []);
+
+    console.log(appointmentId, 'appoinmentId')
 
     const handleTranscript = (transcript) => {
         setPayload(prevPayload => ({ ...prevPayload, assignNote: prevPayload.assignNote ? prevPayload.assignNote + ' ' + transcript : transcript }));

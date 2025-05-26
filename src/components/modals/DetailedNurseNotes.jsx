@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { get, post } from "../../utility/fetch";
 import notification from "../../utility/notification";
 import TagInputs from "../layouts/TagInputs";
 import { RiCloseFill, RiDeleteBinLine } from "react-icons/ri";
@@ -8,6 +7,11 @@ import NurseNotesAdd from "./NurseNotesAdd";
 import NurseNoteTreatment from "./NurseNoteTreatment";
 import Vitals from "../pages/Patient/Vitals"; // Import the Vitals component
 import VitalsTreat from "../pages/Patient/VitalsTreatment";
+import AddMoreTreatment from "./AddMorePrescription";
+import { get, post } from "../../utility/fetch";
+import downloadicon from "../../assets/images/download-icon.png";
+import { RiFilePaper2Line } from "react-icons/ri";
+import { formatDate } from "../../utility/general";
 
 function DetailedNurseNotes({ closeModal, treatment, doctors, nurses, reset }) {
     const [nurseNotesModal, setNurseNotesModal] = useState(false);
@@ -17,6 +21,8 @@ function DetailedNurseNotes({ closeModal, treatment, doctors, nurses, reset }) {
     const [notes, setNotes] = useState([]);
     const [viewing, setViewing] = useState({});
     const [add, setAdd] = useState(false);
+    const [vitals, setVitals] = useState([]);
+
     const [showVitalsSection, setShowVitalsSection] = useState(false); // State to toggle vitals section visibility
 
     const [documentArray, setDocumentArray] = useState([]);
@@ -134,9 +140,23 @@ function DetailedNurseNotes({ closeModal, treatment, doctors, nurses, reset }) {
         }
     };
 
+    const getVital = async () => {
+        try {
+            const res = await get(`/patients/vital-by-appointmentId?appointmentId=${treatment?.appointmentId}&pageIndex=1&pageSize=100`);
+            const vital = res?.data?.[0] || {};
+            setVitals(vital);
+            setTotalPages(res.length);
+        } catch (error) {
+            console.error("Error fetching prescription log:", error);
+        }
+    };
+
     useEffect(() => {
         getPrescriptionLog();
+        getVital();
     }, []);
+
+    console.log(vitals, 'vital')
 
     const selectRecord = (record) => () => {
         setViewing(record);
@@ -216,6 +236,88 @@ function DetailedNurseNotes({ closeModal, treatment, doctors, nurses, reset }) {
                             </tr>
                         </tbody>
                     </table>
+                    <button onClick={() => setAdd(true)} className="submit-btn m-t-10">Add to existing prescriptions</button>
+
+                </div>
+
+                <div className="m-t-20 m-b-10">
+                    <h4>First Vital</h4>
+                </div>
+                <div>
+                    <table className="bordered-table-2">
+                        <thead className="border-top-none">
+                            <tr className="border-top-none">
+                                <th className="w-10">Date</th>
+                                <th>Weight (Kg)</th>
+                                <th>Temp (°C)</th>
+                                <th>Height (cm)</th>
+                                <th>BMI</th>
+                                <th>Heart (bpm)</th>
+                                <th>Respiratory</th>
+                                <th>Blood Pressure (mmHg)</th>
+                                <th>ECG</th>
+                                <th>Nurse Notes</th>
+                                <th>Administered Nurse</th>
+                            </tr>
+                        </thead>
+
+                        <tbody className="white-bg view-det-pane">
+                            <tr>
+                                <td>{formatDate(vitals?.dateOfVisit)}</td>
+                                <td>{vitals?.weight}</td>
+
+                                <td>{vitals?.temperature} C</td>
+                                <td>{vitals?.height} cm</td>
+                                <td>{vitals?.bmi} </td>
+                                <td>{vitals?.heartPulse} bpm</td>
+                                <td>{vitals?.respiratory}</td>
+                                <td>{vitals?.bloodPressure}</td>
+                                <td>
+                                    <div
+                                        style={{ width: "100%" }}
+                                        className="outline pointer"
+                                    // onClick={() => setNoteModalData(vitals)}
+                                    >
+                                        {vitals?.vitalDocuments?.map((item) => (
+                                            <div>
+
+                                                <div className="flex">
+                                                    <a
+                                                        href={item.docPath}
+                                                        target="blank"
+                                                    // download={true}
+                                                    >
+                                                        {item.docName}
+                                                    </a>
+                                                    {item.docPath && (
+                                                        <a
+                                                            href={item.docPath}
+                                                            target="_blank"
+                                                            download={true}
+                                                        >
+                                                            <img
+                                                                style={{ width: "16px", height: "16px" }}
+                                                                src={downloadicon}
+                                                            />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        className="outline pointer"
+                                        onClick={() => selectRecord(vitals)}
+                                    >
+                                        <RiFilePaper2Line />
+                                    </div>
+                                </td>
+                                <td>{vitals?.vitalNurseName}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 {currentNote && (
@@ -266,7 +368,7 @@ function DetailedNurseNotes({ closeModal, treatment, doctors, nurses, reset }) {
                         className="submit-btn"
                         onClick={() => setShowVitalsSection((prev) => !prev)}
                     >
-                        {showVitalsSection ? "Hide Vitals Section" : "Add Vitals"}
+                        {showVitalsSection ? "Hide Vitals Section" : "Show Vitals"}
                     </button>
                     {showVitalsSection && (
                         <div className="card m-t-10">
@@ -335,6 +437,15 @@ function DetailedNurseNotes({ closeModal, treatment, doctors, nurses, reset }) {
                     closeModal={() => setNurseNotesModal(false)}
                     doctors={doctors}
                     nurses={nurses}
+                />
+            )}
+
+            {add && (
+                <AddMoreTreatment
+                    closeModal={() => setAdd(false)} // Close the modal
+                    patientId={patientId}
+                    treatment={treatment}
+                    visit={vitals}
                 />
             )}
 

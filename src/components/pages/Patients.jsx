@@ -48,6 +48,22 @@ function Patients() {
     }
   };
 
+  useEffect(() => {
+    const admitPatients = localStorage.getItem("admitPatients");
+    const hmoPatients = localStorage.getItem("hmoPatients");
+    const patients = localStorage.getItem("patients");
+
+    console.log(admitPatients)
+
+    if (admitPatients) {
+      setNurseTypes("admit");
+    } else if (hmoPatients) {
+      setNurseTypes("hmo");
+    } else if (patients) {
+      setNurseTypes("admin");
+    }
+  }, []);
+
   console.log(nurseRoles)
 
   const generatePageNumbers = (currentPage, totalPages) => {
@@ -405,6 +421,11 @@ function Patients() {
               </>
             ) : nurseTypes === "admit" ? (
               <AdmitCheck data={admittedPatients} setCurrent={setCurrentPage} currentPage={currentPage} totalPages={totalPages} />
+            ) : nurseTypes === "hmo" ? (
+              <div className="center-text m-t-40">
+                <h3>No Patients with HMO</h3>
+                <p>Coming Soon</p>
+              </div>
             ) : nurseTypes === "checkin" && checkinPatients === true ? (
               <>
                 <PatientsAppointTable data={appointPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} fetchData={getAppointmentPatients} />

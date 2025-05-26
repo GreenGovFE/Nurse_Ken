@@ -34,8 +34,13 @@ const useNavigationItems = () => {
             icon: <img src={referral} className="icon" alt="Referrals Icon" />
         },
         {
-            title: 'Finance',
-            href: '/finance',
+            title: 'Birth Record',
+            href: '/birth-record',
+            icon: <img src={finance} className="icon" alt="Finance Icon" />
+        },
+        {
+            title: 'Antenatal',
+            href: '/antenatal',
             icon: <img src={finance} className="icon" alt="Finance Icon" />
         },
         {

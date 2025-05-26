@@ -9,6 +9,7 @@ import OutAndInpatientGraph from "../UI/OutAndInpatientGraph";
 import { get } from "../../utility/fetch";
 import { RiAccountCircleFill, RiGroup2Fill, RiHotelBedFill } from "react-icons/ri";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
 
@@ -25,6 +26,7 @@ function Dashboard() {
 
   const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
 
+  const navigate = useNavigate();
 
   const getAdmittedPatients = async () => {
     try {
@@ -114,6 +116,20 @@ function Dashboard() {
     }
   };
 
+  const clicked = (path, type) => {
+
+    if (type === "admit") {
+    localStorage.setItem("admitPatients", true);
+
+    }else if (type === "hmo") {
+      localStorage.setItem("hmoPatients", true);
+    }else{
+      localStorage.setItem("patients", true);
+    }
+    navigate(path);
+
+  }
+
   useEffect(() => {
     getAdmittedPatients()
     getHmoPatients()
@@ -134,7 +150,7 @@ function Dashboard() {
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
 
-          <div className="col-3">
+          <div onClick={()=>clicked('/patients', 'admit')} className="col-3">
             <StatCard data={{
               number: admittedpatients,
               title: "Admitted Patients",
@@ -148,14 +164,14 @@ function Dashboard() {
             }} icon={<RiAccountCircleFill className="icon" size={32} />}
             />
           </div> */}
-          <div className="col-3">
+          <div onClick={()=>clicked('/patients', 'hmo')}  className="col-3">
             <StatCard data={{
               number: hmopatients,
               title: "Patients with HMO",
             }} icon={<RiGroup2Fill className="icon" size={32} />}
             />
           </div>
-          <div className=" col-3">
+          <div onClick={()=>clicked('/patients', 'patients')}  className=" col-3">
             <StatCard data={{
               number: totalpatients,
               title: "Total Patients",

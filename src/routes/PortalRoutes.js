@@ -14,6 +14,9 @@ import AddPatients from '../components/pages/AddPatients';
 import { useNavigate } from "react-router-dom";
 import PatientHMOetails from '../components/pages/PatientHmoDetails';
 import Notify from '../components/pages/notify';
+import BirthRecordForm from '../components/pages/Patient/BirthRecordForm/BirthRecordForm';
+import AntenatalTable from '../components/pages/Patient/AntenatalTable';
+import Antinatal from '../components/Antinatal';
 
 
 export default () => {
@@ -31,6 +34,10 @@ export default () => {
             <Route path="/customer-engagement" element={<AuthRoute><CustomerEngagement /></AuthRoute>} />
             <Route path="/referrals" element={<AuthRoute><ReferredPatients /></AuthRoute>} />
             <Route path="/notify" element={<AuthRoute><Notify /></AuthRoute>} />
+            <Route path="/birth-record" element={<AuthRoute><BirthRecordForm /></AuthRoute>} />
+            <Route path="/antenatal" element={<AuthRoute><AntenatalTable /></AuthRoute>} />
+            <Route path="antenatal-record" element={<AuthRoute><Antinatal /></AuthRoute>} />
+
         </Routes>
     )
 

@@ -13,13 +13,13 @@ import AddBed from "../../modals/AddBed";
 import { useNavigate } from "react-router-dom";
 
 function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
-  const { patientId, setPatientId, setPatientInfo, setPatientName, setDiagnosis, setHmoDetails } = usePatient();
+  const { patientId, setPatientId, setPatientInfo, setPatientName, setDiagnosis, setHmoDetails, setAppointmentId } = usePatient();
 
   const [viewing, setViewing] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [add, setAdd] = useState(false);
   const [combinedData, setCombinedData] = useState([]);
-  const [patient, setPatient] = useState({});
+  const [patient, setPatient] = useState([]);
   const [loading, setLoading] = useState(false);
   const [beds, setBeds] = useState([]);
   const [bedList, setBedsList] = useState([]);
@@ -119,8 +119,10 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
     setAdd(false)
   };
 
-  const selectRecord = (record) => () => {
+  const selectRecord = (record) =>  {
+    console.log('Selected record:', record.appointmentId);
     setPatientId(record?.patientId);
+    setAppointmentId(record?.appointmentId);
     const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
 
     if (patientRecord) {
@@ -135,6 +137,26 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
     setDiagnosis(record?.diagnosis);
     setViewing(record);
     navigate('/facility');
+  };
+
+  const selectRecord2 = (record) => {
+    console.log('Selected record:', record.appointmentId);
+    setPatientId(record?.patientId);
+    setAppointmentId(record?.appointmentId);
+    const patientRecord = patient?.find((p) => p?.patientId === record?.patientId);
+
+    if (patientRecord) {
+      const hmoDetails = {
+        hmoId: patientRecord?.hmoId,
+        hmoPackageId: patientRecord?.hmoPackageId
+      };
+      setHmoDetails(hmoDetails);
+      const patientName = `${patientRecord?.firstName} ${patientRecord?.lastName}`;
+      setPatientName(patientName);
+    }
+    setDiagnosis(record?.diagnosis);
+    localStorage.setItem('admit', true);
+    navigate('/patient-details');
   };
 
 
@@ -184,6 +206,7 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
             <tr className="border-top-none">
               <th className="center-text">Date</th>
               <th className="center-text">Time</th>
+              <th className="center-text">Age</th>
               <th className="center-text">Diagnosis</th>
               <th className="center-text">Patient</th>
               <th className="center-text">Bed Occupying</th>
@@ -192,12 +215,13 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
 
             </tr>
           </thead>
+
           <tbody className="white-bg view-det-pane">
             {combinedData?.map((row) => {
               const patientName = findPatientName(row.patientId);
               const bed = isPatientOccupyingBed(row.patientId);
               return (
-                <tr className="hovers" key={row?.id}>
+                <tr className="hovers pointer" onClick={() => selectRecord2(row)} key={row?.id}>
                   <td>{new Date(row?.dateOfVisit).toLocaleDateString()}</td>
                   <td>
                     {new Date(row?.createdAt?.split('.')[0]).toLocaleTimeString('en-US', {
@@ -207,13 +231,22 @@ function AdmitCheck({ data, setCurrent, totalPages, currentPage }) {
                       hour12: true, // 12-hour format
                     })}
                   </td>
+                  <td>{row?.age} years</td>
                   <td>
                     {row?.diagnosis}
                   </td>
                   <td>{patientName ? patientName : ''}</td>
                   <td>{bed ? bed : ''}</td>
-                  <td> <RiEdit2Fill size={20} onClick={selectRecord(row)} style={{ color: 'green', cursor: 'pointer' }} /></td>
-
+                  <td>
+                    <RiEdit2Fill
+                      size={20}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click
+                        selectRecord(row); // Trigger edit icon click handler
+                      }}
+                      style={{ color: 'green', cursor: 'pointer' }}
+                    />
+                  </td>
                 </tr>
               )
             })}

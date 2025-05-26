@@ -19,14 +19,15 @@ export const PatientProvider = ({ children }) => {
   });
   const [hmoId, setHmoId] = useState('');
   const [hmoDetails, setHmoDetails] = useState({});
-  const [diagnosis, setDiagnosis] = useState([]);
+  const [diagnosis, setDiagnosis] = useState(null);
+  const [appointmentId, setAppointmentId] = useState('');
   const [states, setStates] = useState(null);
   const userInfo = JSON.parse(localStorage.getItem('USER_INFO'));
   const nurseRoles = userInfo?.role ? userInfo?.role.map(role => role.toLowerCase().replace(/\s+/g, '')) : [];
 
 
   return (
-    <PatientContext.Provider value={{diagnosis, setDiagnosis , states, setStates, patientId, setPatientId, patientName, setPatientName, patientPage, setPatientPage, hmoId, setHmoId, patientInfo, setPatientInfo, hmoDetails, setHmoDetails, nurseRoles }}>
+    <PatientContext.Provider value={{diagnosis, setDiagnosis , states, setStates, patientId, setPatientId, appointmentId, setAppointmentId, patientName, setPatientName, patientPage, setPatientPage, hmoId, setHmoId, patientInfo, setPatientInfo, hmoDetails, setHmoDetails, nurseRoles }}>
       {children}
     </PatientContext.Provider>
   );

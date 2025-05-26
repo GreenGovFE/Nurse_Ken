@@ -71,7 +71,7 @@ const App = () => {
       if (inactivityTimeoutId) {
         clearTimeout(inactivityTimeoutId);
         setInactivityWarning(false);
-        setInactivityMinutesLeft(5); // Reset countdown
+        setInactivityMinutesLeft(2); // Reset countdown to 2 minutes
       }
 
       activityTimeoutId = setTimeout(() => {
@@ -94,7 +94,7 @@ const App = () => {
           });
         }, 60000);
         setInactivityWarning(true);
-      }, 7200000);
+      }, 780000); // 13 minutes (13 * 60 * 1000)
     };
 
     const checkAndSetTimeout = () => {
@@ -103,10 +103,10 @@ const App = () => {
       if (loginTime) {
         const currentTime = new Date().getTime();
         const timeElapsed = currentTime - loginTime;
-        const sessionDuration = 21600000;
+        const sessionDuration = 900000; // 15 minutes (15 * 60 * 1000)
         const timeRemaining = sessionDuration - timeElapsed;
 
-        if (timeRemaining <= 600000 && timeRemaining > 0) {
+        if (timeRemaining <= 120000 && timeRemaining > 0) { // 2 minutes warning
           const minutesLeft = Math.ceil(timeRemaining / 60000);
           setMinutesLeft(minutesLeft);
           if (!warningDisplayed) {

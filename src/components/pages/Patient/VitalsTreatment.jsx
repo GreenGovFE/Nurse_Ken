@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import TagInputs from "../../layouts/TagInputs";
 import TextArea from "../../UI/TextArea";
 import VisitsTable from "../../tables/VisitsTable";
@@ -14,6 +14,7 @@ import EDMSFiles from "../../UI/EDMSFiles";
 import { useNavigate } from "react-router-dom";
 import GhostTextCompletion from "../../UI/TextPrediction";
 import VitalsChart from "./VitalChart"; // Import the VitalsChart component
+import axios from "axios";
 
 function VitalsTreat({ treatment }) {
   const { patientId, nurseTypes, setNurseTypes } = usePatient();
@@ -41,7 +42,7 @@ function VitalsTreat({ treatment }) {
     oxygenSaturation: '',
 
   });
-console.log(treatment)
+  console.log(treatment)
 
   const [nurses, setNurses] = useState([]);
   const [docNames, setDocNames] = useState([]);
@@ -55,10 +56,72 @@ console.log(treatment)
   const [selectedMfiles, setSelectedMfiles] = useState([]);
   const [add, setAdd] = useState(false)
   const [appointmentPassed, setAppointmentPassed] = useState(false);
+  const [isServicePaid, setIsServicePaid] = useState(true);
+  const [vitalServicesFromAppointmentId, setVtalServicesFromAppointmentId] =
+    useState();
   const [showChart, setShowChart] = useState(false); // State to toggle chart visibility
   const navigate = useNavigate();
+  const [category, setCategory] = useState({ name: "Select Category", value: "" });
+  const [service, setService] = useState({ name: "Select Service", value: "" });
+  const [categories, setCategories] = useState([]);
+  const [services, setServices] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
+  const submitServicePayload = async () => {
+    try {
+      let res = await post("/patients/CreateVitalServicePayment", {
+        clinicId: +sessionStorage.getItem("clinicId"),
+        categoryId: category.value,
+        patientId: +patientId,
+        categoryItemId: service.value,
+        amount: 0,
+        status: "Pending",
+        appointmentId: Number(treatment?.appointmentId),
+      });
+      console.log(res);
+      if (res.message === "The Vital service record was added successfully") {
+        notification({ message: 'The service was added successfully', type: "success" });
+        setCategory({ name: "Select Category", value: "" });
+        setService({ name: "Select Service", value: "" });
+        setSelectedCategory(null);
+      }
+      // notification({ message: "Unauthorized Session", type: "error" });
+    } catch (error) {
+      console.log(error);
+      notification({ message: "Failed to add service to treatment", type: "error" });
+    }
+  };
 
+  const getVitalsByAppointmentId = async (id) => {
+    try {
+      let res = await get(
+        `/patients/vital-service-by-appointmentId?appointmentId=${id}`
+      );
+      setIsServicePaid(
+        res.data.find(
+          (e) => e.status === "Not Paid" || e.status === "Advance Paid"
+        )
+      );
+
+      setVtalServicesFromAppointmentId(res.data);
+      // setVtalServicesFromAppointmentId()
+      // setTotalPages(res.pageCount);
+    } catch (error) {
+      console.error("Error fetching visitation details:", error);
+    }
+  };
+
+  const handleSelectChange = useCallback((value, name) => {
+    if (name === "category") {
+      setCategory(value);
+    } else {
+      setService(value);
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        serviceId: value?.value,
+      }));
+    }
+  }, []);
 
   const deleteDoc = (doc) => {
     let newArr = documentArray.filter((id) => id.name !== doc);
@@ -92,25 +155,25 @@ console.log(treatment)
       ? parseFloat(value)
       : value;
 
-      setPayload((prevPayload) => {
-        const updatedPayload = { ...prevPayload, [name]: parsedValue };
-      
-        if (name === "height" || name === "weight") {
-          const heightInMeters = updatedPayload.height / 100;
-          const weight = updatedPayload.weight;
-      
-          if (heightInMeters > 0 && weight > 0) {
-            // multiply by 100, round to nearest integer, then divide back
-            const rawBmi = weight / (heightInMeters ** 2);
-            updatedPayload.bmi = Math.round(rawBmi * 100) / 100;
-          } else {
-            updatedPayload.bmi = 0;
-          }
+    setPayload((prevPayload) => {
+      const updatedPayload = { ...prevPayload, [name]: parsedValue };
+
+      if (name === "height" || name === "weight") {
+        const heightInMeters = updatedPayload.height / 100;
+        const weight = updatedPayload.weight;
+
+        if (heightInMeters > 0 && weight > 0) {
+          // multiply by 100, round to nearest integer, then divide back
+          const rawBmi = weight / (heightInMeters ** 2);
+          updatedPayload.bmi = Math.round(rawBmi * 100) / 100;
+        } else {
+          updatedPayload.bmi = 0;
         }
-      
-        return updatedPayload;
-      });
-      
+      }
+
+      return updatedPayload;
+    });
+
   };
 
   const getNurses = async () => {
@@ -222,7 +285,7 @@ console.log(treatment)
         appointmentId: Number(treatment?.appointmentId),
         doctorId: Number(treatment?.doctorId),
         careType: 2,
-        treatmentId: 0, 
+        treatmentId: 0,
         serviceTreatmentId: treatment?.id || 0,
         vitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
         vitalDocuments: vitalDocs,
@@ -287,7 +350,7 @@ console.log(treatment)
     } catch (error) {
       console.error("Error adding vital record:", error);
       // notification({ message: "Failed to add Vital record", type: "error" });
-    }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -318,21 +381,99 @@ console.log(treatment)
     }
   };
 
+  const getCategories = async () => {
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found in session storage");
+      return;
+    }
+
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/category/list/1/1000`,
+        options
+      );
+
+      const tempServices = res?.data?.resultList
+        // ?.filter((service) => service.category.name === "Clinical Service" || service.category.name === "Clinical Services")
+        .map((category) => ({
+          label: category?.name,
+          value: parseFloat(category?.id),
+        }));
+
+      tempServices?.unshift({ label: "Select Service", value: "" });
+
+      setCategories(tempServices);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
+  const getCategoriesService = async () => {
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+      console.error("Token not found in session storage");
+      return;
+    }
+
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    try {
+      setService({});
+      setServices(null);
+      const res = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/healthfinanceapi/api/categoryitem/list/category/${category?.value}/1/1000`,
+        options
+      );
+
+      const tempServices = res?.data?.resultList.map((service) => ({
+        label: service?.itemName,
+        value: parseFloat(service?.id),
+      }));
+
+      tempServices?.unshift({ label: "Select Service", value: "" });
+
+      setServices(tempServices);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
 
   const toggleChart = () => {
     setShowChart((prev) => !prev); // Toggle chart visibility
   };
 
   useEffect(() => {
+    getCategories()
     getNurses();
     getDoctors();
     fetchData();
+    getVitalsByAppointmentId(treatment?.appointmentId);
     getVitalsDetails(currentPage);
   }, []);
 
   useEffect(() => {
     getVitalsDetails(currentPage);
   }, [currentPage]);
+
+  useEffect(() => {
+    getCategoriesService();
+  }, [category]);
+
 
   return (
     <div className="">
@@ -403,7 +544,7 @@ console.log(treatment)
           {/* <div>
             <TagInputs onChange={handleChange} value={payload?.careType} type="select" options={careTypes} name="careType" label="Care Type" />
           </div> */}
-          
+
           {/* <div>
             <TagInputs onChange={handleChange} value={payload?.doctorId} name="doctorId" label="Assign Doctor" options={doctors} type="select" />
           </div> */}
@@ -442,8 +583,48 @@ console.log(treatment)
           </div>
           <button onClick={submitPayload} disabled={loading} className="submit-btn m-t-20 ">Add Vital</button>
         </div>
+
         <div className="col-8 m-l-20">
-          <VisitsTable data={visits} />
+          <div>
+            <div className="p-20">
+              <div className="w-100">
+                <TagInputs
+                  label="Select Category"
+                  name="category"
+                  value={category}
+                  onChange={(e) => handleSelectChange(e, "category")}
+                  type="R-select"
+                  options={categories}
+                />
+              </div>
+            </div>
+            {Array.isArray(services) && (
+              <div className="p-20">
+                <div className="w-100">
+                  <TagInputs
+                    label="Select Service"
+                    name="serviceId"
+                    value={service}
+                    onChange={(e) => handleSelectChange(e, "serviceId")}
+                    type="R-select"
+                    options={services}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={submitServicePayload}
+              className="submit-btn m-t-20 m-b-20"
+              disabled={loading || !category?.value || !service?.value}
+            >
+              Add Service
+            </button>
+          </div>
+          <div>
+            <VisitsTable data={visits} />
+
+          </div>
           {/* Collapsible Section for Vitals Chart */}
           <div style={{ marginTop: "30px" }}>
             <button onClick={toggleChart} className="submit-btn">
@@ -455,6 +636,12 @@ console.log(treatment)
               </div>
             )}
           </div>
+
+          <UnpaidServices
+            isServicePaid={isServicePaid}
+            payload={payload}
+            unpaidServices={vitalServicesFromAppointmentId}
+          />
           <div className="m-t-20">
             <Paginate
               currentPage={currentPage}
@@ -469,3 +656,55 @@ console.log(treatment)
 }
 
 export default VitalsTreat;
+
+const UnpaidServices = ({ payload, unpaidServices, isServicePaid }) => {
+  const [showTable, setShowTable] = useState(false);
+
+  return (
+    <div className="w-100">
+      {showTable
+        ? // Show alert stripe if appointmentId exists
+        payload?.appointmentId && (
+          <div className="alert-container">
+            <p>You have one or more unpaid services.</p>
+            <button
+              className="view-button"
+              onClick={() => setShowTable(true)}
+            >
+              View
+            </button>
+          </div>
+        )
+        : // Show table after clicking "View"
+        isServicePaid && (
+          <div className="table-container">
+            <h3 className="m-t-20">Added Services</h3>
+            <table className="bordered-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Service</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {unpaidServices?.map((service, index) => (
+                  <tr key={index}>
+                    <td>{service.categoryName}</td>
+                    <td>{service.categoryItem}</td>
+                    <td>{service.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* <button
+              className="view-button"
+              onClick={() => setShowTable(false)}
+            >
+              ← Back
+            </button> */}
+          </div>
+        )}
+    </div>
+  );
+};

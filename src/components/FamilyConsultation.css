@@ -1,0 +1,601 @@
+/** FamilyConsultation.css */
+:root {
+    --primary-green: #109615;
+  }
+  
+  input[type="radio"],
+  input[type="checkbox"] {
+    accent-color: var(--primary-green);
+  }
+/* .consultation-container {
+    font-family: Arial, sans-serif;
+    background: #f8f8f6;
+    padding: 20px;
+  } */
+   .w-70{
+    width:70%
+   }
+   .w-30{
+    width:30%
+   }
+  .no-bullets, li {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  .w-half{
+width: 50%;
+  }
+  .consultation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .flex-between{
+    display: flex;
+    justify-content: space-between;
+  }
+  .align-center{
+    display: flex;
+    align-items: center;
+  }
+  
+  .back-link {
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .right-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .labeled-input {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .labeled-input label {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #333;
+  }
+  
+  /* Label and input side-by-side (row layout) */
+.field-row {
+    display: flex;
+    align-items: center;
+    /* gap: 10px; */
+    flex: 1;
+    min-width: 180px;
+  }
+  
+  .field-row label {
+    width: 150px;
+    background-color: #e6fbe6;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    border: 1px solid #4caf50;
+    border-right: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .field-row .input-field {
+    flex: 1;
+    border: 1px solid #4caf50;
+    padding: 12px;
+    height: 37px;
+    font-size: 14px;
+    background-color: #fff;
+    border-left: none;
+    outline: none;
+  }
+  
+  /* Label above input (column layout for textarea) */
+  .field-column {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+  
+  .field-column label {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    background-color: #e6fbe6;
+    padding: 10px;
+    border: 1px solid #4caf50;
+    border-bottom: none;
+  }
+  
+  .field-column .textarea-field {
+    border: 1px solid #4caf50;
+    padding: 10px;
+    font-size: 14px;
+    background-color: #fff;
+    min-height: 80px;
+    resize: vertical;
+  }
+  
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 20px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: #4caf50;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(16px);
+  }
+  
+  .time-label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  /* .consultation-main {
+    display: flex;
+    margin-top: 20px;
+    gap: 30px;
+  } */
+  
+  .consultation-form {
+    flex: 1;
+    /* border: 2px solid #1e90ff; */
+    padding: 20px;
+    border-radius: 8px;
+    background: #fff;
+  }
+  
+  .sidebar {
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-action {
+    padding: 10px;
+    font-size: 13px;
+    text-align: left;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #f4f4f4;
+    cursor: pointer;
+  }
+  
+  .btn-action.green {
+    background: #ccffcc;
+    border-color: #4caf50;
+  }
+  
+  .btn-action.disabled {
+    background: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+  }
+  
+  .diagnosis-box {
+    border: 1px solid #4caf50;
+    background: #e8fbe8;
+    padding: 12px;
+    font-size: 13px;
+    border-radius: 4px;
+  }
+  
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .new .input-field {
+    flex: 1;
+    min-width: 180px;
+    border: none;
+    outline: none;
+    background: #fff;
+    font-size: 14px;
+    padding: 10px;
+    border-left: 1px solid #4caf50;
+    border-top: 1px solid #4caf50;
+    border-bottom: 1px solid #4caf50;
+    border-right: 1px solid #4caf50;
+    box-sizing: border-box;
+    position: relative;
+  }
+  
+  .input-field::placeholder {
+    color: #555;
+    font-weight: bold;
+    margin-left: -130px;
+    position: relative;
+    left: -130px;
+  }
+  
+  .textarea-field {
+    width: 100%;
+    min-height: 80px;
+    resize: none;
+    padding: 10px;
+    border: 1px solid #4caf50;
+    border-left: 150px solid #e6fbe6;
+    background: #fff;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+ .group-box {
+  flex: 1;
+  border: 1px solid #4caf50;
+  border-radius: 4px;
+  padding: 0;
+  background: #f5fff5;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.group-box {
+    flex: 1;
+    border: 1px solid #4caf50;
+    border-radius: 4px;
+    padding: 0;
+    background: #f5fff5;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .group-box label {
+    font-weight: bold;
+    font-size: 13px;
+    background-color: #e6fbe6;
+    border-bottom: 1px solid #4caf50;
+    padding: 10px;
+    margin: 0;
+  }
+  
+  .group-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 10px;
+  }
+  
+  .group-options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  .upload-box {
+    margin-bottom: 12px;
+    border: 1px solid #4caf50;
+    padding: 10px;
+    border-radius: 4px;
+    background: #f0fff0;
+    font-size: 13px;
+  }
+  
+  .action-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 20px;
+  }
+  
+  .btn {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn.grey {
+    width: 100%;
+    text-align: center;
+    background: #e0e0e0;
+    color: #444;
+  }
+  
+  .btn.green {
+    width: 100%;
+    text-align: center;
+
+    background: #006400;
+    color: #fff;
+  }
+  .appointment-card {
+    background-color: #fff;
+    border: 2px solid #109615;
+    border-radius: 10px;
+    padding: 30px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .appointment-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .circle-icon {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #109615;
+    border-radius: 50%;
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #109615;
+  }
+  
+  .greeting-text {
+    text-align: center;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .appointment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .full-input {
+    padding: 10px;
+    border: 1px solid #109615;
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .half-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #109615;
+    border-radius: 4px;
+  }
+  
+  .notes-area {
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #109615;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  
+  .submit-btn {
+    background-color: #109615;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+ 
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .modal-container {
+    background-color: #fff;
+    padding: 20px;
+    width: 500px;
+    border-radius: 12px;
+    position: relative;
+    border: 2px solid #109615;
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-size: 60px;
+color:white;
+    border: none;
+    background-color: red;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .appointment-card {
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .appointment-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .circle-icon {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #109615;
+    border-radius: 50%;
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #109615;
+  }
+  
+  .greeting-text {
+    text-align: center;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .appointment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .full-input {
+    padding: 10px;
+    border: 1px solid #109615;
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .half-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #109615;
+    border-radius: 4px;
+  }
+  
+  .notes-area {
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #109615;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  
+  .submit-btn {
+    background-color: #109615;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .submit-btn:hover {
+    background-color: #0c7d12;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .form-grid label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+  
+  .form-grid input,
+  .form-grid select {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .form-grid input[type="checkbox"] {
+    width: auto;
+    margin-right: 0.5rem;
+  }
+  
