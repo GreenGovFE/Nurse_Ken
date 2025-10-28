@@ -2,17 +2,24 @@ import React, { useEffect, useState } from "react";
 import { get } from "../../../utility/fetch";
 import { usePatient } from "../../../contexts";
 import ServiceTreatmentTable from "../../ServiceTreatmentTable";
+import Antinatal from "../../Antinatal";
+import PatientsToSeeDoctorTable from "../../tables/PatientsToSeeDoctorTable";
+import { FiArrowLeft } from "react-icons/fi";
 
 function AntenatalTable() {
   const { patientId, patientName, hmoId, patientInfo } = usePatient();
 
-  const [treatment, setTreatment] = useState([])
-  const [currenttreatmentrecord, setCurrenttreatmentrecord] = useState([])
+  const [treatment, setTreatment] = useState([]);
+  const [currenttreatmentrecord, setCurrenttreatmentrecord] = useState([]);
+  const [show, setShow] = useState(false);
+  const [patientData, setPatientData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [reset, setReset] = useState(false)
-  const [selectedTab, setSelectedTab] = useState("ante");
-
+  const [reset, setReset] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("ant-record");
+  const [allPatientsAssignedToDoctor, setAllPatientsAssignedToDoctor] =
+    useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -39,34 +46,33 @@ function AntenatalTable() {
   };
 
   useEffect(() => {
-    getTreatment()
-  }, [currentPage])
+    // getTreatment()
+  }, [currentPage]);
 
   useEffect(() => {
-    getTreatment()
-  }, [reset])
+    getPatientsAssignedToDoctor(1, 1000);
+    // getTreatment()
+  }, [reset]);
 
-  
-
-  const getTreatment = async () => {
-    try {
-      let res = await get(`/ServiceTreatment/list/${currentPage}/10000`);
-      setTreatment(res?.data?.recordList);
-      setTotalPages(res?.metadata?.totalPages)
-    } catch (error) {
-      console.error('Error fetching treatment records:', error);
-    }
-  }
+  // const getTreatment = async () => {
+  //   try {
+  //     let res = await get(`/ServiceTreatment/list/${currentPage}/10000`);
+  //     setTreatment(res?.data?.recordList);
+  //     setTotalPages(res?.metadata?.totalPages)
+  //   } catch (error) {
+  //     console.error('Error fetching treatment records:', error);
+  //   }
+  // }
 
   // Group treatment by their specific type IDs
   const groupTreatmentsByType = (treatments) => {
     return {
-      ante: treatments?.filter(t => t.antenatalId !== 0),
-      general: treatments?.filter(t => t.generalPracticeId !== 0),
-      ogIvf: treatments?.filter(t => t.oG_IVFId !== 0),
-      ortho: treatments?.filter(t => t.orthopedicId !== 0),
-      surg: treatments?.filter(t => t.generalSurgeryId !== 0),
-      famPlan: treatments?.filter(t => t.familyMedicineId !== 0),
+      ante: treatments?.filter((t) => t.antenatalId !== 0),
+      general: treatments?.filter((t) => t.generalPracticeId !== 0),
+      ogIvf: treatments?.filter((t) => t.oG_IVFId !== 0),
+      ortho: treatments?.filter((t) => t.orthopedicId !== 0),
+      surg: treatments?.filter((t) => t.generalSurgeryId !== 0),
+      famPlan: treatments?.filter((t) => t.familyMedicineId !== 0),
     };
   };
 
@@ -74,63 +80,101 @@ function AntenatalTable() {
 
   console.log("groupedTreatments", groupedTreatments);
 
+  const getPatientsAssignedToDoctor = async (
+    pageIndex = 1,
+    pageSize = 1000
+  ) => {
+    setLoading(true);
+    try {
+      const res = await get(
+        `/patients/assignedtodoctor?pageIndex=${pageIndex}&pageSize=${pageSize}`
+      );
+      console.log(res.data);
+      setAllPatientsAssignedToDoctor(res?.data);
+      setTotalPages(res?.pageCount);
+      return res;
+    } catch (error) {
+      console.error("Error fetching patients assigned to doctor:", error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAntenatalRowClick = (row) => {
+    console.log(row);
+    localStorage.setItem("appointmentId", row.appointmentId);
+    setShow(!show);
+    setPatientData(row);
+  };
 
   return (
     <div className="w-100">
-      <div className=" m-t-80">
-        <div className="tabs m-t-20 bold-text">
-          <div
-            className={`tab-item ${selectedTab === "ante" ? "active" : ""}`}
-            onClick={() => setSelectedTab("ante")}
-          >
-            Antenatal
+      {!show ? (
+        <div className="m-t-80">
+          <div className="tabs m-t-20 bold-text">
+            <div
+              className={`tab-item ${
+                selectedTab === "ant-record" ? "active" : ""
+              }`}
+              onClick={() => setSelectedTab("ant-record")}
+            >
+              Antenatal Record
+            </div>
+            <div
+              className={`tab-item ${
+                selectedTab === "treatment-table" ? "active" : ""
+              }`}
+              onClick={() => setSelectedTab("treatment-table")}
+            >
+              Treatment Table
+            </div>
           </div>
+
+          {selectedTab === "ant-record" && (
+            <PatientsToSeeDoctorTable
+            antenatal
+            onAntenatalRowClick={handleAntenatalRowClick}
+            data={allPatientsAssignedToDoctor}
+            currentPage={1}
+            itemsPerPage={1000}
+            fetchData={getPatientsAssignedToDoctor}
+          />
+          )}
+          {selectedTab === "treatment-table" && (
+           <ServiceTreatmentTable
+              data={groupedTreatments.ante}
+              reset={setReset}
+            />
+          )}
+         
         </div>
-        <ServiceTreatmentTable
-          data={
-            selectedTab === "general" ? groupedTreatments.general :
-              selectedTab === "og-ivf" ? groupedTreatments.ogIvf :
-                selectedTab === "ortho" ? groupedTreatments.ortho :
-                  selectedTab === "ante" ? groupedTreatments.ante :
-                    selectedTab === "surg" ? groupedTreatments.surg :
-                      selectedTab === "fam-plan" ? groupedTreatments.famPlan :
-                        []
-          }
-          reset={setReset}
-        />
-        {/* <div className="pagination flex space-between float-right col-3 m-t-20">
-          <div className="flex gap-8">
-            <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+      ) : (
+        <div className="m-t-80">
+          <div
+            className="flex"
+            style={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              cursor: "pointer",
+              marginBottom: "16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <FiArrowLeft />
+              <p onClick={() => setShow(!show)} style={{ marginLeft: 8 }}>
+                Back
+              </p>
+            </div>
+            <div style={{ fontWeight: "bold" }}>
+              {patientData?.firstName} {patientData?.lastName}
+            </div>
           </div>
-          <div className="flex gap-8">
-            <button
-              className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              {"Previous"}
-            </button>
 
-            {generatePageNumbers().map((page, index) => (
-              <button
-                key={`page-${index}`}
-                className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
-                onClick={() => handlePageChange(page)}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              {"Next"}
-            </button>
-          </div>
-        </div> */}
-      </div>
+            <Antinatal patientData={patientData} />
+         
+        </div>
+      )}
     </div>
   );
 }

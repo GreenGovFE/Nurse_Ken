@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { get } from "../../utility/fetch";
 import Visits from "../pages/Patient/Vitals";
 import ViewVisit from "../modals/visits";
+import moment from "moment/moment";
 
 function VisitsTable({ data }) {
   const [nurses, setNurses] = useState([]);
@@ -77,6 +78,7 @@ function VisitsTable({ data }) {
           <thead className="border-top-none">
             <tr className="border-top-none">
               <th className="center-text">Date</th>
+              <th className="center-text">Time</th>
               <th className="center-text">Blood Pressure (mmHg)</th>
               <th  className="center-text">Temp (°C)</th>
               <th className="center-text">Weight (Kg)</th>
@@ -95,6 +97,10 @@ function VisitsTable({ data }) {
             {Array.isArray(data) && data?.map((row) => (
               <tr key={row?.id}>
                 <td style={{ minWidth: '100px' }}>{formatDate(row?.dateOfVisit)}</td>
+                <td style={{ minWidth: '100px' }}>
+                  {moment(row?.dateOfVisit).format("hh:mm A")}
+                </td>
+
                 <td>{row?.bloodPressure}</td>
                 <td>{row?.temperature}</td>
                 <td>{row?.weight}</td>

@@ -7,47 +7,96 @@ import PatientAdmission from "../UI/PatientAdmission";
 import GenderDistribution from "../UI/GenderDistribution";
 import OutAndInpatientGraph from "../UI/OutAndInpatientGraph";
 import { get } from "../../utility/fetch";
-import { RiAccountCircleFill, RiGroup2Fill, RiHotelBedFill } from "react-icons/ri";
+import {
+  RiAccountCircleFill,
+  RiGroup2Fill,
+  RiHotelBedFill,
+} from "react-icons/ri";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
-
-  const [admittedpatients, setAdmittedPatients] = useState(0)
-  const [inPatients, setInpatients] = useState(0)
-  const [patientsVisited, setPatientsVisited] = useState(0) 
-  const [outPatients, setOutpatients] = useState(0)
-  const [malePercentage, setMalePercentage] = useState(0)
-  const [femalePercentage, setFemalePercentage] = useState(0)
-  const [patientAdmission, setPatientAdmission] = useState([])
-  const [availableStaff, setAvailableStaff] = useState(0)
+  const [admittedpatients, setAdmittedPatients] = useState(0);
+  const [inPatients, setInpatients] = useState(0);
+  const [patientsVisited, setPatientsVisited] = useState(0);
+  const [outPatients, setOutpatients] = useState(0);
+  const [malePercentage, setMalePercentage] = useState(0);
+  const [femalePercentage, setFemalePercentage] = useState(0);
+  const [patientAdmission, setPatientAdmission] = useState([]);
+  const [availableStaff, setAvailableStaff] = useState(0);
   const [hmopatients, setHmoPatients] = useState(0);
   const [totalpatients, setTotalPatients] = useState(0);
 
-  const userInfo = JSON.parse(localStorage.getItem('USER_INFO'))
+  const userInfo = JSON.parse(localStorage.getItem("USER_INFO"));
 
   const navigate = useNavigate();
 
-  const getAdmittedPatients = async () => {
-    try {
-      let res = await get("/dashboard/doctor/admittedpatients")
-      setAdmittedPatients(res)
-    } catch (error) {
-      console.error('Error fetching in and out patients:', error);
+  function getRoleTitle(roles) {
+    if (!Array.isArray(roles) || roles.length === 0) return "No Role";
 
+    let roleString = "";
+
+    const hasRole = (roleName) => roles.includes(roleName);
+    if (hasRole("Doctor")) {
+      roleString = "Doctor";
+    } else if (hasRole("Nurse") && hasRole("checkin")) {
+      roleString = "Checkin Nurse";
     }
+    // Priority 4: Nurse and Local Admin
+    else if (hasRole("Nurse") && hasRole("Local Admin")) {
+      roleString = "Admin Nurse";
+    } else if (hasRole("Pharmacist")) {
+      roleString = "Pharmacist";
+    }
+    // Priority 1: Super Admin or more than 7 roles
+
+    // Priority 2: Only one role
+    else if (roles.length === 1) {
+      roleString = roles[0];
+    }
+    // Priority 3: Nurse and checkin
+    else if (hasRole("Nurse") && hasRole("checkin")) {
+      roleString = "Checkin Nurse";
+    }
+    // Priority 4: Nurse and Local Admin
+    else if (hasRole("Nurse") && hasRole("Local Admin")) {
+      roleString = "Admin Nurse";
+    } else if (hasRole("Health Finance Admin")) {
+      roleString += " - Admin Manager";
+    }
+    // Fallback
+    else {
+      roleString = roles[0]; // default to first role
+    }
+
+    // Add "- Admin Manager" if Health Finance Admin is present
+
+    if (hasRole("Super Admin") || roles.length > 7) {
+      roleString += " - Super Admin";
+    }
+
+    return roleString;
   }
 
-  const token = sessionStorage.getItem('token');
+  const getAdmittedPatients = async () => {
+    try {
+      let res = await get("/dashboard/doctor/admittedpatients");
+      setAdmittedPatients(res);
+    } catch (error) {
+      console.error("Error fetching in and out patients:", error);
+    }
+  };
+
+  const token = sessionStorage.getItem("token");
 
   const getInAndOutPatients = async () => {
     try {
       let res = await get("/dashboard/AllOutPatientAndInPatientCount");
       setInpatients(res);
-      setPatientsVisited(res?.monthlyStats)
+      setPatientsVisited(res?.monthlyStats);
       // setOutpatients(res?.outpatientCount);
     } catch (error) {
-      console.error('Error fetching in and out patients:', error);
+      console.error("Error fetching in and out patients:", error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
@@ -57,17 +106,19 @@ function Dashboard() {
       let res = await get("/dashboard/admission");
       setPatientAdmission(res);
     } catch (error) {
-      console.error('Error fetching patient admission:', error);
+      console.error("Error fetching patient admission:", error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
 
   const getAvailableStaff = async () => {
     try {
-      let res = await get(`/dashboard/AvaliableStaff/${sessionStorage?.getItem("clinicId")}`);
+      let res = await get(
+        `/dashboard/AvaliableStaff/${sessionStorage?.getItem("clinicId")}`
+      );
       setAvailableStaff(res?.avaliableStaff);
     } catch (error) {
-      console.error('Error fetching available staff:', error);
+      console.error("Error fetching available staff:", error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
@@ -78,31 +129,31 @@ function Dashboard() {
       setFemalePercentage(res?.femalePatientPercentage);
       setMalePercentage(res?.malePatientPercentage);
     } catch (error) {
-      console.error('Error fetching gender distribution:', error);
+      console.error("Error fetching gender distribution:", error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
 
   const getHmoPatients = async () => {
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem("token");
 
     if (!token) {
-      console.error('Token not found in session storage');
+      console.error("Token not found in session storage");
       return;
     }
 
     const options = {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     };
 
     try {
       let res = await get("/dashboard/hmo-patient");
       setHmoPatients(res);
     } catch (error) {
-      console.error('Error fetching HMO patients:', error);
+      console.error("Error fetching HMO patients:", error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
@@ -111,50 +162,55 @@ function Dashboard() {
       let res = await get("/dashboard/AllPatientCount");
       setTotalPatients(res);
     } catch (error) {
-      console.error('Error fetching HMO patients:', error);
+      console.error("Error fetching HMO patients:", error);
       // Handle the error here, such as displaying an error message to the user
     }
   };
 
   const clicked = (path, type) => {
-
     if (type === "admit") {
-    localStorage.setItem("admitPatients", true);
-
-    }else if (type === "hmo") {
+      localStorage.setItem("admitPatients", true);
+    } else if (type === "hmo") {
       localStorage.setItem("hmoPatients", true);
-    }else{
+    } else {
       localStorage.setItem("patients", true);
     }
     navigate(path);
-
-  }
+  };
 
   useEffect(() => {
-    getAdmittedPatients()
-    getHmoPatients()
-    getInAndOutPatients()
-    getGenderDistribution()
-    getPatientAdmission()
-    getAvailableStaff()
-    getTotalPatients()
-
+    getAdmittedPatients();
+    getHmoPatients();
+    getInAndOutPatients();
+    getGenderDistribution();
+    getPatientAdmission();
+    getAvailableStaff();
+    getTotalPatients();
   }, []);
   return (
     <div className="w-100 m-t-60">
       <div className="m-t-40">
         <div className="m-b-40">
           <span>Good Day</span>
-          <h3>{userInfo?.firstName} {userInfo?.lastName}</h3>
-          <span>{userInfo?.role}</span>
+          <h3>
+            {userInfo?.firstName} {userInfo?.lastName}
+          </h3>
+          <span>{getRoleTitle(userInfo?.role)}</span>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-
-          <div onClick={()=>clicked('/patients', 'admit')} className="col-3">
-            <StatCard data={{
-              number: admittedpatients,
-              title: "Admitted Patients",
-            }} icon={<RiHotelBedFill className="icon" size={32} />}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+          }}
+        >
+          <div onClick={() => clicked("/patients", "admit")} className="col-3">
+            <StatCard
+              data={{
+                number: admittedpatients,
+                title: "Admitted Patients",
+              }}
+              icon={<RiHotelBedFill className="icon" size={32} />}
             />
           </div>
           {/* <div className="col-3">
@@ -164,42 +220,43 @@ function Dashboard() {
             }} icon={<RiAccountCircleFill className="icon" size={32} />}
             />
           </div> */}
-          <div onClick={()=>clicked('/patients', 'hmo')}  className="col-3">
-            <StatCard data={{
-              number: hmopatients,
-              title: "Patients with HMO",
-            }} icon={<RiGroup2Fill className="icon" size={32} />}
+          <div onClick={() => clicked("/patients", "hmo")} className="col-3">
+            <StatCard
+              data={{
+                number: hmopatients,
+                title: "Patients with HMO",
+              }}
+              icon={<RiGroup2Fill className="icon" size={32} />}
             />
           </div>
-          <div onClick={()=>clicked('/patients', 'patients')}  className=" col-3">
-            <StatCard data={{
-              number: totalpatients,
-              title: "Total Patients",
-            }} icon={<RiGroup2Fill className="icon" size={32} />}
+          <div
+            onClick={() => clicked("/patients", "patients")}
+            className=" col-3"
+          >
+            <StatCard
+              data={{
+                number: totalpatients,
+                title: "Total Patients",
+              }}
+              icon={<RiGroup2Fill className="icon" size={32} />}
             />
           </div>
-
         </div>
         <div className="w-100 gap-16 ">
           <div className="flex wrap space-between m-t-40">
             <div className="col-8">
-              <OutAndInpatientGraph
-                monthlyStats={patientsVisited}
-              />
+              <OutAndInpatientGraph monthlyStats={patientsVisited} />
             </div>
             <div className="col-4 ">
               <GenderDistribution
                 malePatientPercentage={malePercentage}
                 femalePatientPercentage={femalePercentage}
-
               />
             </div>
           </div>
           <div className=" m-t-20 w-100">
             <div className="col-8">
-              <PatientAdmission
-                PatientAdmission={patientAdmission}
-              />
+              <PatientAdmission PatientAdmission={patientAdmission} />
             </div>
           </div>
         </div>

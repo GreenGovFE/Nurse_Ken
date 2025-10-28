@@ -3,19 +3,27 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { GiHamburgerMenu } from "react-icons/gi";
-import EdsgLogo from "../../assets/images/SidebarLogo.png";
+import EdsgLogo from "../../assets/images/ConnectHealthPro.png";
 import useNavigationItems from "../../config/sideBarMenu";
 import { usePatient } from "../../contexts";
 import Cookies from "js-cookie";
 
 const Sidebar = () => {
-  const { setPatientId, setPatientInfo, setHmoDetails, setPatientName, setDiagnosis, nurseRoles } = usePatient();
+  const {
+    setPatientId,
+    setPatientInfo,
+    setHmoDetails,
+    setPatientName,
+    setDiagnosis,
+    nurseRoles,
+  } = usePatient();
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const homeLink = Cookies.get("homeLink");
-
+  const companyInfo = JSON.parse(localStorage.getItem("COMPANY_INFO"));
+  const UserInfo = JSON.parse(localStorage.getItem("USER_INFO"));
   const toggleSidebar = () => {
     setSidebarVisible((prev) => !prev);
   };
@@ -37,12 +45,12 @@ const Sidebar = () => {
     setPatientId(null);
     setDiagnosis(null);
     localStorage.removeItem("from");
-    localStorage.removeItem('admitPatients')
-    localStorage.removeItem('hmoPatients')
-    localStorage.removeItem('patients')
+    localStorage.removeItem("admitPatients");
+    localStorage.removeItem("hmoPatients");
+    localStorage.removeItem("patients");
     Cookies.remove("patientInfo");
     Cookies.remove("patientName");
-    Cookies.remove('patientId')
+    Cookies.remove("patientId");
   };
 
   const handleMenuItemClick = (title, href) => {
@@ -64,7 +72,8 @@ const Sidebar = () => {
   };
 
   const handleSupport = () => {
-    window.location.href = "https://greenzonetechnologies.atlassian.net/servicedesk/customer/portals";
+    window.location.href =
+      "https://greenzonetechnologies.atlassian.net/servicedesk/customer/portals";
   };
 
   const navigationItems = useNavigationItems();
@@ -76,7 +85,10 @@ const Sidebar = () => {
           <GiHamburgerMenu size={24} />
         </button>
       )}
-      <nav className={`page-sidebar ${isSidebarVisible ? "visible" : ""}`} ref={sidebarRef}>
+      <nav
+        className={`page-sidebar ${isSidebarVisible ? "visible" : ""}`}
+        ref={sidebarRef}
+      >
         <div className="sidebar-header">
           <img src={EdsgLogo} alt="logo" className="brand" width="150" />
         </div>
@@ -94,7 +106,14 @@ const Sidebar = () => {
               <RiLogoutCircleLine className="icon" />
               <span className="title m-l-20">Log Out</span>
             </li>
-            <div style={{ position: "fixed", bottom: "0%", right: "30%", zIndex: 1000 }}>
+            <div
+              style={{
+                position: "fixed",
+                bottom: "0%",
+                right: "30%",
+                zIndex: 1000,
+              }}
+            >
               <img
                 onClick={handleSupport}
                 style={{ width: "120px", height: "120px", cursor: "pointer" }}
@@ -109,7 +128,11 @@ const Sidebar = () => {
   );
 };
 
-const MenuItem = ({ item: { title, href, icon, children }, pathname, onMenuItemClick }) => {
+const MenuItem = ({
+  item: { title, href, icon, children },
+  pathname,
+  onMenuItemClick,
+}) => {
   const [showSubMenu, setShowSubMenu] = useState(false);
 
   const handleClick = () => {
@@ -122,7 +145,10 @@ const MenuItem = ({ item: { title, href, icon, children }, pathname, onMenuItemC
 
   return (
     <>
-      <li className={`${pathname === href ? "active" : ""} pointer`} onClick={handleClick}>
+      <li
+        className={`${pathname === href ? "active" : ""} pointer`}
+        onClick={handleClick}
+      >
         {icon}
         <span className="title m-l-20">{title}</span>
         {children && (

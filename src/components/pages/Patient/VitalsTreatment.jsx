@@ -75,6 +75,7 @@ function VitalsTreat({ treatment }) {
         patientId: +patientId,
         categoryItemId: service.value,
         amount: 0,
+        quantity: payload.quantity || 1,
         status: "Pending",
         appointmentId: Number(treatment?.appointmentId),
       });
@@ -181,7 +182,7 @@ function VitalsTreat({ treatment }) {
       let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
       let tempNurses = res?.data
         ?.filter((nurse) => nurse?.username)
-        .map((nurse) => {
+        ?.map((nurse) => {
           return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
         });
 
@@ -198,7 +199,7 @@ function VitalsTreat({ treatment }) {
       let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
       let tempDoc = res?.data
         ?.filter((doc) => doc?.username)
-        .map((doc) => {
+        ?.map((doc) => {
           return { name: doc?.username, value: parseFloat(doc?.employeeId) };
         });
 
@@ -334,7 +335,7 @@ function VitalsTreat({ treatment }) {
             return errors[field].some((errorMsg) => /is required/i.test(errorMsg));
           });
           if (missingFields.length > 0) {
-            const formattedFields = missingFields.map((field) => {
+            const formattedFields = missingFields?.map((field) => {
               if (customFieldNames[field]) {
                 return customFieldNames[field];
               }
@@ -404,7 +405,7 @@ function VitalsTreat({ treatment }) {
 
       const tempServices = res?.data?.resultList
         // ?.filter((service) => service.category.name === "Clinical Service" || service.category.name === "Clinical Services")
-        .map((category) => ({
+        ?.map((category) => ({
           label: category?.name,
           value: parseFloat(category?.id),
         }));
@@ -440,7 +441,7 @@ function VitalsTreat({ treatment }) {
         options
       );
 
-      const tempServices = res?.data?.resultList.map((service) => ({
+      const tempServices = res?.data?.resultList?.map((service) => ({
         label: service?.itemName,
         value: parseFloat(service?.id),
       }));
@@ -612,6 +613,16 @@ function VitalsTreat({ treatment }) {
                 </div>
               </div>
             )}
+
+              <div className="w-100">
+                            <TagInputs
+                              onChange={(e) => setPayload({ ...payload, quantity: e.target.value })}
+                              value={payload?.quantity}
+                              variation={true}
+                              name="quantity"
+                              label="Quantity"
+                            />
+                          </div>
 
             <button
               onClick={submitServicePayload}

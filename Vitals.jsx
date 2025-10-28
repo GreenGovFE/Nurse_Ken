@@ -152,11 +152,19 @@ function Vitals({ setSelectedTab }) {
     let missingFields = [];
 
     Object.keys(fieldLabels).forEach((field) => {
+      const value = payload[field];
+
+      // Special handling for appointmentId: must exist and must not be 0
       if (field === 'appointmentId') {
+        const appointmentIdValue = value === '' || value === null || value === undefined ? NaN : Number(value);
+        if (!value || appointmentIdValue === 0 || Number.isNaN(appointmentIdValue)) {
+          validationErrors[field] = `${fieldLabels[field]} is required`;
+          missingFields.push(fieldLabels[field]);
+        }
         return;
       }
 
-      if (!payload[field]) {
+      if (value === null || value === undefined || value === '') {
         validationErrors[field] = `${fieldLabels[field]} is required`;
         missingFields.push(fieldLabels[field]);
       }
@@ -199,7 +207,8 @@ function Vitals({ setSelectedTab }) {
         docPath: selectedMfiles?.filePath,
       }
     ];
-    
+    console.log(payload?.appointmentId)
+
 
 
     try {

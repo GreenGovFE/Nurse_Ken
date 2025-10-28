@@ -42,8 +42,8 @@ function PatientDetails() {
   const getAllAdmittedPatients = async () => {
     try {
       let res = await get(`/patients/${patientId}/admited-patients?pageNumber=${currentPage}&pageSize=${10}`);
-      setAdmittedPatients(res.data);
-      setTotalPages(res.pageCount);
+      setAdmittedPatients(res?.data);
+      setTotalPages(res?.pageCount);
     } catch (error) {
       console.error('Error fetching all patients:', error);
     }
@@ -70,6 +70,8 @@ function PatientDetails() {
         return <ContactDetails setSelectedTab={setSelectedTab} hide={true} renderTabContent={renderTabContent} />;
       case "emergencyContact":
         return <EmergencyContact renderTabContent={renderTabContent} />;
+          case "hmo":
+        return <Finance_HMO renderTabContent={renderTabContent} />;
       case "medicalRecord":
         return <MedicalRecord renderTabContent={renderTabContent} />;
       case "immunization":
@@ -80,8 +82,8 @@ function PatientDetails() {
         return <Treatments renderTabContent={renderTabContent} />;
       case "labs":
         return <Labs renderTabContent={renderTabContent} />;
-      case "financeHmo":
-        return <Finance_HMO />;
+      // case "financeHmo":
+      //   return <Finance_HMO />;
       case "appointment":
         return <Appointment data={combinedData} setCurrent={setCurrentPage} />;
       default:
@@ -129,6 +131,12 @@ function PatientDetails() {
               >
                 Emergency Contact
               </div>
+                <div
+                className={`tab-item ${selectedTab === "hmo" ? "active" : ""}`}
+                onClick={() => setSelectedTab("hmo")}
+              >
+                HMO
+              </div>
             </>
           ) : (
             <>
@@ -152,6 +160,12 @@ function PatientDetails() {
                   >
                     Emergency Contact
                   </div>
+                    <div
+                className={`tab-item ${selectedTab === "hmo" ? "active" : ""}`}
+                onClick={() => setSelectedTab("hmo")}
+              >
+                HMO
+              </div>
                 </>
               )}
               {nurseRoles.includes('vitalnurse') && patientInfo && (

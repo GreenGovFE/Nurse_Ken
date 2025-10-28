@@ -67,10 +67,11 @@ function Immunization({ setSelectedTab }) {
 
   const getImmunization = async () => {
     try {
-      let res = await get(`/patients/getAllImmunizationRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
+      let res = await get(
+        `/patients/getAllImmunizationRecordByPatientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`
+      );
       setImmunizationData(res.data);
-      setTotalPages(res.pageCount)
-
+      setTotalPages(res.pageCount);
     } catch (error) {
       console.error("Error fetching immunization data:", error);
       // Handle the error here, such as displaying an error message to the user
@@ -87,11 +88,14 @@ function Immunization({ setSelectedTab }) {
       currentDate.setHours(0, 0, 0, 0);
 
       if (selectedDate > currentDate) {
-        notification({ message: 'Date selected cannot be a future date', type: "error" });
+        notification({
+          message: "Date selected cannot be a future date",
+          type: "error",
+        });
 
         // Reset the date input to an empty string
         event.target.value = "";
-        setPayload(prevPayload => ({ ...prevPayload, [name]: "" }));
+        setPayload((prevPayload) => ({ ...prevPayload, [name]: "" }));
         return;
       }
     }
@@ -154,7 +158,9 @@ function Immunization({ setSelectedTab }) {
     setErrors(validationErrors);
 
     if (missingFields.length > 0) {
-      const errorMessage = `The following fields are required: ${missingFields.join(", ")}`;
+      const errorMessage = `The following fields are required: ${missingFields.join(
+        ", "
+      )}`;
       notification({ message: errorMessage, type: "error" });
     }
 
@@ -208,21 +214,25 @@ function Immunization({ setSelectedTab }) {
         if (res && res.errors) {
           const errors = res.errors;
           const missingFields = Object.keys(errors).filter((field) => {
-            return errors[field].some((errorMsg) => /is required/i.test(errorMsg));
+            return errors[field].some((errorMsg) =>
+              /is required/i.test(errorMsg)
+            );
           });
           if (missingFields.length > 0) {
-            const formattedFields = missingFields.map((field) =>
-              fieldLabels[field] || field.replace(/([a-z])([A-Z])/g, "$1 $2")
+            const formattedFields = missingFields.map(
+              (field) =>
+                fieldLabels[field] || field.replace(/([a-z])([A-Z])/g, "$1 $2")
             );
 
-            errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
+            errorMessage = `The following fields are required: ${formattedFields.join(
+              ", "
+            )}`;
           }
         }
 
         notification({ message: errorMessage, type: "error" });
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const next = () => {
@@ -234,16 +244,21 @@ function Immunization({ setSelectedTab }) {
   }, [currentPage]);
 
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window) {
+    if ("webkitSpeechRecognition" in window) {
       const SpeechRecognition = window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = "en-US";
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        setPayload(prevPayload => ({ ...prevPayload, notes: prevPayload.notes ? prevPayload.notes + ' ' + transcript : transcript }));
+        setPayload((prevPayload) => ({
+          ...prevPayload,
+          notes: prevPayload.notes
+            ? prevPayload.notes + " " + transcript
+            : transcript,
+        }));
       };
 
       recognitionRef.current.onerror = (event) => {
@@ -258,7 +273,12 @@ function Immunization({ setSelectedTab }) {
   }, []);
 
   const handleTranscript = (transcript) => {
-    setPayload(prevPayload => ({ ...prevPayload, notes: prevPayload.notes ? prevPayload.notes + ' ' + transcript : transcript }));
+    setPayload((prevPayload) => ({
+      ...prevPayload,
+      notes: prevPayload.notes
+        ? prevPayload.notes + " " + transcript
+        : transcript,
+    }));
   };
 
   return (
@@ -266,36 +286,90 @@ function Immunization({ setSelectedTab }) {
       <div className="w-100  wrap flex ">
         <div className="col-3-3">
           <div>
-            <TagInputs onChange={handleChange} value={payload?.vaccine || ''} name="vaccine" label="Vaccine" error={errors.vaccine} />
+            <TagInputs
+              onChange={handleChange}
+              value={payload?.vaccine || ""}
+              name="vaccine"
+              label="Vaccine"
+              error={errors.vaccine}
+            />
           </div>
           <div>
-            <TagInputs onChange={handleChange} value={payload?.vaccineBrand || ''} name="vaccineBrand" label="Vaccine Brand" error={errors.vaccineBrand} />
+            <TagInputs
+              onChange={handleChange}
+              value={payload?.vaccineBrand || ""}
+              name="vaccineBrand"
+              label="Vaccine Brand"
+              error={errors.vaccineBrand}
+            />
           </div>
           <div>
-            <TagInputs onChange={handleChange} value={payload?.batchId || ''} name="batchId" label="Batch #ID" error={errors.batchId} />
+            <TagInputs
+              onChange={handleChange}
+              value={payload?.batchId || ""}
+              name="batchId"
+              label="Batch #ID"
+              error={errors.batchId}
+            />
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.quantity || ''} variation={true} name="quantity" label="Quantity" error={errors.quantity} />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.quantity || ""}
+                variation={true}
+                name="quantity"
+                label="Quantity"
+                error={errors.quantity}
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.age || ''} variation={true} name="age" label="Age" error={errors.age} />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.age || ""}
+                variation={true}
+                name="age"
+                label="Age"
+                error={errors.age}
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.weight || ''} variation={true} name="weight" label="Weight" error={errors.weight} />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.weight || ""}
+                variation={true}
+                name="weight"
+                label="Weight"
+                error={errors.weight}
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.temperature || ''} variation={true} name="temperature" label="Temperature" error={errors.temperature} />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.temperature || ""}
+                variation={true}
+                name="temperature"
+                label="Temperature"
+                error={errors.temperature}
+              />
             </div>
           </div>
           <div>
-            <TagInputs onChange={handleChange} name="dateGiven" value={payload.dateGiven || ''} dateRestriction={'past'} label="Date Given" type="date" error={errors.dateGiven} />
+            <TagInputs
+              onChange={handleChange}
+              name="dateGiven"
+              value={payload.dateGiven || ""}
+              dateRestriction={"past"}
+              label="Date Given"
+              type="date"
+              error={errors.dateGiven}
+            />
           </div>
           <div>
             <GhostTextCompletion
@@ -304,11 +378,13 @@ function Immunization({ setSelectedTab }) {
               value={payload?.notes}
               handleChange={handleChange}
             />
-            
           </div>
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">
-              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray} />
+              <UploadButton
+                setDocNames={setDocNames}
+                setdocumentArray={setDocumentArray}
+              />
             </div>
 
             {documentArray?.map((item, index) => (
@@ -316,7 +392,11 @@ function Immunization({ setSelectedTab }) {
                 <a href={item.path} target="_blank" className="m-r-10">
                   {item.name}
                 </a>
-                <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
+                <RiDeleteBinLine
+                  color="red"
+                  className="pointer"
+                  onClick={() => deleteDoc(item.name)}
+                />
               </div>
             ))}
           </div>
@@ -338,35 +418,79 @@ function Immunization({ setSelectedTab }) {
         <div className="col-8 m-l-20">
           <ImmunizationTable data={immunizationData} />
           <div>
-            <div className="pagination flex space-between float-right  col-5 m-t-20">
-              <div className="flex gap-8">
-                <div className="bold-text">Page</div> <div>{currentPage}/{totalPages}</div>
+            <div
+              className="pagination flex flex-v-center gap-12 m-t-20"
+              style={{ justifyContent: "space-between" }}
+            >
+              <div className="flex flex-v-center gap-8">
+                <span className="bold-text">Page</span>
+                <span>
+                  {currentPage} of {totalPages}
+                </span>
               </div>
-              <div className="flex gap-8">
+
+              <div className="flex flex-v-center gap-4">
                 <button
-                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                  className={`pagination-btn-small ${
+                    currentPage === 1 ? "disabled" : ""
+                  }`}
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
+                  style={{
+                    padding: "6px 12px",
+                    fontSize: "14px",
+                    border: "1px solid #ddd",
+                    borderRadius: "4px",
+                    backgroundColor: currentPage === 1 ? "#f5f5f5" : "#fff",
+                    color: currentPage === 1 ? "#999" : "#333",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                  }}
                 >
-                  {"Previous"}
+                  Previous
                 </button>
 
                 {generatePageNumbers().map((page, index) => (
                   <button
                     key={`page-${index}`}
-                    className={`pagination-btn ${currentPage === page ? 'bg-green text-white' : ''}`}
+                    className={`pagination-btn-small ${
+                      currentPage === page ? "active" : ""
+                    }`}
                     onClick={() => handlePageChange(page)}
+                    style={{
+                      padding: "6px 10px",
+                      fontSize: "14px",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      backgroundColor:
+                        currentPage === page ? "#007bff" : "#fff",
+                      color: currentPage === page ? "#fff" : "#333",
+                      cursor: "pointer",
+                      minWidth: "32px",
+                    }}
                   >
                     {page}
                   </button>
                 ))}
 
                 <button
-                  className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+                  className={`pagination-btn-small ${
+                    currentPage === totalPages ? "disabled" : ""
+                  }`}
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
+                  style={{
+                    padding: "6px 12px",
+                    fontSize: "14px",
+                    border: "1px solid #ddd",
+                    borderRadius: "4px",
+                    backgroundColor:
+                      currentPage === totalPages ? "#f5f5f5" : "#fff",
+                    color: currentPage === totalPages ? "#999" : "#333",
+                    cursor:
+                      currentPage === totalPages ? "not-allowed" : "pointer",
+                  }}
                 >
-                  {"Next"}
+                  Next
                 </button>
               </div>
             </div>

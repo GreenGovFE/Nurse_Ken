@@ -42,6 +42,7 @@ const LabRequestTable = ({ data, isFamily=true }) => {
             <th className="border p-2">Patient Name</th>
             <th className="border p-2">Diagnosis</th>
             <th className="border p-2">Lab Centre</th>
+            <th className="border p-2">Lab Test</th>
             <th className="border p-2">Note</th>
             <th className="border p-2">Status</th>
             <th className="border p-2">Action</th>
@@ -59,6 +60,7 @@ const LabRequestTable = ({ data, isFamily=true }) => {
                     <td className="border p-2">{request.patientFullName}</td>
                     <td className="border p-2">{request.diagnosis}</td>
                     <td className="border p-2">{test.labCentre}</td>
+                    <td className="border p-2">{test.labTest}</td>
                     <td className="border p-2">{request.additionalNote}</td>
                     <td className="border p-2">{request.status}</td>
                     <td className="border p-2">

@@ -150,10 +150,10 @@ function NurseNotesAdd({ closeModal, treatment, doctors, nurses, fetch, currentP
                                 {medications.map((medication) => (
                                     <tr key={medication?.id}>
                                         <td>{medication?.pharmacyInventory?.productName}</td>
-                                        <td>{medication?.quantity} {drugStrengthUnits.find(unit => unit.id === medication?.drugStrengthUnit)?.name || 'N/A'}</td>
+                                        <td>{medication?.quantity||medication.doctorPrescription?.quantity} {drugStrengthUnits.find(unit => unit.id === medication?.drugStrengthUnit)?.name || medication.doctorPrescription?.strength || 'N/A'}</td>
                                         <td>{medication?.duration} days </td>
-                                        <td>{routesOfAdministration.find(route => route.id === medication.routeOfAdministration)?.name || 'N/A'}</td>
-                                        <td>{administrationFrequencies.find(freq => freq.id === medication.administrationFrequency)?.name || 'N/A'}</td>
+                                        <td>{routesOfAdministration.find(route => route.id === medication.routeOfAdministration)?.name ||medication.doctorPrescription?.routeOfAdministration || 'N/A'}</td>
+                                        <td>{administrationFrequencies.find(freq => freq.id === medication.administrationFrequency)?.name ||medication.doctorPrescription?.administrationFrequency || 'N/A'}</td>
                                         <td>
                                             <button
                                                 className="save-drafts"

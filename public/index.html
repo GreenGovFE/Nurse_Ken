@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/greenzone medical.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/greenzone medical.png" />
-    <!--
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/ConnectHealthPro.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Web site created using create-react-app" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/ConnectHealthPro.png" />
+  <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
+  <link rel="manifest" href="%PUBLIC_URL%/ConnectHealthPro.png" />
+  <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
       Only files inside the `public` folder can be referenced from the HTML.
@@ -24,12 +22,288 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>GreenZone Medicals</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
+  <title>ConnectHealthPro</title>
+  <style>
+    :root {
+      --chp-green: #2e7d32;
+      --chp-green-200: #a5d6a7;
+      --chp-border: rgba(46, 125, 50, 0.15);
+      --chp-card-bg: rgba(255, 255, 255, 0.75);
+    }
+
+    /* Floating container */
+    .google-translate-container {
+      position: fixed;
+      top: auto;
+      /* was: top: 16px; */
+      right: 16px;
+      bottom: 16px;
+      /* new: stick to bottom */
+      z-index: 2147483647;
+      background: var(--chp-card-bg);
+      border: 1px solid var(--chp-border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* Small label */
+    #google_translate_element::before {
+      content: "Language";
+      display: block;
+      margin: 2px 6px 6px;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--chp-green);
+      opacity: 0.9;
+    }
+
+    /* Align gadget content */
+    #google_translate_element .goog-te-gadget {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+
+    /* Modern pill select */
+    #google_translate_element .goog-te-combo {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #111827;
+      background:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="%232e7d32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 12px center,
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="%232e7d32"><path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm6.93 9h-3.184a14.51 14.51 0 00-1.2-5.051A8.016 8.016 0 0118.93 11zM12 4a12.69 12.69 0 011.886 5H10.11A12.69 12.69 0 0112 4zM4.07 13h3.184a14.51 14.51 0 001.2 5.051A8.016 8.016 0 014.07 13zm3.184-2H4.07a8.016 8.016 0 014.384-5.051A14.51 14.51 0 007.254 11zM12 20a12.69 12.69 0 01-1.886-5h3.776A12.69 12.69 0 0112 20zm2.446-5h3.184a8.016 8.016 0 01-4.384 5.051A14.51 14.51 0 0014.446 15zm-6.892 0h3.776a12.69 12.69 0 001.886 5A12.69 12.69 0 017.554 15zm0-2h3.776A12.69 12.69 0 0012 4a12.69 12.69 0 00-1.886 5H7.554zM19.93 13h-3.184a14.51 14.51 0 01-1.2 5.051A8.016 8.016 0 0019.93 13z"/></svg>') no-repeat left 12px center;
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 9999px;
+      padding: 10px 40px 10px 40px;
+      /* space for icons */
+      min-width: 220px;
+      height: 40px;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.02s;
+      margin: 0 !important;
+    }
+
+    #google_translate_element .goog-te-combo:hover {
+      border-color: var(--chp-green-200);
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+    }
+
+    #google_translate_element .goog-te-combo:focus {
+      border-color: var(--chp-green);
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+    }
+
+    #google_translate_element .goog-te-combo:active {
+      transform: translateY(0.5px);
+    }
+
+    /* Hide "Powered by Google" text and icon inside the widget */
+    #google_translate_element .goog-logo-link,
+    #google_translate_element .goog-te-gadget span,
+    #google_translate_element .goog-te-gadget img {
+      display: none !important;
+    }
+
+    /* Ensure Google top banner/menu never shows and doesn't shift layout */
+    #goog-gt-tt,
+    .goog-te-banner,
+    .goog-te-banner * {
+      display: none !important;
+      visibility: hidden !important;
+    }
+
+    iframe.goog-te-banner-frame,
+    .goog-te-banner-frame,
+    .goog-te-balloon-frame {
+      display: none !important;
+      height: 0 !important;
+      width: 0 !important;
+    }
+
+    html,
+    body,
+    body.skiptranslate,
+    .skiptranslate body {
+      top: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    /* Override and hide Google injected top menu/banner container */
+    .VIpgJd-ZVi9od-ORHb-OEVmcd {
+      left: 0 !important;
+      top: 0 !important;
+      height: 0 !important;
+      /* collapse height */
+      width: 100% !important;
+      /* z-index: 10000001; */
+      /* keep suppressed */
+      position: fixed !important;
+      border: none !important;
+      border-bottom: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      display: none !important;
+      /* hide completely */
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .VIpgJd-ZVi9od-ORHb-OEVmcd>iframe {
+      display: none !important;
+      height: 0 !important;
+      width: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .VIpgJd-ZVi9od-aZ2wEe {
+      margin: 2px 0 0 2px;
+      -webkit-animation: none !important;
+      z-index: -100000;
+      animation: none !important;
+      display: none !important;
+    }
+
+    /* Drawer wrapper fixed to the extreme right */
+    .translate-drawer {
+      position: fixed;
+      bottom: 16px;
+      right: 0;
+      /* stick to extreme right */
+      z-index: 2147483647;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      /* panel sits flush against handle */
+    }
+
+    /* Sliding panel that holds the widget (hidden off-canvas by default) */
+    .drawer-panel {
+      order: 1;
+      /* panel to the left of handle */
+      position: relative;
+      transform: translateX(100%);
+      /* slide fully out to the right when closed */
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: transform .2s ease, opacity .2s ease, visibility .2s ease;
+      will-change: transform, opacity;
+    }
+
+    /* Handle (arrow tab) anchored on the extreme right */
+    .drawer-handle {
+      order: 2;
+      /* handle at the far right */
+      width: auto;
+      /* changed from fixed width to auto */
+      min-width: 44px;
+      height: 48px;
+      border-radius: 8px 0 0 8px;
+      /* tab style */
+      background: #ffffff;
+      border: 1px solid var(--chp-border);
+      border-right: none;
+      /* seamless join with panel */
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0 10px;
+    }
+
+    /* Language code display */
+    .lang-code {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--chp-green);
+      margin-left: 5px;
+    }
+
+    .translate-drawer:not(.open):not(:hover):not(:focus-within) .lang-code {
+      display: none;
+    }
+
+    .drawer-handle .lang-icon {
+      transition: transform .2s ease;
+    }
+
+    /* Open states: hover, focus-within, or .open class (for touch) */
+    .translate-drawer:hover .drawer-panel,
+    .translate-drawer:focus-within .drawer-panel,
+    .translate-drawer.open .drawer-panel {
+      transform: translateX(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .translate-drawer:hover .drawer-handle .chev,
+    .translate-drawer:focus-within .drawer-handle .chev,
+    .translate-drawer.open .drawer-handle .chev {
+      transform: rotate(180deg);
+      /* arrow points right when open */
+    }
+
+    /* Override old fixed placement for the widget when inside drawer */
+    .translate-drawer .google-translate-container {
+      position: static;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      background: var(--chp-card-bg);
+      border: 1px solid var(--chp-border);
+      border-radius: 12px 0 12px 12px;
+      /* rounded, open side matches handle */
+      padding: 8px 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* Mobile: keep tap to open via .open class */
+    @media (max-width: 640px) {
+      .translate-drawer {
+        right: 0;
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+
+  <!-- Drawer wrapper: arrow handle + sliding panel with the widget -->
+  <div id="gtranslate-drawer" class="translate-drawer">
+    <div class="drawer-panel">
+      <div id="google_translate_element" class="google-translate-container notranslate" aria-label="Language selector"></div>
+    </div>
+    <button id="gtranslate-handle" class="drawer-handle" aria-label="Language" aria-expanded="false">
+      <!-- language globe icon -->
+      <svg class="lang-icon" width="18" height="18" viewBox="0 0 24 24" fill="#2e7d32" aria-hidden="true">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+      </svg>
+      <span id="lang-code" class="lang-code">EN</span>
+    </button>
+  </div>
+
+  <div id="root"></div>
+  <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 
@@ -39,5 +313,50 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-  </body>
+  <script>
+    // Initializes Google Translate widget
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          // includedLanguages: 'en,es,fr,de,ru,ar,pt,hi,ja,ko,zh-CN',
+          autoDisplay: false
+        },
+        'google_translate_element'
+      );
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <script>
+    // Tap/click to toggle drawer; click-away closes; keyboard accessible
+    (function () {
+      const drawer = document.getElementById('gtranslate-drawer');
+      const handle = document.getElementById('gtranslate-handle');
+      if (!drawer || !handle) return;
+
+      const setExpanded = () => handle.setAttribute('aria-expanded', drawer.classList.contains('open'));
+
+      handle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        drawer.classList.toggle('open');
+        setExpanded();
+      });
+      handle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          drawer.classList.toggle('open');
+          setExpanded();
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (!drawer.contains(e.target)) {
+          drawer.classList.remove('open');
+          setExpanded();
+        }
+      });
+    })();
+  </script>
+</body>
+
 </html>

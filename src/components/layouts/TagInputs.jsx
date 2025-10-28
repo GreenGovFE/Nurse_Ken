@@ -23,7 +23,7 @@ export default function TagInputs(props) {
 
     return (
         <div className='m-t-10'>
-            <div className='flex'>
+            <div className='flex w-100' style={{ width: "100%" }}>
                 {props.label &&
                     <div className={` ${props.type === 'textArea' ? 'label-textarea' : 'label-box'} ${props.className}`}>{props.label}</div>
                 }

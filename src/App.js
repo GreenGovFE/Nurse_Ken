@@ -59,83 +59,83 @@ const App = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    let activityTimeoutId;
-    let inactivityTimeoutId;
-    let checkSessionTimeoutId;
+  // useEffect(() => {
+  //   let activityTimeoutId;
+  //   let inactivityTimeoutId;
+  //   let checkSessionTimeoutId;
 
-    const resetInactivityTimer = () => {
-      if (activityTimeoutId) {
-        clearTimeout(activityTimeoutId);
-      }
-      if (inactivityTimeoutId) {
-        clearTimeout(inactivityTimeoutId);
-        setInactivityWarning(false);
-        setInactivityMinutesLeft(2); // Reset countdown to 2 minutes
-      }
+  //   const resetInactivityTimer = () => {
+  //     if (activityTimeoutId) {
+  //       clearTimeout(activityTimeoutId);
+  //     }
+  //     if (inactivityTimeoutId) {
+  //       clearTimeout(inactivityTimeoutId);
+  //       setInactivityWarning(false);
+  //       setInactivityMinutesLeft(2); // Reset countdown to 2 minutes
+  //     }
 
-      activityTimeoutId = setTimeout(() => {
-        inactivityTimeoutId = setInterval(() => {
-          setInactivityMinutesLeft((prev) => {
-            if (prev === 1) {
-              setSessionExpired(true);
-              setInactivityWarning(false);
-              setWarningDisplayed(false);
-              navigate('/');
-              localStorage.removeItem('LOGIN_TIME');
+  //     activityTimeoutId = setTimeout(() => {
+  //       inactivityTimeoutId = setInterval(() => {
+  //         setInactivityMinutesLeft((prev) => {
+  //           if (prev === 1) {
+  //             setSessionExpired(true);
+  //             setInactivityWarning(false);
+  //             setWarningDisplayed(false);
+  //             navigate('/');
+  //             localStorage.removeItem('LOGIN_TIME');
 
-              clearInterval(inactivityTimeoutId);
-              setTimeout(() => {
-                setSessionExpired(false);
-              }, 5000);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 60000);
-        setInactivityWarning(true);
-      }, 780000); // 13 minutes (13 * 60 * 1000)
-    };
+  //             clearInterval(inactivityTimeoutId);
+  //             setTimeout(() => {
+  //               setSessionExpired(false);
+  //             }, 5000);
+  //             return 0;
+  //           }
+  //           return prev - 1;
+  //         });
+  //       }, 6000000);
+  //       setInactivityWarning(true);
+  //     }, 78000000); // 13 minutes (13 * 60 * 1000)
+  //   };
 
-    const checkAndSetTimeout = () => {
-      const loginTime = localStorage.getItem('LOGIN_TIME');
+  //   const checkAndSetTimeout = () => {
+  //     const loginTime = localStorage.getItem('LOGIN_TIME');
 
-      if (loginTime) {
-        const currentTime = new Date().getTime();
-        const timeElapsed = currentTime - loginTime;
-        const sessionDuration = 900000; // 15 minutes (15 * 60 * 1000)
-        const timeRemaining = sessionDuration - timeElapsed;
+  //     if (loginTime) {
+  //       const currentTime = new Date().getTime();
+  //       const timeElapsed = currentTime - loginTime;
+  //       const sessionDuration = 900000; // 15 minutes (15 * 60 * 1000)
+  //       const timeRemaining = sessionDuration - timeElapsed;
 
-        if (timeRemaining <= 120000 && timeRemaining > 0) { // 2 minutes warning
-          const minutesLeft = Math.ceil(timeRemaining / 60000);
-          setMinutesLeft(minutesLeft);
-          if (!warningDisplayed) {
-            setWarningDisplayed(true);
-            setSessionExpired(false);
-          }
-        }
-      }
-    };
+  //       if (timeRemaining <= 120000 && timeRemaining > 0) { // 2 minutes warning
+  //         const minutesLeft = Math.ceil(timeRemaining / 60000);
+  //         setMinutesLeft(minutesLeft);
+  //         if (!warningDisplayed) {
+  //           setWarningDisplayed(true);
+  //           setSessionExpired(false);
+  //         }
+  //       }
+  //     }
+  //   };
 
-    window.addEventListener('mousemove', resetInactivityTimer);
-    window.addEventListener('keypress', resetInactivityTimer);
-    window.addEventListener('click', resetInactivityTimer);
+  //   window.addEventListener('mousemove', resetInactivityTimer);
+  //   window.addEventListener('keypress', resetInactivityTimer);
+  //   window.addEventListener('click', resetInactivityTimer);
 
-    checkAndSetTimeout();
+  //   checkAndSetTimeout();
 
-    checkSessionTimeoutId = setInterval(checkAndSetTimeout, 60000);
+  //   checkSessionTimeoutId = setInterval(checkAndSetTimeout, 60000);
 
-    resetInactivityTimer();
+  //   resetInactivityTimer();
 
-    return () => {
-      clearInterval(checkSessionTimeoutId);
-      clearTimeout(activityTimeoutId);
-      clearTimeout(inactivityTimeoutId);
-      window.removeEventListener('mousemove', resetInactivityTimer);
-      window.removeEventListener('keypress', resetInactivityTimer);
-      window.removeEventListener('click', resetInactivityTimer);
-    };
-  }, [navigate, warningDisplayed, sessionExpired]);
+  //   return () => {
+  //     clearInterval(checkSessionTimeoutId);
+  //     clearTimeout(activityTimeoutId);
+  //     clearTimeout(inactivityTimeoutId);
+  //     window.removeEventListener('mousemove', resetInactivityTimer);
+  //     window.removeEventListener('keypress', resetInactivityTimer);
+  //     window.removeEventListener('click', resetInactivityTimer);
+  //   };
+  // }, [navigate, warningDisplayed, sessionExpired]);
 
   return (
     <PatientProvider>
@@ -146,12 +146,12 @@ const App = () => {
             <Route path="*" element={<PageLayout />} />
             <Route render={() => <h1>Error 404. Page not found.</h1>} />
           </Routes>
-          {warningDisplayed && (
+          {/* {warningDisplayed && (
             <div style={toastStyle}>
               <span role="img" aria-label="warning">⚠️</span>
               {` Session will time out in ${minutesLeft} minutes`}
             </div>
-          )}
+          )} */}
           {sessionExpired && (
             <div style={toastStyle}>
               <span role="img" aria-label="error">❌</span>

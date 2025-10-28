@@ -78,7 +78,7 @@ const ServiceTreatmentTable = ({ }) => {
                                     </thead>
                                     <tbody>
                                         {records.length > 0 ? (
-                                            records.map((record) => (
+                                            records?.map((record) => (
                                                 <tr key={record.id}>
                                                     <td>
                                                         {record.patient?.firstName} {record.patient?.lastName}

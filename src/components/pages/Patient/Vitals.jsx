@@ -29,13 +29,12 @@ function Vitals({ setSelectedTab }) {
     weight: 0,
     bmi: 0, // Added BMI to the payload
     careType: 0,
-    VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
+    VitalNurseEmployeeId: Number(sessionStorage.getItem("userId")),
     appointmentId: null,
     notes: "",
     vitalDocuments: [],
-    bloodSugar: '',
-    oxygenSaturation: '',
-
+    bloodSugar: "",
+    oxygenSaturation: "",
   });
   const [nurses, setNurses] = useState([]);
   const [docNames, setDocNames] = useState([]);
@@ -47,12 +46,10 @@ function Vitals({ setSelectedTab }) {
   const [Appointments, setAppointments] = useState([]);
   const [viewing, setViewing] = useState(false);
   const [selectedMfiles, setSelectedMfiles] = useState([]);
-  const [add, setAdd] = useState(false)
+  const [add, setAdd] = useState(false);
   const [appointmentPassed, setAppointmentPassed] = useState(false);
   const [showChart, setShowChart] = useState(false); // State to toggle chart visibility
   const navigate = useNavigate();
-
-
 
   const deleteDoc = (doc) => {
     let newArr = documentArray.filter((id) => id.name !== doc);
@@ -62,10 +59,10 @@ function Vitals({ setSelectedTab }) {
   const handleEdit = (recordId) => {
     setViewing(parseInt(recordId));
     setAdd(true);
-  }
+  };
 
   const closeModal = () => {
-    setAdd(false)
+    setAdd(false);
   };
 
   const fieldLabels = {
@@ -75,45 +72,56 @@ function Vitals({ setSelectedTab }) {
     heartPulse: "Heart Pulse",
     respiratory: "Respiratory",
     VitalNurseEmployeeId: "Assigned Nurse",
-    appointmentId: 'Appointment',
+    appointmentId: "Appointment",
     notes: "Notes",
   };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    const parsedValue = ["height", "weight", "temperature", "heartPulse"].includes(name)
+    const parsedValue = [
+      "height",
+      "weight",
+      "temperature",
+      "heartPulse",
+    ].includes(name)
       ? parseFloat(value)
       : value;
 
-      setPayload((prevPayload) => {
-        const updatedPayload = { ...prevPayload, [name]: parsedValue };
-      
-        if (name === "height" || name === "weight") {
-          const heightInMeters = updatedPayload.height / 100;
-          const weight = updatedPayload.weight;
-      
-          if (heightInMeters > 0 && weight > 0) {
-            // multiply by 100, round to nearest integer, then divide back
-            const rawBmi = weight / (heightInMeters ** 2);
-            updatedPayload.bmi = Math.round(rawBmi * 100) / 100;
-          } else {
-            updatedPayload.bmi = 0;
-          }
+    setPayload((prevPayload) => {
+      const updatedPayload = { ...prevPayload, [name]: parsedValue };
+
+      if (name === "height" || name === "weight") {
+        const heightInMeters = updatedPayload.height / 100;
+        const weight = updatedPayload.weight;
+
+        if (heightInMeters > 0 && weight > 0) {
+          // multiply by 100, round to nearest integer, then divide back
+          const rawBmi = weight / heightInMeters ** 2;
+          updatedPayload.bmi = Math.round(rawBmi * 100) / 100;
+        } else {
+          updatedPayload.bmi = 0;
         }
-      
-        return updatedPayload;
-      });
-      
+      }
+
+      return updatedPayload;
+    });
   };
 
   const getNurses = async () => {
     try {
-      let res = await get(`/patients/Allnurse/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
+      let res = await get(
+        `/patients/Allnurse/${sessionStorage.getItem(
+          "clinicId"
+        )}?pageIndex=1&pageSize=300`
+      );
       let tempNurses = res?.data
         ?.filter((nurse) => nurse?.username)
         .map((nurse) => {
-          return { name: nurse?.username, value: parseFloat(nurse?.employeeId) };
+          return {
+            name: nurse?.username,
+            value: parseFloat(nurse?.employeeId),
+          };
         });
 
       tempNurses?.unshift({ name: "Select Nurse", value: "" });
@@ -123,10 +131,13 @@ function Vitals({ setSelectedTab }) {
     }
   };
 
-
   const getDoctors = async () => {
     try {
-      let res = await get(`/patients/AllDoctor/${sessionStorage.getItem("clinicId")}?pageIndex=1&pageSize=300`);
+      let res = await get(
+        `/patients/AllDoctor/${sessionStorage.getItem(
+          "clinicId"
+        )}?pageIndex=1&pageSize=300`
+      );
       let tempDoc = res?.data
         ?.filter((doc) => doc?.username)
         .map((doc) => {
@@ -140,13 +151,13 @@ function Vitals({ setSelectedTab }) {
     }
   };
 
-
   const getVitalsDetails = async (currentPage) => {
     try {
-      let res = await get(`/patients/vital-by-patientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`);
+      let res = await get(
+        `/patients/vital-by-patientId?patientId=${patientId}&pageIndex=${currentPage}&pageSize=10`
+      );
       setVisits(res.data);
-      setTotalPages(res.pageCount)
-
+      setTotalPages(res.pageCount);
     } catch (error) {
       console.error("Error fetching visitation details:", error);
     }
@@ -157,7 +168,13 @@ function Vitals({ setSelectedTab }) {
     let missingFields = [];
 
     Object.keys(fieldLabels).forEach((field) => {
-      if (field === 'appointmentId') {
+      // Special handling for appointmentId: must exist and not be 0
+      if (field === "appointmentId") {
+        const val = payload[field];
+        if (!val || Number(val) === 0) {
+          validationErrors[field] = `${fieldLabels[field]} is required`;
+          missingFields.push(fieldLabels[field]);
+        }
         return;
       }
 
@@ -168,13 +185,14 @@ function Vitals({ setSelectedTab }) {
     });
 
     if (missingFields.length > 0) {
-      const errorMessage = `The following fields are required: ${missingFields.join(", ")}`;
+      const errorMessage = `The following fields are required: ${missingFields.join(
+        ", "
+      )}`;
       notification({ message: errorMessage, type: "error" });
     }
 
     return Object.keys(validationErrors).length === 0;
   };
-
 
   const careTypes = [
     { name: "Select Care Type", value: "" },
@@ -204,10 +222,8 @@ function Vitals({ setSelectedTab }) {
       {
         docName: selectedMfiles?.fileName,
         docPath: selectedMfiles?.filePath,
-      }
+      },
     ];
-
-
 
     try {
       let res = await post("/patients/AddVitalsRecord", {
@@ -218,7 +234,7 @@ function Vitals({ setSelectedTab }) {
         appointmentId: Number(payload?.appointmentId),
         doctorId: Number(payload?.doctorId),
         careType: 2,
-        VitalNurseEmployeeId: Number(sessionStorage.getItem('userId')),
+        VitalNurseEmployeeId: Number(sessionStorage.getItem("userId")),
         vitalDocuments: vitalDocs,
       });
 
@@ -238,16 +254,16 @@ function Vitals({ setSelectedTab }) {
           notes: "",
           docName: "",
           docPath: "",
-          bloodSugar: '',
-          oxygenSaturation: '',
+          bloodSugar: "",
+          oxygenSaturation: "",
           vitalDocuments: [],
-        })
+        });
         setSelectedMfiles([]);
         setDocumentArray([]);
         getVitalsDetails(currentPage);
-        setNurseTypes('vital');
-        navigate('/patients')
-        return
+        setNurseTypes("vital");
+        navigate("/patients");
+        return;
       } else if (res.StatusCode === 401) {
         notification({ message: "Unauthorized Session", type: "error" });
       } else if (res.StatusCode === 500) {
@@ -263,7 +279,9 @@ function Vitals({ setSelectedTab }) {
           };
 
           const missingFields = Object.keys(errors).filter((field) => {
-            return errors[field].some((errorMsg) => /is required/i.test(errorMsg));
+            return errors[field].some((errorMsg) =>
+              /is required/i.test(errorMsg)
+            );
           });
           if (missingFields.length > 0) {
             const formattedFields = missingFields.map((field) => {
@@ -273,7 +291,9 @@ function Vitals({ setSelectedTab }) {
               return field.replace(/([a-z])([A-Z])/g, "$1 $2");
             });
 
-            errorMessage = `The following fields are required: ${formattedFields.join(", ")}`;
+            errorMessage = `The following fields are required: ${formattedFields.join(
+              ", "
+            )}`;
           }
         }
 
@@ -283,33 +303,35 @@ function Vitals({ setSelectedTab }) {
       // notification({ message: "Failed to add Vital record", type: "error" });
     } finally {
       setLoading(false);
-    } 
+    }
   };
 
   const fetchData = async () => {
     try {
-      const response = await get(`/appointment/get-appointment-bypatientId/${patientId}?pageIndex=${1}&pageSize=1000`);
+      const response = await get(
+        `/appointment/get-appointment-bypatientId/${patientId}?pageIndex=${1}&pageSize=1000`
+      );
 
       let tempDoc = response?.data
-        ?.filter(item => item?.tracking === 'AwaitingVitals')
+        ?.filter((item) => item?.tracking === "AwaitingVitals")
         ?.map((item, idx) => {
-          const appointTime = item?.appointTime === '00:00' ? '(Visit)' : `at ${item?.appointTime}`;
-          const doctorText = item?.doctorId ? `with ${item?.doctor}` : '';
+          const appointTime =
+            item?.appointTime === "00:00"
+              ? "(Visit)"
+              : `at ${item?.appointTime}`;
+          const doctorText = item?.doctorId ? `with ${item?.doctor}` : "";
 
           return {
             name: `${item?.appointDate} ${appointTime} ${doctorText}`.trim(),
-            value: parseFloat(item?.id)
+            value: parseFloat(item?.id),
           };
         });
 
-
       tempDoc?.unshift({ name: "Select Appointment", value: "" });
       setAppointments(tempDoc);
-      setPayload(prevPayload => ({ ...prevPayload, appointmentId: '' }))
+      setPayload((prevPayload) => ({ ...prevPayload, appointmentId: "" }));
       setAppointmentPassed(false);
-
-    } catch (e) {
-    }
+    } catch (e) {}
   };
 
   const next = () => {
@@ -336,37 +358,76 @@ function Vitals({ setSelectedTab }) {
       <div className="w-100 flex wrap">
         <div className="col-3-3">
           <div>
-            <TagInputs onChange={handleChange} dateRestriction={'current'} name="dateOfVisit" value={payload?.dateOfVisit} label="Date" type="date" />
+            <TagInputs
+              onChange={handleChange}
+              dateRestriction={"current"}
+              name="dateOfVisit"
+              value={payload?.dateOfVisit}
+              label="Date"
+              type="date"
+            />
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.temperature} variation={true} name="temperature" label="Temperature" />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.temperature}
+                variation={true}
+                name="temperature"
+                label="Temperature"
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.bloodPressure} name="bloodPressure" label="Blood Pressure" />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.bloodPressure}
+                name="bloodPressure"
+                label="Blood Pressure"
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.heartPulse} variation={true} name="heartPulse" label="Heart Pulse" />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.heartPulse}
+                variation={true}
+                name="heartPulse"
+                label="Heart Pulse"
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.respiratory} name="respiratory" label="Respiratory" />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.respiratory}
+                name="respiratory"
+                label="Respiratory"
+              />
             </div>
           </div>
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.bloodSugar} name="bloodSugar" label="Blood Sugar" />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.bloodSugar}
+                name="bloodSugar"
+                label="Blood Sugar"
+              />
             </div>
           </div>
 
           <div className="flex">
             <div className="w-100">
-              <TagInputs onChange={handleChange} value={payload?.oxygenSaturation} name="oxygenSaturation" label="Oxygen Saturation" />
+              <TagInputs
+                onChange={handleChange}
+                value={payload?.oxygenSaturation}
+                name="oxygenSaturation"
+                label="Oxygen Saturation"
+              />
             </div>
           </div>
           <div className="flex">
@@ -401,7 +462,14 @@ function Vitals({ setSelectedTab }) {
             <TagInputs onChange={handleChange} value={payload?.careType} type="select" options={careTypes} name="careType" label="Care Type" />
           </div> */}
           <div>
-            <TagInputs onChange={handleChange} value={payload?.appointmentId} options={Appointments} name="appointmentId" label="Select Appointment/Visit" type="select" />
+            <TagInputs
+              onChange={handleChange}
+              value={payload?.appointmentId}
+              options={Appointments}
+              name="appointmentId"
+              label="Select Appointment/Visit"
+              type="select"
+            />
             {/* {appointmentPassed && (
               <div className="m-t-10">
                 <p style={{ color: 'red', marginBottom: '10px' }}>This appointment has passed. Please reschedule.</p>
@@ -419,7 +487,10 @@ function Vitals({ setSelectedTab }) {
           </div> */}
           <div className="w-100 flex flex-h-end flex-direction-v">
             <div className="m-t-20 m-b-20">
-              <UploadButton setDocNames={setDocNames} setdocumentArray={setDocumentArray} />
+              <UploadButton
+                setDocNames={setDocNames}
+                setdocumentArray={setDocumentArray}
+              />
             </div>
 
             {documentArray?.map((item, index) => (
@@ -427,7 +498,11 @@ function Vitals({ setSelectedTab }) {
                 <a href={item.path} target="_blank" className="m-r-10">
                   {item.name}
                 </a>
-                <RiDeleteBinLine color="red" className="pointer" onClick={() => deleteDoc(item.name)} />
+                <RiDeleteBinLine
+                  color="red"
+                  className="pointer"
+                  onClick={() => deleteDoc(item.name)}
+                />
               </div>
             ))}
           </div>
@@ -447,7 +522,13 @@ function Vitals({ setSelectedTab }) {
               name="notes"
             />
           </div>
-          <button onClick={submitPayload} disabled={loading} className="submit-btn m-t-20 ">Add Vital</button>
+          <button
+            onClick={submitPayload}
+            disabled={loading}
+            className="submit-btn m-t-20 "
+          >
+            Add Vital
+          </button>
         </div>
         <div className="col-8 m-l-20">
           <VisitsTable data={visits} />

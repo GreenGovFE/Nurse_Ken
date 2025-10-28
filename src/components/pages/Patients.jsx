@@ -16,29 +16,37 @@ import AdmitCheck from "./Patient/AdmitCheck";
 import PatientsAppointTable from "../tables/PatientsAppointTable";
 import BlackListTable from "../tables/BlackListTable";
 import LabsTablePending from "../tables/awaitingLab";
+import PatientsToSeeDoctorTable from "../tables/PatientsToSeeDoctorTable";
 
 function Patients() {
   const [allPatients, setAllPatients] = useState([]);
+  const [allPatientsAssignedToDoctor, setAllPatientsAssignedToDoctor] =
+    useState([]);
+  const [totalPagesAdmitted, setTotalPagesAdmitted] = useState(1);
+  const [totalPagesDischarge, setTotalPagesDischarge] = useState(1);
+  const [currentPageDischarge, setCurrentPageDischarge] = useState(1);
   const [vitalPatients, setVitalPatients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [payload, setPayload] = useState('');
+  const [payload, setPayload] = useState("");
   const [filterSelected, setFilterSelected] = useState("firstName");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalPagesVital, setTotalPagesVital] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [admittedPatients, setAdmittedPatients] = useState([])
-  const [appointPatients, setAppointPatients] = useState([])
-  const [labPatient, setLabPatient] = useState([])
-  const [BlacklistPatient, setBlacklistPatient] = useState([])
-  const [checkinPatients, setCheckinPatients] = useState(false)
-  const [nurseTypes, setNurseTypes] = useState('admin');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [admittedPatients, setAdmittedPatients] = useState([]);
+  const [appointPatients, setAppointPatients] = useState([]);
+  const [labPatient, setLabPatient] = useState([]);
+  const [BlacklistPatient, setBlacklistPatient] = useState([]);
+  const [checkinPatients, setCheckinPatients] = useState(false);
+  const [nurseTypes, setNurseTypes] = useState("admin");
+  const [checkInTypes, setCheckInTypes] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-
-
-  const itemsPerPage = 10;
+  // const itemsPerPage = 10;
 
   const { setHmoDetails, patientId, nurseRoles } = usePatient();
 
@@ -53,7 +61,7 @@ function Patients() {
     const hmoPatients = localStorage.getItem("hmoPatients");
     const patients = localStorage.getItem("patients");
 
-    console.log(admitPatients)
+    console.log(admitPatients);
 
     if (admitPatients) {
       setNurseTypes("admit");
@@ -64,7 +72,7 @@ function Patients() {
     }
   }, []);
 
-  console.log(nurseRoles)
+  console.log(nurseRoles);
 
   const generatePageNumbers = (currentPage, totalPages) => {
     let pages = [];
@@ -100,8 +108,8 @@ function Patients() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
     return `${day}-${month}-${year}`;
@@ -127,14 +135,36 @@ function Patients() {
     </button>
   );
 
-  const getAllAdmittedPatients = async (currentPage) => {
+  // const getAllAdmittedPatients = async (currentPage) => {
+  //   setLoading(true);
+  //   try {
+  //     let res = await get(
+
+  //       `/ServiceTreatment/list/paginate/false/admitted-patients`
+  //       // `/lab/admitted-patients-service?pageNumber=${currentPage}&pageSize=10`
+  //     );
+  //     console.log(res);
+  //     setAdmittedPatients(res?.data.recordList);
+  //     // setTotalPages(res?.pageCount);
+  //   } catch (error) {
+  //     console.error("Error fetching all patients:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const getAllAdmittedPatients = async (page = 1, pageSize = 10) => {
     setLoading(true);
     try {
-      let res = await get(`/patients/admitted-patients-service?pageNumber=${currentPage}&pageSize=10`);
-      setAdmittedPatients(res?.data);
-      setTotalPages(res?.pageCount);
+      const res = await get(
+        `/ServiceTreatment/list/paginate/true/admitted-patients?pageNumber=${page}&pageSize=${pageSize}`
+      );
+      // Use recordList for data and metadata for pagination
+      setAdmittedPatients(res?.data?.recordList || []);
+      setTotalPagesAdmitted(res?.data?.metadata?.totalPages || 1);
+      setCurrentPage(res?.data?.metadata?.page || 1);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching admitted patients:", error);
     } finally {
       setLoading(false);
     }
@@ -143,11 +173,15 @@ function Patients() {
   const getPatientsAwaitingLab = async () => {
     setLoading(true);
     try {
-      let res = await get(`/patients/labrequests-not-attended/${sessionStorage.getItem('clinicId')}`);
+      let res = await get(
+        `/patients/labrequests-not-attended/${sessionStorage.getItem(
+          "clinicId"
+        )}`
+      );
       setLabPatient(res);
       setTotalPages(1);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching all patients:", error);
     } finally {
       setLoading(false);
     }
@@ -156,11 +190,62 @@ function Patients() {
   const getAllPatients = async () => {
     setLoading(true);
     try {
-      let res = await get(`/patients/AllPatient/${sessionStorage?.getItem("clinicId")}?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
+      let res = await get(
+        `/patients/AllPatient/${sessionStorage?.getItem(
+          "clinicId"
+        )}?pageIndex=${currentPage}&pageSize=${itemsPerPage}`
+      );
       setAllPatients(res?.data);
       setTotalPages(res?.pageCount);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching all patients:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch referred patients for a specific clinic
+  const getReferredPatients = async (
+    clinicId = sessionStorage?.getItem("clinicId"),
+    pageIndex = 1,
+    pageSize = 10
+  ) => {
+    setLoading(true);
+    try {
+      const res = await get(
+        `/patients/AllReferredPatient/${clinicId}?pageIndex=${pageIndex}&pageSize=${pageSize}`
+      );
+      setAllPatients(res?.data);
+      setTotalPages(res?.pageCount);
+
+      // You can set the result to a state variable, e.g. setReferredPatients(res?.data);
+      // Example:
+      // setReferredPatients(res?.data);
+      // setTotalPages(res?.pageCount);
+      return res;
+    } catch (error) {
+      console.error("Error fetching referred patients:", error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch patients assigned to doctor
+  const getPatientsAssignedToDoctor = async (pageIndex = 1, pageSize = 20) => {
+    setLoading(true);
+    try {
+      const res = await get(
+        `/patients/assignedtodoctor?pageIndex=${pageIndex}&pageSize=${pageSize}`
+      );
+      console.log(res.data);
+      setAllPatientsAssignedToDoctor(res?.data);
+      setTotalPagesDischarge(res?.pageCount);
+      setCurrentPageDischarge(res.pageIndex);
+      return res;
+    } catch (error) {
+      console.error("Error fetching patients assigned to doctor:", error);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -169,11 +254,13 @@ function Patients() {
   const getBlacklistedPatients = async () => {
     setLoading(true);
     try {
-      let res = await get(`/PatientBlackList/list/${currentPage}/${itemsPerPage}`);
+      let res = await get(
+        `/PatientBlackList/list/${currentPage}/${itemsPerPage}`
+      );
       setBlacklistPatient(res?.resultList);
       setTotalPages(res?.totalPages);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching all patients:", error);
     } finally {
       setLoading(false);
     }
@@ -181,12 +268,23 @@ function Patients() {
 
   const getAppointmentPatients = async () => {
     setLoading(true);
+
     try {
-      let res = await get(`/Appointment/get-pending-appointments?pageIndex=${currentPage}&pageSize=${itemsPerPage}`);
-      setAppointPatients(res?.data);
-      setTotalPages(res?.pageCount);
+      let res = await get(
+        `/Appointment/getall-appointment/${sessionStorage.getItem(
+          "clinicId"
+        )}?pageIndex=${currentPage}&pageSize=${20}&endDate=${endDate}&startDate=${startDate}`
+      );
+      console.log(
+        "Appointment Query Params:",
+        `endDate=${endDate}&startDate=${startDate}&pageIndex=${currentPage}&pageSize=${20}`
+      );
+      console.log("Appointment Patients:", res);
+      setAppointPatients(res?.data?.resultList);
+      setTotalPages(res?.data?.paginationMetadata?.totalPages);
+      setItemsPerPage(res?.data?.paginationMetadata?.limit);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching all patients:", error);
     } finally {
       setLoading(false);
     }
@@ -195,9 +293,9 @@ function Patients() {
   const getPatientsAwaitingVital = async (searchParam) => {
     setLoading(true);
     try {
-      let url = '/patients/patient-awaiting-vital?'
+      let url = "/patients/patient-awaiting-vital?";
       if (searchParam) {
-        url += `pageIndex=${currentPage}&pageSize=${itemsPerPage}&AppointmentDate=${searchParam}`
+        url += `pageIndex=${currentPage}&pageSize=${itemsPerPage}&AppointmentDate=${searchParam}`;
       } else {
         url += `pageIndex=${currentPage}&pageSize=${itemsPerPage}`;
       }
@@ -206,7 +304,7 @@ function Patients() {
       setVitalPatients(res?.data);
       setTotalPagesVital(res?.pageCount);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching all patients:", error);
     } finally {
       setLoading(false);
     }
@@ -215,7 +313,7 @@ function Patients() {
   const searchPatients = async (searchParam) => {
     setLoading(true);
     try {
-      let url = '/patients/filter?';
+      let url = "/patients/filter?";
       if (filterSelected) {
         url += `${filterSelected}=${searchParam}&`;
       }
@@ -223,7 +321,7 @@ function Patients() {
       let res = await get(url);
       setAllPatients(res?.data);
     } catch (error) {
-      console.error('Error fetching all patients:', error);
+      console.error("Error fetching all patients:", error);
     } finally {
       setLoading(false);
     }
@@ -233,29 +331,29 @@ function Patients() {
     const { name, value } = event.target;
     if (name === "filter") {
       setFilterSelected(value);
-    } else if (name === 'searchDate') {
+    } else if (name === "searchDate") {
       const formattedDate = formatDate(value);
-      setSearchTerm(value)
+      setSearchTerm(value);
     } else {
       setPayload(value);
     }
   };
 
   useEffect(() => {
-    if (nurseTypes === ('admit')) {
+    if (nurseTypes === "admit") {
       getAllAdmittedPatients(currentPage);
-    } else if (nurseTypes === ('vital')) {
+    } else if (nurseTypes === "vital") {
       getPatientsAwaitingVital(searchTerm);
-    }
-    else if (nurseTypes === ('blacklist') && checkinPatients === true) {
+    } else if (nurseTypes === "blacklist" && checkinPatients === true) {
       getBlacklistedPatients(currentPage);
-    } else if (nurseTypes === ('checkin') && checkinPatients === true) {
+    } else if (
+      nurseTypes === "checkin" &&
+      (checkinPatients === "status" || checkinPatients === "appointment")
+    ) {
       getAppointmentPatients(currentPage);
-    }
-    else if (nurseTypes === ('checkin') && checkinPatients === 'notify') {
-      getPatientsAwaitingLab()
-    }
-    else {
+    } else if (nurseTypes === "checkin" && checkinPatients === "notify") {
+      getPatientsAwaitingLab();
+    } else {
       getAllPatients(currentPage);
     }
   }, [currentPage, searchTerm, nurseTypes, checkinPatients]);
@@ -268,6 +366,17 @@ function Patients() {
     }
   }, [filterSelected, payload]);
 
+
+   useEffect(() => {
+    if (startDate && endDate) {
+      getAppointmentPatients(startDate, endDate);
+    }
+   
+  }, [startDate, endDate]);
+
+
+
+
   const filterOptions = [
     { value: "firstName", name: "First Name" },
     { value: "lastName", name: "Last Name" },
@@ -279,122 +388,188 @@ function Patients() {
   return (
     <div className="w-100 m-t-40">
       <>
-        {
-          nurseTypes !== 'vital' ? (
-            <div className="flex flex-v-center space-between wrap  m-t-20">
-              <h3 className="float-left">Patients Management</h3>
-              <div className="flex flex-v-center gap-6">
-                <div className="">
-                  <TagInputs onChange={handleChange} name="firstName" label="Find Patient" />
-                </div>
-                <div className=" ">
-                  <TagInputs
-                    onChange={handleChange}
-                    name="filter"
-                    type="select"
-                    options={filterOptions}
-                  />
-                </div>
-                {nurseRoles?.includes('checkin') &&
-                  <div className=" m-t-10 ">
-                    <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex gap-16 flex-h-center flex-v-center">
-                      <>
-                        <AiOutlinePlus size={24} color="white" />
-                        <p className="m-l-10 m-r-10">Onboard a Patient</p>
-                      </>
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-v-center  space-between" >
-              <h3 className="m-t-20 float-left col-4">Patients Awaiting Vital</h3>
-              <div className="col-3  m-t-20 ">
+        {nurseTypes !== "vital" ? (
+          <div className="flex flex-v-center space-between wrap  m-t-20">
+            <h3 className="float-left">Patients Management</h3>
+            <div className="flex flex-v-center gap-6">
+              <div className="">
                 <TagInputs
-                  label="Search By Date"
                   onChange={handleChange}
-                  name="searchDate"
-                  type="date"
+                  name="firstName"
+                  label="Find Patient"
                 />
               </div>
-              <>
-                {
-                  nurseRoles?.includes('checkin') && (
-                    <button onClick={() => { setIsModalOpen(true); navigate('/patient-details'); setHmoDetails(null) }} className="submit-btn flex gap-16 flex-h-center col-3 m-t-30 flex-v-center">
-                      <>
-                        <AiOutlinePlus size={24} color="white" />
-                        <p className="m-l-10 m-r-10">Onboard a Patient</p>
-                      </>
-                    </button>
-                  )
-                }
-              </>
+              <div className=" ">
+                <TagInputs
+                  onChange={handleChange}
+                  name="filter"
+                  type="select"
+                  options={filterOptions}
+                />
+              </div>
+              {nurseRoles?.includes("checkin") && (
+                <div className=" m-t-10 ">
+                  <button
+                    onClick={() => {
+                      setIsModalOpen(true);
+                      navigate("/patient-details");
+                      setHmoDetails(null);
+                    }}
+                    className="submit-btn flex gap-16 flex-h-center flex-v-center"
+                  >
+                    <>
+                      <AiOutlinePlus size={24} color="white" />
+                      <p className="m-l-10 m-r-10">Onboard a Patient</p>
+                    </>
+                  </button>
+                </div>
+              )}
             </div>
-          )
-        }
+          </div>
+        ) : (
+          <div className="flex flex-v-center  space-between">
+            <h3 className="m-t-20 float-left col-4">Patients Awaiting Vital</h3>
+            <div className="col-3  m-t-20 ">
+              <TagInputs
+                label="Search By Date"
+                onChange={handleChange}
+                name="searchDate"
+                type="date"
+              />
+            </div>
+            <>
+              {nurseRoles?.includes("checkin") && (
+                <button
+                  onClick={() => {
+                    setIsModalOpen(true);
+                    navigate("/patient-details");
+                    setHmoDetails(null);
+                  }}
+                  className="submit-btn flex gap-16 flex-h-center col-3 m-t-30 flex-v-center"
+                >
+                  <>
+                    <AiOutlinePlus size={24} color="white" />
+                    <p className="m-l-10 m-r-10">Onboard a Patient</p>
+                  </>
+                </button>
+              )}
+            </>
+          </div>
+        )}
       </>
       <div>
         <div className=" tabs m-t-20 bold-text">
           <>
-            {nurseRoles?.includes('nurse') && (
+            {nurseRoles?.includes("nurse") && (
               <>
                 <div
-                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
+                  className={`tab-item ${
+                    nurseTypes === "admin" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("admin");
+                    setCurrentPage(1);
+                  }}
                 >
                   Patients
                 </div>
                 <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
+                  className={`tab-item ${
+                    nurseTypes === "vital" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("vital");
+                    setCurrentPage(1);
+                  }}
                 >
                   Patients Awaiting Vital
                 </div>
                 <div
-                  className={`tab-item ${nurseTypes === "admit" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admit"); setCurrentPage(1) }}
+                  className={`tab-item ${
+                    nurseTypes === "admit" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("admit");
+                    setCurrentPage(1);
+                  }}
                 >
                   Patients For Admission
                 </div>
                 <div
-                  className={`tab-item ${nurseTypes === "checkin" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients(true) }}
+                  className={`tab-item ${
+                    nurseTypes === "checkin" && checkinPatients === "status"
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("checkin");
+                    setCurrentPage(1);
+                    setCheckinPatients("status");
+                  }}
                 >
-                  Patients For Appointment
+                  Patients Appointments List
                 </div>
                 <div
-                  className={`tab-item ${nurseTypes === "blacklist" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("blacklist"); setCurrentPage(1); setCheckinPatients(true) }}
+                  className={`tab-item ${
+                    nurseTypes === "blacklist" && checkinPatients === true
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("blacklist");
+                    setCurrentPage(1);
+                    setCheckinPatients(true);
+                  }}
                 >
                   Patients Blacklisted
                 </div>
+                <div
+                  className={`tab-item ${
+                    nurseTypes === "checkin" &&
+                    checkinPatients === "appointment"
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("checkin");
+                    setCurrentPage(1);
+                    setCheckinPatients("appointment");
+                    getPatientsAssignedToDoctor();
+                  }}
+                >
+                  Patients For Discharge
+                </div>
               </>
             )}
-            {nurseRoles?.includes('vitalnurse') && (
+            {nurseRoles?.includes("vitalnurse") && (
               <>
                 <div
-                  className={`tab-item ${nurseTypes === "vital" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("vital"); setCurrentPage(1) }}
+                  className={`tab-item ${
+                    nurseTypes === "vital" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("vital");
+                    setCurrentPage(1);
+                  }}
                 >
                   Patients Awaiting Vital
                 </div>
               </>
             )}
-            {nurseRoles?.includes('checkin') && (
+            {nurseRoles?.includes("checkin") && (
               <>
                 <div
-                  className={`tab-item ${nurseTypes === "admin" ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("admin"); setCurrentPage(1) }}
+                  className={`tab-item ${
+                    nurseTypes === "admin" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setNurseTypes("admin");
+                    setCurrentPage(1);
+                  }}
                 >
                   Patients
                 </div>
-                <div
-                  className={`tab-item ${nurseTypes === "checkin" && checkinPatients === true ? "active" : ""}`}
-                  onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients(true) }}
-                >
-                  Patients For Appointment
-                </div>
+
                 {/* <div
                   className={`tab-item ${nurseTypes === "checkin" && checkinPatients === 'notify' ? "active" : ""}`}
                   onClick={() => { setNurseTypes("checkin"); setCurrentPage(1); setCheckinPatients('notify') }}
@@ -411,24 +586,73 @@ function Patients() {
           <>
             {nurseTypes === "vital" ? (
               <>
-                <VitalPatientsTable data={vitalPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
-                <Pagination
+                <VitalPatientsTable
+                  data={vitalPatients}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                />
+                {/* <Pagination
                   currentPage={currentPage}
                   totalPages={totalPagesVital}
                   handlePageChange={handlePageChange}
                   generatePageNumbers={generatePageNumbers}
-                />
+                /> */}
               </>
             ) : nurseTypes === "admit" ? (
-              <AdmitCheck data={admittedPatients} setCurrent={setCurrentPage} currentPage={currentPage} totalPages={totalPages} />
+              <div>
+                {/* kikiikiki */}
+                {/* <AdmitCheck
+                  getAllAdmittedPatients={getAllAdmittedPatients}
+                  data={admittedPatients}
+                  setCurrent={setCurrentPage}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                /> */}
+                <AdmitCheck
+                  data={admittedPatients}
+                  getAllAdmittedPatients={getAllAdmittedPatients}
+                  setCurrent={setCurrentPage}
+                  currentPage={currentPage}
+                  totalPages={totalPagesAdmitted}
+                />
+              </div>
             ) : nurseTypes === "hmo" ? (
               <div className="center-text m-t-40">
                 <h3>No Patients with HMO</h3>
                 <p>Coming Soon</p>
               </div>
-            ) : nurseTypes === "checkin" && checkinPatients === true ? (
+            ) : nurseTypes === "checkin" &&
+              checkinPatients === "appointment" ? (
               <>
-                <PatientsAppointTable data={appointPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} fetchData={getAppointmentPatients} />
+                {/* jjjjjjjjjjjjjjjjj */}
+                <PatientsToSeeDoctorTable
+                  data={allPatientsAssignedToDoctor}
+                  currentPage={currentPageDischarge}
+                  itemsPerPage={itemsPerPage}
+                  totalPages={totalPagesDischarge}
+                  fetchData={getPatientsAssignedToDoctor}
+                />
+                {/* <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                /> */}
+              </>
+            ) : nurseTypes === "checkin" && checkinPatients === "status" ? (
+              <>
+                {/* jjjjjjjjjjjjjjjjj */}
+                <PatientsAppointTable
+                  data={appointPatients}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  fetchData={getAppointmentPatients}
+                  // startDate={startDatets}
+                  startDate={startDate}
+                  endDate={endDate}
+                  setStartDate={setStartDate}
+                  setEndDate={setEndDate}
+                />
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -436,48 +660,122 @@ function Patients() {
                   generatePageNumbers={generatePageNumbers}
                 />
               </>
-            )
-              : nurseTypes === "checkin" && checkinPatients === 'notify' ? (
-                <>
-                  <LabsTablePending data={labPatient} currentPage={currentPage} itemsPerPage={itemsPerPage} fetchData={getPatientsAwaitingLab} />
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    handlePageChange={handlePageChange}
-                    generatePageNumbers={generatePageNumbers}
-                  />
-                </>
-              )
-                : nurseTypes === "blacklist" ? (
-                  <>
-                    <BlackListTable data={BlacklistPatient} currentPage={currentPage} itemsPerPage={itemsPerPage} fetchData={getAppointmentPatients} />
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      handlePageChange={handlePageChange}
-                      generatePageNumbers={generatePageNumbers}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <PatientsTable data={allPatients} currentPage={currentPage} itemsPerPage={itemsPerPage} />
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      handlePageChange={handlePageChange}
-                      generatePageNumbers={generatePageNumbers}
-                    />
-                  </>
-                )}
-          </>
+            ) : nurseTypes === "checkin" && checkinPatients === "notify" ? (
+              <>
+                <LabsTablePending
+                  data={labPatient}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  fetchData={getPatientsAwaitingLab}
+                />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                />
+              </>
+            ) : nurseTypes === "blacklist" ? (
+              <>
+                <BlackListTable
+                  data={BlacklistPatient}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  // fetchData={getAppointmentPatients}
+                />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                />
+              </>
+            ) : (
+              <>
+                {/* Patients and Referred Patients buttons */}
+                <div className="flex gap-10 m-b-20 justify-end">
+                  <button
+                    className={`tab-item custom-btn${
+                      checkInTypes === "admin" ? " active-btn" : ""
+                    }`}
+                    style={
+                      checkInTypes === "admin"
+                        ? { backgroundColor: "#007bff", color: "#fff" }
+                        : { backgroundColor: "#f0f0f0", color: "#333" }
+                    }
+                    onClick={() => {
+                      setNurseTypes("admin");
+                      setCheckInTypes("admin");
 
+                      setCurrentPage(1);
+                      getAllPatients();
+                    }}
+                  >
+                    Patients
+                  </button>
+                  <button
+                    className={`tab-item custom-btn${
+                      checkInTypes === "referred" ? " active-btn" : ""
+                    }`}
+                    style={
+                      checkInTypes === "referred"
+                        ? { backgroundColor: "#007bff", color: "#fff" }
+                        : { backgroundColor: "#f0f0f0", color: "#333" }
+                    }
+                    onClick={async () => {
+                      setCheckInTypes("referred");
+                      setCurrentPage(1);
+                      getReferredPatients();
+                      // setAllPatients(res?.data || []);
+                      // setTotalPages(res?.pageCount || 1);
+                    }}
+                  >
+                    Referred Patients
+                  </button>
+                  <button
+                    className={`tab-item custom-btn${
+                      checkInTypes === "specialist" ? " active-btn" : ""
+                    }`}
+                    style={
+                      checkInTypes === "specialist"
+                        ? { backgroundColor: "#007bff", color: "#fff" }
+                        : { backgroundColor: "#f0f0f0", color: "#333" }
+                    }
+                    onClick={async () => {
+                      setCheckInTypes("specialist");
+                      setCurrentPage(1);
+                      // Call the endpoint for specialist patients
+                      const clinicId = sessionStorage?.getItem("clinicId");
+                      // AllReferredPatientSpecialist/2?pageIndex=1&pageSize=10
+                      const res = await get(
+                        `/patients/AllReferredPatientSpecialist/${clinicId}?pageIndex=1&pageSize=10`
+                      );
+                      setAllPatients(res?.data || []);
+                      setTotalPages(res?.pageCount || 1);
+                    }}
+                  >
+                    Specialist Patients
+                  </button>
+                </div>
+                <PatientsTable
+                  data={allPatients}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  nurseTypes={checkInTypes}
+                  // selectRecord={selectRecord}
+                />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  generatePageNumbers={generatePageNumbers}
+                />
+              </>
+            )}
+          </>
         )}
       </div>
-      {isModalOpen &&
-        <ReferralModal
-          closeModal={closeModal}
-        />
-      }
+      {isModalOpen && <ReferralModal closeModal={closeModal} />}
     </div>
   );
 }

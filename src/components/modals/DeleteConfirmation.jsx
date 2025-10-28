@@ -21,6 +21,8 @@ const DeleteConfirmationModal = ({ closeModal, confirmDelete, equipment, from, s
             <p>Are you sure you want to reinstate?</p>
           ) : equipment === "patient" ? (
             <p>Are you sure you want to cancel this appointment?</p>
+          ) : equipment === "discharge" ? (
+            <p>Are you sure you want to discharge this patient?</p>
           ) : (
             <p>Are you sure you want to unassign this patient from the {equipment}?</p>
           )}

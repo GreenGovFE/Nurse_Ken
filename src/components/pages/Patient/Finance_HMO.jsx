@@ -15,7 +15,7 @@ function Finance_HMO() {
   const [paymentHistory, setPaymentHistory] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hmo, setHmo] = useState([])
-  const [selectedTab, setSelectedTab] = useState("identityDetails");
+  const [selectedTab, setSelectedTab] = useState("membershipCover");
 
   useEffect(() => {
     getHmo()
@@ -57,12 +57,12 @@ function Finance_HMO() {
     <div>
       <div className="w-100 ">
         <div className="flex m-l-10 m-t-40">
-          <div
+          {/* <div
             style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "identityDetails" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "identityDetails" ? '#3C7E2D' : '#393939' }}
             onClick={() => setSelectedTab("identityDetails")}
           >
             Identity Details
-          </div>
+          </div> */}
           <div
             style={{ cursor: 'pointer', padding: '10px', borderBottom: selectedTab === "membershipCover" ? '2px solid #3C7E2D' : 'none', color: selectedTab === "membershipCover" ? '#3C7E2D' : '#393939' }}
             onClick={() => setSelectedTab("membershipCover")}
@@ -72,8 +72,8 @@ function Finance_HMO() {
         </div>
         <div className="">
           {
-            selectedTab === "identityDetails" ?
-              <IdentityDetails hide={false} setSelectedTab={setSelectedTab} /> :
+            // selectedTab === "identityDetails" ?
+            //   <IdentityDetails hide={false} setSelectedTab={setSelectedTab} /> :
               selectedTab === "membershipCover" ?
                 <MembershipCover hide={false} setSelectedTab={setSelectedTab} /> : null
           }
