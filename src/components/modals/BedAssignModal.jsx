@@ -9,18 +9,18 @@ import Notify from "../../utility/notify";
 import SpeechToTextButton from "../UI/SpeechToTextButton";
 import GhostTextCompletion from "../UI/TextPrediction";
 
-const BedAssignModal = ({ closeModal, getBeds, data }) => {
+const BedAssignModal = ({ closeModal, getBeds, data, fromAdmitCheck = false, preselectedPatientId = null, preselectedPatientName = "" }) => {
     const [payload, setPayload] = useState({
-        patientAssignedName: "",
+        patientAssignedName: fromAdmitCheck ? preselectedPatientName : "",
         bedId: data.id,
-        patientAssignedId: 0,
+        patientAssignedId: fromAdmitCheck ? Number(preselectedPatientId) : 0,
         assignNote: "",
         assignerUserId: Number(sessionStorage?.getItem("userId"))
     });
-    const [selectedStaff, setSelectedStaff] = useState();
+    const [selectedStaff, setSelectedStaff] = useState(fromAdmitCheck ? preselectedPatientName : "");
 
     
-    const [staffIdInput, setStaffIdInput] = useState("");
+    const [staffIdInput, setStaffIdInput] = useState(fromAdmitCheck ? String(preselectedPatientId) : "");
     
     const [userNames, setUserNames] = useState([]);
     const getUsers = async () => {
@@ -55,13 +55,20 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
             patientAssignedName,
             bedId,
             patientAssignedId,
-            patientAssignedUserId,
             assignNote,
             assignerUserId } = payload;
 
-        if (bedId === 0 || patientAssignedId === 0 || patientAssignedUserId === 0 || assignNote === "" || assignerUserId === 0 || patientAssignedName === "") {
-            Notify({ title: "Error", message: "Please fill all the fields", type: "danger" });
-            return;
+        // Skip patientAssignedId validation if coming from admit check
+        if (fromAdmitCheck) {
+            if (bedId === 0 || assignNote === "" || assignerUserId === 0 || patientAssignedName === "") {
+                Notify({ title: "Error", message: "Please fill all the fields", type: "danger" });
+                return;
+            }
+        } else {
+            if (bedId === 0 || patientAssignedId === 0 || assignNote === "" || assignerUserId === 0 || patientAssignedName === "") {
+                Notify({ title: "Error", message: "Please fill all the fields", type: "danger" });
+                return;
+            }
         }
 
         let res = await post("/bed/assign-bed", { ...payload })
@@ -92,7 +99,24 @@ const BedAssignModal = ({ closeModal, getBeds, data }) => {
                         }}
                     >
                         <h3 className="m-b-10">Assign a Patient</h3>
-                        <TagInputs type="select" value={staffIdInput} name="patientAssignedId" options={userNames} onChange={handleChange} label="Select Patient" />
+                        {fromAdmitCheck ? (
+                            <TagInputs 
+                                type="text" 
+                                value={preselectedPatientName} 
+                                name="patientAssignedName" 
+                                label="Patient Name" 
+                                disabled={true}
+                            />
+                        ) : (
+                            <TagInputs 
+                                type="select" 
+                                value={staffIdInput} 
+                                name="patientAssignedId" 
+                                options={userNames} 
+                                onChange={handleChange} 
+                                label="Select Patient" 
+                            />
+                        )}
                         <GhostTextCompletion
                             label="Additional Notes"
                             name="additionalNote"

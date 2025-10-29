@@ -3,10 +3,11 @@ import FacilityCard from "../UI/FacilityCard";
 import TagInputs from "../layouts/TagInputs";
 import { get, post } from "../../utility/fetch";
 import notification from "../../utility/notification";
-import BedAssignModal from "../layouts/BedAssignModal";
+import BedAssignModal from "../modals/BedAssignModal";
 import Notify from "../../utility/notify";
 import EquipmentTable from "../tables/AssignedEquipmentTable";
 import AmbulanceTable from "../tables/AmbulanceTable";
+import { usePatient } from "../../contexts";
 
 const location = [
   { value: "", name: "Select location" },
@@ -16,6 +17,7 @@ const location = [
 ]
 
 function Facility() {
+  const { patientId, patientName } = usePatient();
   const [selectedTab, setSelectedTab] = useState("beds");
   const [payload, setPayload] = useState({
     name: "",
@@ -229,7 +231,7 @@ function Facility() {
 
       {renderTabContent()}
 
-      {showAssignModal && <BedAssignModal data={assignmentData} closeModal={() => setShowAssignModal(false)} getBeds={getBeds} />}
+      {showAssignModal && <BedAssignModal data={assignmentData} closeModal={() => setShowAssignModal(false)} getBeds={getBeds} fromAdmitCheck={!!patientId} preselectedPatientId={patientId} preselectedPatientName={patientName} />}
     </div>
   );
 }
